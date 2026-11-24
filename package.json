@@ -1,0 +1,57 @@
+{
+  "name": "metro-telecom",
+  "version": "1.0.0",
+  "description": "Metro Telecom - Professional POS & Stock Management Desktop Application",
+  "main": "main.js",
+  "author": "Shahin <shahin0964>",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^30.0.9",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.metro.telecom",
+    "productName": "Metro Telecom",
+    "copyright": "Copyright © 2026 Metro Telecom",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!dist/**",
+      "!.github/**",
+      "!*.md"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Metro Telecom",
+      "artifactName": "Metro-Telecom-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "Metro-Telecom-Portable-${version}.${ext}"
+    }
+  }
+}

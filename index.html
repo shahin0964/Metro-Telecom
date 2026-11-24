@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Metro Telecom - POS & Stock System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    
+    <!-- Top Professional Header -->
+    <header class="top-nav">
+      <div class="nav-brand">
+        <div class="brand-logo-wrap">
+          <span class="brand-avatar">MT</span>
+        </div>
+        <div class="brand-title-box">
+          <div class="brand-name-row">
+            <h1 class="brand-name">Metro Telecom</h1>
+            <span class="pro-tag">PRO POS</span>
+          </div>
+          <p class="brand-sub">মেট্রো টেলিকম ও কম্পিউটার হাব | স্মার্ট রিটেইল সলিউশন</p>
+        </div>
+      </div>
+
+      <div class="top-nav-right">
+        <div class="quick-stat-badge">
+          <span class="badge-dot"></span>
+          <span id="header-today-sale-mini">আজকের বিক্রি: ৳ 0</span>
+        </div>
+        <div class="user-chip">
+          <span class="user-avatar">👤</span>
+          <span class="user-name">ম্যানেজার</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Navigation Bar -->
+    <nav class="main-tabs-bar">
+      <button class="tab-btn active" data-tab="dashboard">
+        <span class="t-icon">📊</span>
+        <span class="t-text">ড্যাশবোর্ড</span>
+      </button>
+      <button class="tab-btn" data-tab="pos">
+        <span class="t-icon">🛒</span>
+        <span class="t-text">দ্রুত বিক্রয় (POS)</span>
+        <span class="cart-pill-badge" id="nav-cart-pill" style="display:none;">0</span>
+      </button>
+      <button class="tab-btn" data-tab="inventory">
+        <span class="t-icon">📦</span>
+        <span class="t-text">স্টক ও মালামাল</span>
+        <span class="warn-pill-badge" id="nav-low-stock-pill">0</span>
+      </button>
+      <button class="tab-btn" data-tab="warranty">
+        <span class="t-icon">🛡️</span>
+        <span class="t-text">ওয়ারেন্টি চেক</span>
+      </button>
+      <button class="tab-btn" data-tab="customers">
+        <span class="t-icon">📒</span>
+        <span class="t-text">বাকির খাতা</span>
+      </button>
+      <button class="tab-btn" data-tab="expenses">
+        <span class="t-icon">💸</span>
+        <span class="t-text">দোকান খরচ</span>
+      </button>
+      <button class="tab-btn" data-tab="settings">
+        <span class="t-icon">⚙️</span>
+        <span class="t-text">সেটিংস</span>
+      </button>
+    </nav>
+
+    <!-- Main Views Area -->
+    <main class="page-viewport">
+
+      <!-- ================= 1. EXECUTIVE DASHBOARD ================= -->
+      <section class="tab-view active" id="view-dashboard">
+        <div class="view-content">
+          <!-- Welcome & Date banner -->
+          <div class="dash-welcome-card">
+            <div class="welcome-left">
+              <h2>স্বাগতম, মেট্রো টেলিকম ম্যানেজমেন্ট! 👋</h2>
+              <p>দোকানের আজকের সার্বিক বেচাকেনা, লাভ-ক্ষতি ও স্টকের লাইভ পরিস্থিতি</p>
+            </div>
+            <div class="welcome-right">
+              <div class="live-clock-badge" id="dash-live-time">১২ নভেম্বর, ২০২৬</div>
+              <button class="btn-hero-pos" id="btn-dash-go-pos">⚡ নতুন বিক্রি শুরু করুন</button>
+            </div>
+          </div>
+
+          <!-- KPI Cards Grid -->
+          <div class="kpi-grid">
+            <div class="kpi-card green-kpi">
+              <div class="kpi-icon-box">💰</div>
+              <div class="kpi-data">
+                <span class="kpi-title">আজকের মোট বিক্রি</span>
+                <h3 class="kpi-num" id="kpi-today-sale">৳ 0.00</h3>
+                <span class="kpi-sub">ক্যাশ মেমো সংখ্যা: <b id="kpi-today-invoices">০ টি</b></span>
+              </div>
+            </div>
+
+            <div class="kpi-card blue-kpi">
+              <div class="kpi-icon-box">💵</div>
+              <div class="kpi-data">
+                <span class="kpi-title">আজকের নগদ জমা (Cash)</span>
+                <h3 class="kpi-num" id="kpi-today-cash">৳ 0.00</h3>
+                <span class="kpi-sub">ক্যাশ ড্রয়ারে উপস্থিত টাকা</span>
+              </div>
+            </div>
+
+            <div class="kpi-card purple-kpi">
+              <div class="kpi-icon-box">📈</div>
+              <div class="kpi-data">
+                <span class="kpi-title">আজকের মোট লাভ (Profit)</span>
+                <h3 class="kpi-num" id="kpi-today-profit">৳ 0.00</h3>
+                <span class="kpi-sub">মাল বিক্রি ও খরচ বাদে নিট লাভ</span>
+              </div>
+            </div>
+
+            <div class="kpi-card red-kpi">
+              <div class="kpi-icon-box">📝</div>
+              <div class="kpi-data">
+                <span class="kpi-title">বাজারে মোট বাকি পাওনা</span>
+                <h3 class="kpi-num" id="kpi-total-due">৳ 0.00</h3>
+                <span class="kpi-sub">কাস্টমারদের নিকট পাওনা</span>
+              </div>
+            </div>
+
+            <div class="kpi-card amber-kpi">
+              <div class="kpi-icon-box">🏬</div>
+              <div class="kpi-data">
+                <span class="kpi-title">বর্তমান স্টকের মোট মূল্য</span>
+                <h3 class="kpi-num" id="kpi-stock-value">৳ 0.00</h3>
+                <span class="kpi-sub">মোট পণ্যের আইটেম: <b id="kpi-product-types">০ টি</b></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dashboard Two Columns: Quick Trends & Low Stock Warning -->
+          <div class="dash-split-grid">
+            <!-- 7-Day Sales Trend Bar Chart -->
+            <div class="content-panel">
+              <div class="panel-head">
+                <div class="head-title">
+                  <h3>📊 গত ৭ দিনের বিক্রয় চিত্র (Sales Trend)</h3>
+                  <p>দৈনিক বেচাকেনার গ্রাফিকাল পরিসংখ্যান</p>
+                </div>
+              </div>
+              <div class="sales-chart-wrap" id="dash-chart-container">
+                <!-- Dynamically generated SVG Bar chart -->
+              </div>
+            </div>
+
+            <!-- Low Stock Alert Box -->
+            <div class="content-panel">
+              <div class="panel-head">
+                <div class="head-title">
+                  <h3>⚠️ সতর্কবার্তা: যে পণ্যগুলোর স্টক কম</h3>
+                  <p>৫টি বা তার কম মাল অবশিষ্ট থাকা পণ্যের তালিকা</p>
+                </div>
+                <button class="btn-sm-action" id="btn-dash-manage-stock">সব স্টক দেখুন</button>
+              </div>
+              <div class="table-compact-wrap">
+                <table class="simple-table">
+                  <thead>
+                    <tr>
+                      <th>পণ্য ও ব্র্যান্ড</th>
+                      <th>ক্যাটাগরি</th>
+                      <th class="text-right">মূল্য</th>
+                      <th class="text-center">স্টক</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dash-low-stock-tbody">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Invoices on Dashboard -->
+          <div class="content-panel">
+            <div class="panel-head">
+              <div class="head-title">
+                <h3>🧾 সর্বশেষ বিক্রয় ও ক্যাশ মেমো তালিকা</h3>
+                <p>যেকোনো মেমো ক্লিক করে পুনরায় প্রিন্ট বা দেখতে পারেন</p>
+              </div>
+            </div>
+            <div class="table-compact-wrap">
+              <table class="simple-table">
+                <thead>
+                  <tr>
+                    <th>মেমো নং</th>
+                    <th>তারিখ ও সময়</th>
+                    <th>ক্রেতার নাম</th>
+                    <th>পেমেন্ট মাধ্যম</th>
+                    <th class="text-right">বিল টাকা</th>
+                    <th class="text-right">জমা</th>
+                    <th class="text-right">বাকি</th>
+                    <th class="text-center">মেমো</th>
+                  </tr>
+                </thead>
+                <tbody id="dash-recent-invoices-tbody">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 2. HIGH SPEED POS DESK ================= -->
+      <section class="tab-view" id="view-pos">
+        <div class="pos-layout">
+          <!-- Left: Catalog & Fast Scanning -->
+          <div class="pos-catalog-pane">
+            <div class="pos-top-toolbar">
+              <div class="pos-search-wrapper">
+                <span class="search-ico">🔍</span>
+                <input type="text" id="pos-search-box" placeholder="পণ্য খুঁজুন, কোড বা বারকোড স্ক্যান করুন..." autocomplete="off">
+                <button class="btn-search-clear" id="btn-pos-clear-search">✕</button>
+              </div>
+              <div class="pos-category-scroller" id="pos-category-scroller">
+                <!-- Dynamically populated categories -->
+              </div>
+            </div>
+
+            <!-- Product Cards Grid with Images -->
+            <div class="pos-items-grid" id="pos-items-grid">
+              <!-- Dynamically populated cards with photos -->
+            </div>
+          </div>
+
+          <!-- Right: Cart & Multi-Item Fast Checkout -->
+          <div class="pos-cart-pane">
+            <div class="cart-header-row">
+              <div class="cart-headline">
+                <h3>ক্যাশ মেমো কার্ট</h3>
+                <span class="cart-badge-count" id="cart-total-badge">০ আইটেম</span>
+              </div>
+              <div class="cart-tools">
+                <button class="btn-hold-cart" id="btn-hold-bill" title="সাময়িক হোল্ড করুন">⏸️ হোল্ড বিল</button>
+                <button class="btn-clear-cart" id="btn-reset-cart" title="কার্ট খালি করুন">রিসেট</button>
+              </div>
+            </div>
+
+            <!-- Hold Bills Notification Bar (if any held) -->
+            <div class="held-bills-banner" id="held-bills-banner" style="display:none;">
+              <span>⚠️ <b id="held-bills-count">১টি</b> বিল হোল্ড অবস্থায় আছে</span>
+              <button class="btn-link-action" id="btn-restore-held-bill">পুনরায় আনুন</button>
+            </div>
+
+            <!-- Customer Selector Bar -->
+            <div class="pos-customer-bar">
+              <div class="cust-label-row">
+                <label>👤 কাস্টমার:</label>
+                <button class="btn-mini-add" id="btn-pos-add-customer">+ নতুন কাস্টমার</button>
+              </div>
+              <select id="pos-customer-select">
+                <option value="walk-in">খুচরা ক্রেতা (নগদ কাস্টমার)</option>
+              </select>
+            </div>
+
+            <!-- Cart Table Items -->
+            <div class="cart-table-container" id="cart-table-container">
+              <!-- Rendered items or empty state -->
+            </div>
+
+            <!-- Bottom Calculation Box -->
+            <div class="cart-billing-footer">
+              <div class="bill-row">
+                <span>মোট পণ্যের দাম:</span>
+                <span class="b-val" id="cart-subtotal-val">৳ 0.00</span>
+              </div>
+              <div class="bill-row">
+                <span>বিশেষ ছাড় (Discount):</span>
+                <div class="bill-input-box">
+                  <span>৳</span>
+                  <input type="number" id="cart-discount-input" value="0" min="0">
+                </div>
+              </div>
+              <div class="bill-row total-highlight">
+                <span>সর্বমোট বিল (Grand Total):</span>
+                <span class="b-val text-green" id="cart-net-total-val">৳ 0.00</span>
+              </div>
+
+              <!-- Payment Method Chips -->
+              <div class="pay-method-selector">
+                <label>পেমেন্ট মাধ্যম:</label>
+                <div class="method-grid">
+                  <button class="pay-btn active" data-method="cash">
+                    <span class="m-icon">💵</span>
+                    <span class="m-text">ক্যাশ</span>
+                  </button>
+                  <button class="pay-btn" data-method="bkash">
+                    <span class="m-icon">📱</span>
+                    <span class="m-text">বিকাশ/নগদ</span>
+                  </button>
+                  <button class="pay-btn" data-method="due">
+                    <span class="m-icon">📝</span>
+                    <span class="m-text">বাকি</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Paid & Due Amounts -->
+              <div class="bill-row paid-row">
+                <span>জমা গ্রহণ (Paid Amount):</span>
+                <div class="bill-input-box">
+                  <span>৳</span>
+                  <input type="number" id="cart-paid-input" value="0" min="0">
+                </div>
+              </div>
+
+              <div class="bill-row due-preview-row" id="cart-due-row" style="display:none;">
+                <span class="text-danger">বাকি থাকবে:</span>
+                <span class="b-val text-danger" id="cart-due-val">৳ 0.00</span>
+              </div>
+
+              <!-- Big Checkout Button -->
+              <button class="btn-pos-checkout" id="btn-pos-checkout">
+                <span>🖨️ মেমো তৈরি ও প্রিন্ট করুন</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 3. INVENTORY & STOCK MANAGEMENT ================= -->
+      <section class="tab-view" id="view-inventory">
+        <div class="view-content">
+          <div class="section-header-box">
+            <div>
+              <h2>স্টক ও পণ্যের তালিকা (Inventory Master)</h2>
+              <p>দোকানের সকল মালামাল ছবি সহ যুক্ত করুন, দাম নির্ধারণ ও স্টক নিয়ন্ত্রণ করুন</p>
+            </div>
+            <button class="btn-primary-action" id="btn-open-create-product">
+              <span>📷 + ছবি সহ নতুন পণ্য যোগ করুন</span>
+            </button>
+          </div>
+
+          <!-- Inventory Filters -->
+          <div class="inv-filter-toolbar">
+            <div class="search-box-large">
+              <span class="search-ico">🔍</span>
+              <input type="text" id="inv-search-box" placeholder="পণ্যের নাম, মডেল বা বারকোড দিয়ে খুঁজুন...">
+            </div>
+            <div class="inv-select-group">
+              <select id="inv-filter-cat">
+                <option value="all">সব ক্যাটাগরি</option>
+              </select>
+              <select id="inv-filter-stock-status">
+                <option value="all">সব ধরনের স্টক</option>
+                <option value="low">কম স্টক (Low Stock)</option>
+                <option value="out">স্টক শেষ (Out of Stock)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Product Table with Photo -->
+          <div class="card-table-wrapper">
+            <table class="data-table-main">
+              <thead>
+                <tr>
+                  <th style="width: 70px;">ছবি</th>
+                  <th>পণ্যের নাম ও ব্র্যান্ড</th>
+                  <th>ক্যাটাগরি</th>
+                  <th>ইউনিট</th>
+                  <th>ওয়ারেন্টি মেয়াদ</th>
+                  <th class="text-right">ক্রয়মূল্য (কেনা দাম)</th>
+                  <th class="text-right">বিক্রয়মূল্য (MRP)</th>
+                  <th class="text-center">বর্তমান স্টক</th>
+                  <th class="text-center">অ্যাকশন</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-master-tbody">
+                <!-- Dynamically rendered rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 4. WARRANTY CHECKER TOOL ================= -->
+      <section class="tab-view" id="view-warranty">
+        <div class="view-content">
+          <div class="section-header-box">
+            <div>
+              <h2>🛡️ ডিজিটাল ওয়ারেন্টি ভেরিফিকেশন (Warranty Check)</h2>
+              <p>কাস্টমারের মেমো নম্বর, পণ্যের সিরিয়াল নম্বর অথবা IMEI দিয়ে এক ক্লিকে ওয়ারেন্টি যাচাই করুন</p>
+            </div>
+          </div>
+
+          <!-- Search Box for Warranty -->
+          <div class="warranty-search-card">
+            <div class="form-group">
+              <label>মেমো নম্বর, সিরিয়াল নম্বর অথবা IMEI প্রবেশ করান:</label>
+              <div class="warranty-input-wrap">
+                <input type="text" id="warranty-query-input" placeholder="যেমন: INV-2026-0101 অথবা SN-980X-482910">
+                <button class="btn-primary-action" id="btn-run-warranty-check">যাচাই করুন</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Warranty Result Container -->
+          <div id="warranty-results-container">
+            <div class="empty-placeholder">
+              <span class="icon">🔍</span>
+              <h3>ওয়ারেন্টি সম্পর্কিত তথ্য খুঁজতে উপরে সার্চ করুন</h3>
+              <p>দোকান থেকে বিক্রি হওয়া যেকোনো ডিভাইসের বিক্রয় তারিখ, কাস্টমার এবং অবশিষ্ট মেয়াদ স্বয়ংক্রিয়ভাবে দেখাবে।</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 5. CUSTOMERS & BAKIR KHATA ================= -->
+      <section class="tab-view" id="view-customers">
+        <div class="view-content">
+          <div class="section-header-box">
+            <div>
+              <h2>কাস্টমার বাকির খাতা (Due Ledger)</h2>
+              <p>নিয়মিত গ্রাহকদের বাকির হিসাব ও কিস্তির টাকা আদায়ের ডিজিটাল ভাউচার</p>
+            </div>
+            <button class="btn-primary-action" id="btn-open-create-customer">
+              <span>+ নতুন কাস্টমার প্রোফাইল</span>
+            </button>
+          </div>
+
+          <div class="customer-stats-cards">
+            <div class="cust-stat-box red-box">
+              <span class="title">বাজারে মোট বাকি টাকা</span>
+              <h3 id="due-total-sum">৳ 0.00</h3>
+            </div>
+            <div class="cust-stat-box blue-box">
+              <span class="title">মোট কাস্টমার তালিকাভুক্ত</span>
+              <h3 id="due-total-count">০ জন</h3>
+            </div>
+          </div>
+
+          <div class="card-table-wrapper">
+            <table class="data-table-main">
+              <thead>
+                <tr>
+                  <th>কাস্টমারের নাম</th>
+                  <th>মোবাইল নম্বর</th>
+                  <th>দোকান বা ঠিকানা</th>
+                  <th class="text-right">বর্তমান মোট বাকি</th>
+                  <th class="text-center">টাকা গ্রহণ</th>
+                  <th class="text-center">অ্যাকশন</th>
+                </tr>
+              </thead>
+              <tbody id="customer-master-tbody">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 6. STORE EXPENSES ================= -->
+      <section class="tab-view" id="view-expenses">
+        <div class="view-content">
+          <div class="section-header-box">
+            <div>
+              <h2>দোকানের দৈনন্দিন খরচের খাতা</h2>
+              <p>দোকান ভাড়া, স্টাফের বেতন, বিদ্যুৎ বিল ও বিবিধ খরচের হিসাব</p>
+            </div>
+            <button class="btn-primary-action" id="btn-open-create-expense">
+              <span>+ নতুন খরচ এন্ট্রি</span>
+            </button>
+          </div>
+
+          <div class="expense-today-box">
+            <span>আজকের মোট খরচ:</span>
+            <h3 id="expense-today-display">৳ 0.00</h3>
+          </div>
+
+          <div class="card-table-wrapper">
+            <table class="data-table-main">
+              <thead>
+                <tr>
+                  <th>তারিখ</th>
+                  <th>খরচের বিবরণ / খাত</th>
+                  <th>নোট ও মন্তব্য</th>
+                  <th class="text-right">টাকার পরিমাণ</th>
+                  <th class="text-center">অ্যাকশন</th>
+                </tr>
+              </thead>
+              <tbody id="expense-master-tbody">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 7. SETTINGS ================= -->
+      <section class="tab-view" id="view-settings">
+        <div class="view-content">
+          <div class="section-header-box">
+            <div>
+              <h2>দোকান ও ইনভয়েস সেটিংস</h2>
+              <p>দোকানের নাম, ঠিকানা, মেমো সাইজ ও ডেটা ব্যাকআপ নিয়ন্ত্রণ করুন</p>
+            </div>
+          </div>
+
+          <div class="settings-grid">
+            <div class="settings-card">
+              <h3>দোকানের তথ্য (ক্যাশ মেমোতে যা প্রিন্ট হবে)</h3>
+              <form id="form-shop-settings">
+                <div class="form-group">
+                  <label>দোকানের নাম (বাংলা)</label>
+                  <input type="text" id="set-shop-name-bn" value="মেট্রো টেলিকম ও কম্পিউটার হাব">
+                </div>
+                <div class="form-group">
+                  <label>দোকানের নাম (ইংরেজি)</label>
+                  <input type="text" id="set-shop-name-en" value="METRO TELECOM & COMPUTER HUB">
+                </div>
+                <div class="form-group">
+                  <label>দোকানের ঠিকানা</label>
+                  <input type="text" id="set-shop-address" value="শপ নং #১২, সিটি সেন্টার প্লাজা, কলেজ রোড">
+                </div>
+                <div class="form-group">
+                  <label>মোবাইল নম্বরসমূহ</label>
+                  <input type="text" id="set-shop-phone" value="০১৭১১-০০১১২২, ০১৮২২-৩৩৪৪৫৫">
+                </div>
+                <div class="form-group">
+                  <label>মেমোর নিচে বিশেষ শর্তাবলী</label>
+                  <textarea id="set-shop-terms" rows="3">১. বিক্রিত মাল ফেরত নেওয়া হয় না।&#10;২. ওয়ারেন্টির জন্য মেমো অবশ্যই সংরক্ষণ করতে হবে।&#10;৩. পোড়া বা ভাঙ্গা পণ্যে ওয়ারেন্টি প্রযোজ্য নয়।</textarea>
+                </div>
+                <button type="submit" class="btn-primary-action">সেটিংস সেভ করুন</button>
+              </form>
+            </div>
+
+            <div class="settings-card">
+              <h3>ডাটাবেস ও ব্যাকআপ</h3>
+              <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:1rem;">
+                আপনার সমস্ত বেচাকেনা, স্টক এবং কাস্টমার ডাটা সম্পূর্ণ অফলাইনে সুরক্ষিত আছে।
+              </p>
+              <div class="backup-actions">
+                <button class="btn-outline-action" id="btn-export-data">📥 সম্পূর্ণ ডেটা ব্যাকআপ ডাউনলোড (JSON)</button>
+                <button class="btn-outline-action danger-outline" id="btn-reset-demo-data">🔄 ডেমো ডাটা পুনরায় সেট করুন</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- Add Product Modal (With Photo Upload) -->
+  <div class="modal-backdrop" id="modal-add-product">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <h3>📷 ছবি সহ নতুন পণ্য যুক্ত করুন</h3>
+        <button class="modal-close-btn" id="btn-close-prod-modal">✕</button>
+      </div>
+      <form id="form-create-product">
+        <div class="modal-body form-grid-2">
+          
+          <!-- Image upload column -->
+          <div class="form-group full-width image-upload-card">
+            <label>পণ্যের ছবি (Photo):</label>
+            <div class="image-uploader-box">
+              <div class="img-preview-box" id="product-img-preview-box">
+                <span class="img-placeholder-icon">📸</span>
+                <img id="product-img-preview" src="" alt="Preview" style="display:none;">
+              </div>
+              <div class="img-uploader-actions">
+                <label for="inp-product-file" class="btn-upload-label">
+                  <span>📁 ছবি আপলোড করুন / ক্যামেরা</span>
+                </label>
+                <input type="file" id="inp-product-file" accept="image/*" style="display:none;">
+                <button type="button" class="btn-remove-photo" id="btn-remove-photo" style="display:none;">ছবি মুছুন</button>
+                <small class="hint-text">JPG, PNG বা WEBP ছবি নির্বাচন করুন। স্বয়ংক্রিয়ভাবে ক্রপ ও কম্প্রেস হবে।</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label>পণ্যের নাম ও মডেল *</label>
+            <input type="text" id="inp-p-name" placeholder="যেমন: Xiaomi Redmi Note 13 (8GB/256GB)" required>
+          </div>
+
+          <div class="form-group">
+            <div class="label-with-action">
+              <label>ক্যাটাগরি *</label>
+              <button type="button" class="btn-link-sm" id="btn-modal-add-cat">+ নতুন ক্যাটাগরি</button>
+            </div>
+            <select id="inp-p-cat" required>
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>ব্র্যান্ড / কোম্পানি</label>
+            <input type="text" id="inp-p-brand" placeholder="যেমন: Xiaomi, Samsung, Realme, Anker">
+          </div>
+
+          <div class="form-group">
+            <label>পরিমাপের ইউনিট *</label>
+            <select id="inp-p-unit">
+              <option value="Pcs">পিস (Pcs)</option>
+              <option value="Box">বক্স (Box)</option>
+              <option value="Packet">প্যাকেট (Packet)</option>
+              <option value="Rim">রিম (Rim)</option>
+              <option value="Set">সেট (Set)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>বারকোড / প্রোডাক্ট কোড (SKU)</label>
+            <input type="text" id="inp-p-barcode" placeholder="খালি রাখলে অটো কোড হবে">
+          </div>
+
+          <div class="form-group">
+            <label>ক্রয়মূল্য (কেনা দাম - ৳) *</label>
+            <input type="number" id="inp-p-cost" placeholder="0" min="0" required>
+          </div>
+
+          <div class="form-group">
+            <label>বিক্রয়মূল্য (MRP - ৳) *</label>
+            <input type="number" id="inp-p-price" placeholder="0" min="0" required>
+          </div>
+
+          <div class="form-group">
+            <label>স্টকের পরিমাণ *</label>
+            <input type="number" id="inp-p-stock" placeholder="1" min="0" required>
+          </div>
+
+          <div class="form-group">
+            <label>ওয়ারেন্টি মেয়াদ *</label>
+            <select id="inp-p-warranty">
+              <option value="কোন ওয়ারেন্টি নেই">কোন ওয়ারেন্টি নেই</option>
+              <option value="১ মাস রিপ্লেসমেন্ট">১ মাস রিপ্লেসমেন্ট</option>
+              <option value="৬ মাস ওয়ারেন্টি">৬ মাস ওয়ারেন্টি</option>
+              <option value="১ বছর অফিসিয়াল ওয়ারেন্টি">১ বছর অফিসিয়াল ওয়ারেন্টি</option>
+              <option value="২ বছর ওয়ারেন্টি">২ বছর ওয়ারেন্টি</option>
+              <option value="৩ বছর ওয়ারেন্টি">৩ বছর ওয়ারেন্টি</option>
+              <option value="লাইফটাইম ওয়ারেন্টি">লাইফটাইম ওয়ারেন্টি</option>
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="custom-chk-label">
+              <input type="checkbox" id="inp-p-has-serial">
+              <span>বিক্রির সময় <b>Serial Number বা IMEI</b> ইনপুট নিতে হবে? (মোবাইল ও দামি যন্ত্রাংশের জন্য)</span>
+            </label>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" id="btn-cancel-create-prod">বাতিল</button>
+          <button type="submit" class="btn-submit">পণ্য সংরক্ষণ করুন</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Serial/IMEI Input Modal on POS click -->
+  <div class="modal-backdrop" id="modal-pos-serial">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>সিরিয়াল নম্বর / IMEI এন্ট্রি</h3>
+        <button class="modal-close-btn" id="btn-close-serial-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-info-box" id="serial-prod-info-text">
+          পণ্য: Xiaomi Redmi Note 13 | ওয়ারেন্টি: ১ বছর
+        </div>
+        <div class="form-group" style="margin-top: 1rem;">
+          <label>ডিভাইসের Serial Number বা IMEI লিখুন বা বারকোড স্ক্যানার দিয়ে স্ক্যান করুন:</label>
+          <input type="text" id="serial-input-field" placeholder="যেমন: 862940051928374" autofocus>
+          <small class="hint-text">ওয়ারেন্টি মেমোতে এই নম্বরটি মুদ্রিত থাকবে।</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" id="btn-cancel-serial-modal">সিরিয়াল ছাড়া যোগ করুন</button>
+        <button type="button" class="btn-submit" id="btn-confirm-serial">কার্টে যুক্ত করুন</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Customer Modal -->
+  <div class="modal-backdrop" id="modal-add-customer">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>নতুন কাস্টমার যুক্ত করুন</h3>
+        <button class="modal-close-btn" id="btn-close-cust-modal">✕</button>
+      </div>
+      <form id="form-create-customer">
+        <div class="modal-body form-grid-2">
+          <div class="form-group full-width">
+            <label>কাস্টমারের নাম *</label>
+            <input type="text" id="inp-c-name" placeholder="যেমন: মোঃ আল-আমিন" required>
+          </div>
+          <div class="form-group full-width">
+            <label>মোবাইল নম্বর *</label>
+            <input type="tel" id="inp-c-phone" placeholder="01XXXXXXXXX" required>
+          </div>
+          <div class="form-group full-width">
+            <label>দোকানের নাম / ঠিকানা</label>
+            <input type="text" id="inp-c-address" placeholder="যেমন: নিউ মার্কেট, শেরপুর">
+          </div>
+          <div class="form-group full-width">
+            <label>পূর্বের কোনো বাকি থাকলে (৳)</label>
+            <input type="number" id="inp-c-due" value="0" min="0">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" id="btn-cancel-create-cust">বাতিল</button>
+          <button type="submit" class="btn-submit">কাস্টমার সংরক্ষণ করুন</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Collect Due Modal -->
+  <div class="modal-backdrop" id="modal-collect-due">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>বাকির টাকা জমা নিন (Collect Due)</h3>
+        <button class="modal-close-btn" id="btn-close-due-modal">✕</button>
+      </div>
+      <form id="form-submit-due">
+        <div class="modal-body">
+          <div class="modal-info-box" id="due-cust-header-info">
+            কাস্টমার: মোঃ আল-আমিন | বর্তমান বাকি: ৳ ২,৫০০
+          </div>
+          <div class="form-group" style="margin-top: 1rem;">
+            <label>জমা গ্রহণের পরিমাণ (টাকা) *</label>
+            <input type="number" id="inp-due-amount-collect" placeholder="0" min="1" required>
+          </div>
+          <div class="form-group">
+            <label>পেমেন্ট মাধ্যম</label>
+            <select id="inp-due-method">
+              <option value="Cash">ক্যাশ নগদ</option>
+              <option value="bKash">বিকাশ</option>
+              <option value="Nagad">নগদ</option>
+              <option value="Bank">ব্যাংক ট্রান্সফার</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" id="btn-cancel-due-modal">বাতিল</button>
+          <button type="submit" class="btn-submit">টাকা জমা নিশ্চিত করুন</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Expense Modal -->
+  <div class="modal-backdrop" id="modal-add-expense">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>নতুন দোকান খরচ এন্ট্রি</h3>
+        <button class="modal-close-btn" id="btn-close-exp-modal">✕</button>
+      </div>
+      <form id="form-create-expense">
+        <div class="modal-body form-grid-2">
+          <div class="form-group full-width">
+            <label>খরচের খাত / শিরোনাম *</label>
+            <input type="text" id="inp-e-title" placeholder="যেমন: দোকান ভাড়া, স্টাফের নাস্তা, বিদ্যুৎ বিল" required>
+          </div>
+          <div class="form-group full-width">
+            <label>টাকার পরিমাণ (৳) *</label>
+            <input type="number" id="inp-e-amount" placeholder="0" min="1" required>
+          </div>
+          <div class="form-group full-width">
+            <label>মন্তব্য বা নোট</label>
+            <input type="text" id="inp-e-note" placeholder="অতিরিক্ত বিবরণ থাকলে">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" id="btn-cancel-create-exp">বাতিল</button>
+          <button type="submit" class="btn-submit">খরচ সেভ করুন</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= ADD CUSTOM CATEGORY MODAL ================= -->
+  <div class="modal-backdrop" id="modal-add-category">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🏷️ নতুন ক্যাটাগরি তৈরি করুন</h3>
+        <button class="modal-close-btn" id="btn-close-cat-modal">✕</button>
+      </div>
+      <form id="form-create-category">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>ক্যাটাগরির নাম (Category Name) *</label>
+            <input type="text" id="inp-new-cat-name" placeholder="যেমন: Smart Watch বা খেলনা বা লাইট" required autofocus>
+          </div>
+          <div class="form-group" style="margin-top: 0.85rem;">
+            <label>আইকন বা ইমোজি (ঐচ্ছিক)</label>
+            <input type="text" id="inp-new-cat-icon" placeholder="যেমন: ⌚, 🔋, 🧸, 💡">
+            <small class="hint-text">খালি রাখলে স্বয়ংক্রিয় 🏷️ আইকন বসবে।</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" id="btn-cancel-create-cat">বাতিল</button>
+          <button type="submit" class="btn-submit">ক্যাটাগরি সেভ করুন</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= PROFESSIONAL CASH MEMO / INVOICE PREVIEW MODAL ================= -->
+  <div class="modal-backdrop invoice-modal-bg" id="modal-invoice-dialog">
+    <div class="modal-card invoice-window">
+      <!-- Toolbar (Non-printable) -->
+      <div class="inv-top-toolbar no-print">
+        <div class="inv-title-wrap">
+          <span class="ico">📄</span>
+          <h3>মেট্রো টেলিকম ক্যাশ মেমো / ইনভয়েস প্রিভিউ</h3>
+          <div class="inv-size-switch">
+            <button class="size-pill active" data-size="a4">A4 সাইজ</button>
+            <button class="size-pill" data-size="a5">A5 সাইজ</button>
+          </div>
+        </div>
+        <div class="inv-actions-wrap">
+          <button class="btn-print-action" id="btn-invoke-print">
+            <span>🖨️ প্রিন্ট করুন (Print Memo)</span>
+          </button>
+          <button class="modal-close-btn" id="btn-close-invoice-modal">✕</button>
+        </div>
+      </div>
+
+      <!-- The Printable Cash Memo Paper -->
+      <div class="printable-invoice-paper" id="printable-memo-sheet">
+        <!-- Memo Header -->
+        <div class="memo-header">
+          <div class="memo-brand-block">
+            <div class="memo-brand-icon">MT</div>
+            <div class="memo-title-block">
+              <h1 class="memo-main-title" id="out-memo-shop-name-bn">মেট্রো টেলিকম ও কম্পিউটার হাব</h1>
+              <p class="memo-en-title" id="out-memo-shop-name-en">METRO TELECOM & COMPUTER HUB</p>
+              <p class="memo-addr" id="out-memo-shop-address">শপ নং #১২, সিটি সেন্টার প্লাজা, কলেজ রোড</p>
+              <p class="memo-contacts">হটলাইন: <span id="out-memo-shop-phone">০১৭১১-০০১১২২, ০১৮২২-৩৩৪৪৫৫</span></p>
+            </div>
+          </div>
+          <div class="memo-type-badge">
+            <span>ক্যাশ মেমো / ইনভয়েস</span>
+          </div>
+        </div>
+
+        <div class="memo-border-line"></div>
+
+        <!-- Memo Metadata Row -->
+        <div class="memo-meta-row">
+          <div class="meta-col">
+            <p><strong>ইনভয়েস নং:</strong> <span id="out-memo-no">INV-2026-0101</span></p>
+            <p><strong>বিক্রয় তারিখ:</strong> <span id="out-memo-date">২৫ নভেম্বর, ২০২৬ ০১:৪০ PM</span></p>
+            <p><strong>বিক্রেতা:</strong> মেট্রো টেলিকম সেলস ডেস্ক</p>
+          </div>
+          <div class="meta-col text-right">
+            <p><strong>ক্রেতার নাম:</strong> <span id="out-memo-cust-name">খুচরা নগদ ক্রেতা</span></p>
+            <p><strong>মোবাইল নম্বর:</strong> <span id="out-memo-cust-phone">প্রযোজ্য নয়</span></p>
+            <p><strong>ঠিকানা:</strong> <span id="out-memo-cust-address">লোকাল</span></p>
+          </div>
+        </div>
+
+        <!-- Items Table -->
+        <table class="memo-items-table">
+          <thead>
+            <tr>
+              <th style="width: 40px;" class="text-center">ক্র.</th>
+              <th>পণ্যের বিবরণ ও মডেল</th>
+              <th>সিরিয়াল নম্বর / IMEI</th>
+              <th style="width: 120px;">ওয়ারেন্টি মেয়াদ</th>
+              <th style="width: 65px;" class="text-center">পরিমাণ</th>
+              <th style="width: 95px;" class="text-right">দর (৳)</th>
+              <th style="width: 110px;" class="text-right">মোট টাকা (৳)</th>
+            </tr>
+          </thead>
+          <tbody id="out-memo-tbody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+
+        <!-- Calculations & Terms Row -->
+        <div class="memo-bottom-layout">
+          <div class="memo-terms-box">
+            <h4>বিশেষ বিক্রয় ও ওয়ারেন্টি শর্তাবলী:</h4>
+            <div id="out-memo-terms-text">
+              <p>১. বিক্রিত মাল কোনো অবস্থাতেই ফেরত নেওয়া হয় না।</p>
+              <p>২. ওয়ারেন্টিযুক্ত পণ্যের ক্ষেত্রে অবশ্যই এই মূল ক্যাশ মেমো সাথে আনতে হবে।</p>
+              <p>৩. পোড়া, ভাঙ্গা বা পানিতে ভিজা পণ্যের ওপর ওয়ারেন্টি প্রযোজ্য হবে না।</p>
+            </div>
+            <div class="memo-words-bar">
+              <strong>কথায়: </strong><span id="out-memo-words">দশ হাজার টাকা মাত্র</span>
+            </div>
+          </div>
+
+          <div class="memo-calc-box">
+            <div class="calc-row">
+              <span>মোট আইটেম মূল্য:</span>
+              <span id="out-memo-subtotal">৳ 0.00</span>
+            </div>
+            <div class="calc-row">
+              <span>বিশেষ ছাড় (Discount):</span>
+              <span id="out-memo-discount">- ৳ 0.00</span>
+            </div>
+            <div class="calc-row highlight-calc">
+              <span>সর্বমোট প্রদেয় বিল:</span>
+              <span id="out-memo-grand">৳ 0.00</span>
+            </div>
+            <div class="calc-row">
+              <span>পরিশোধিত টাকা (Paid):</span>
+              <span id="out-memo-paid">৳ 0.00</span>
+            </div>
+            <div class="calc-row due-calc-row">
+              <span>বাকি টাকা (Due Balance):</span>
+              <span id="out-memo-due">৳ 0.00</span>
+            </div>
+            <div class="calc-row status-calc-row">
+              <span>পেমেন্ট অবস্থা:</span>
+              <span class="memo-paid-chip" id="out-memo-status-chip">পরিশোধিত</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Signature Lines -->
+        <div class="memo-signatures-row">
+          <div class="sig-block">
+            <div class="dotted-line"></div>
+            <span>ক্রেতার স্বাক্ষর</span>
+          </div>
+          <div class="sig-block">
+            <div class="dotted-line"></div>
+            <span>অনুমোদিত কর্মকর্তার স্বাক্ষর</span>
+          </div>
+        </div>
+
+        <div class="memo-bottom-note">
+          মেট্রো টেলিকম-এ আসার জন্য ধন্যবাদ! আমাদের পণ্য ও সেবায় আমরা সন্তুষ্টির নিশ্চয়তা দেই।
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

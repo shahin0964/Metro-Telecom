@@ -1,0 +1,10 @@
+{
+  "manifest_version": 1,
+  "id": "com.metro.telecom",
+  "name": "Metro Telecom",
+  "version": "1.0.0",
+  "description": "Metro Telecom - Professional Dokan POS & Stock Inventory Management System",
+  "entry": "index.html",
+  "theme_color": "#0F172A",
+  "permissions": {}
+}
