@@ -1,0 +1,186 @@
+name: Unified Multi-Platform Build (Web, Windows PC & Android Mobile)
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "unified-build"
+  cancel-in-progress: false
+
+jobs:
+  # 1. WEB SOFTWARE DEPLOYMENT (GitHub Pages)
+  deploy-web:
+    name: 🌐 Deploy Live Web Software
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build Web Bundle
+        run: npm run build:web
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'www/'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # 2. WINDOWS PC BUILD (.exe Installer & Portable)
+  build-windows:
+    name: 💻 Build Windows Desktop (.exe)
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Windows Apps (Installer + Portable)
+        run: npm run build:win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Windows Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Metro-Telecom-Windows
+          path: dist/*.exe
+
+  # 3. ANDROID MOBILE APP BUILD (.apk)
+  build-android:
+    name: 📱 Build Android Mobile (.apk)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Build Web Bundle
+        run: npm run build:web
+
+      - name: Install Dependencies & Capacitor
+        run: |
+          npm install
+          npm install --save-dev @capacitor/core @capacitor/cli @capacitor/android
+
+      - name: Initialize & Sync Android
+        run: |
+          npx cap add android || true
+          npx cap sync android
+
+      - name: Build Android APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
+          mkdir -p ../dist-apk
+          cp app/build/outputs/apk/debug/app-debug.apk ../dist-apk/Metro-Telecom.apk
+
+      - name: Upload Android APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Metro-Telecom-Android-APK
+          path: dist-apk/*.apk
+
+  # 4. UNIFIED RELEASE PUBLISHER (Publish All to GitHub Releases)
+  publish-release:
+    name: 🚀 Publish Unified Release (PC + Mobile)
+    needs: [build-windows, build-android]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download Windows Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Metro-Telecom-Windows
+          path: release-assets
+
+      - name: Download Android Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Metro-Telecom-Android-APK
+          path: release-assets
+
+      - name: List Release Assets
+        run: ls -la release-assets/
+
+      - name: Publish or Update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: "Metro Telecom v1.0.0 (Windows PC, Android Mobile & Web)"
+          body: |
+            # 🏪 Metro Telecom - Unified Multi-Platform Release (v1.0.0)
+            > **"এক হোস্টিং, এক মাথা, পথ ৩টা"** — PC, Android Mobile ও Web সফটওয়্যার একই ক্লাউড ডাটাবেজে রিয়েল-টাইমে সংযুক্ত!
+
+            ---
+
+            ### 💻 1. Windows PC Software:
+            * **Installer**: `Metro-Telecom-Setup-1.0.0.exe` (ইনস্টল করুন, ডেস্কটপ আইকন তৈরি হবে)
+            * **Portable**: `Metro-Telecom-Portable-1.0.0.exe` (কোনো ইনস্টলেশন ছাড়াই সরাসরি রান করুন)
+
+            ### 📱 2. Android Mobile App:
+            * **Android APK**: `Metro-Telecom.apk` (মোবাইলে ইনস্টল করে সরাসরি দোকান পরিচালনা করুন)
+
+            ### 🌐 3. Live Web Software:
+            * **Web App URL**: [https://shahin0964.github.io/Metro-Telecom/](https://shahin0964.github.io/Metro-Telecom/)
+            *(যেকোনো কম্পিউটার বা মোবাইল ব্রাউজারে লগইন করে সরাসরি ব্যবহার করুন)*
+
+            ---
+
+            ### 🌟 প্রধান সুবিধাসমূহ:
+            * ☁️ **রিয়েল-টাইম ক্লাউড সিঙ্ক**: মোবাইলে সেল বা স্টক যোগ করলে সাথে সাথে পিসির সফটওয়্যার ও ওয়েব ভার্সনে আপডেট।
+            * 🔄 **ইন-অ্যাপ অটো-আপডেট**: সফটওয়্যারের ভেতর থেকেই ১-ক্লিকে নতুন ভার্সন ডাউনলোড ও ইনস্টল।
+            * 🔔 **পিসি ডেস্কটপ নোটিফিকেশন**: নতুন আপডেট আসলে উইন্ডোজ পিসিতে নোটিফিকেশন অ্যালার্ট।
+            * 📦 **কাস্টম ও ডাইনামিক ক্যাটাগরি**: মোবাইল, হেডফোন, খেলনা, লাইট, স্টেশনারি, ইলেকট্রনিক্স ও আনলিমিটেড নতুন ক্যাটাগরি।
+            * ⚡ **দ্রুত POS বিলিং ও ক্যাশ মেমো**: একসাথে একাধিক পণ্য বিক্রি ও A4/A5 প্রিন্ট।
+            * 🛡️ **ডিজিটাল ওয়ারেন্টি ও সিরিয়াল ট্র্যাকিং**: IMEI/Serial ট্র্যাকিং ও মেয়াদ যাচাই।
+            * 📒 **বাকির খাতা ও খরচ নিয়ন্ত্রণ**: কাস্টমার লেজার ও দৈনিক খরচ বিশ্লেষণ।
+          files: release-assets/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

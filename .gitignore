@@ -1,4 +1,8 @@
 node_modules/
 dist/
+dist-apk/
+release-assets/
+android/
+www/
 .DS_Store
 *.log

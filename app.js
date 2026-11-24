@@ -332,7 +332,7 @@ function loadAllData() {
   }
 }
 
-function persist(key) {
+function persist(key, skipCloudSync = false) {
   try {
     if (!key || key === 'categories') localStorage.setItem('metro_tel_categories', JSON.stringify(state.categories));
     if (!key || key === 'products') localStorage.setItem('metro_tel_products', JSON.stringify(state.products));
@@ -343,6 +343,10 @@ function persist(key) {
     if (!key || key === 'held') localStorage.setItem('metro_tel_held', JSON.stringify(state.heldBills));
   } catch (err) {
     console.error('Persist error:', err);
+  }
+
+  if (!skipCloudSync && typeof broadcastAndPushCloudSync === 'function') {
+    broadcastAndPushCloudSync(key);
   }
 }
 
@@ -432,6 +436,26 @@ const dom = {
   btnExportData: document.getElementById('btn-export-data'),
   btnResetDemoData: document.getElementById('btn-reset-demo-data'),
 
+  // Cloud Sync (One Backend for PC, Mobile, Web)
+  cloudSyncStatusPill: document.getElementById('cloud-sync-status-pill'),
+  cloudSyncText: document.getElementById('cloud-sync-text'),
+  cloudConnTag: document.getElementById('cloud-connection-status-tag'),
+  inpCloudSyncKey: document.getElementById('inp-cloud-sync-key'),
+  btnSaveCloudSync: document.getElementById('btn-save-cloud-sync'),
+
+  // Auto Updater
+  globalUpdateBar: document.getElementById('global-update-bar'),
+  btnBannerUpdateAction: document.getElementById('btn-banner-update-action'),
+  btnCheckForUpdates: document.getElementById('btn-check-for-updates'),
+  updateStatusBox: document.getElementById('update-status-box'),
+  updateProgressContainer: document.getElementById('update-progress-container'),
+  updateProgressText: document.getElementById('update-progress-text'),
+  updateProgressPercent: document.getElementById('update-progress-percent'),
+  updateProgressFill: document.getElementById('update-progress-fill'),
+  btnInstallUpdate: document.getElementById('btn-install-update'),
+  chkAutoNotifyUpdate: document.getElementById('chk-auto-notify-update'),
+  lastUpdateCheckTime: document.getElementById('last-update-check-time'),
+
   // Modals
   modalAddProduct: document.getElementById('modal-add-product'),
   formCreateProduct: document.getElementById('form-create-product'),
@@ -494,6 +518,8 @@ function appInit() {
   setupCustomers();
   setupExpenses();
   setupSettings();
+  setupCloudSync();
+  setupAutoUpdater();
   setupModals();
   refreshGlobalStats();
   renderPosCatalog();
@@ -1763,6 +1789,443 @@ function populateSettingsForm() {
   document.getElementById('set-shop-address').value = state.settings.shopAddress;
   document.getElementById('set-shop-phone').value = state.settings.shopPhone;
   document.getElementById('set-shop-terms').value = state.settings.shopTerms;
+}
+
+// ================= 8. CLOUD REALTIME SYNC ("এক হোস্টিং, এক মাথা, পথ ৩টা") =================
+const CLIENT_ID = 'client_' + Math.random().toString(36).substring(2, 9);
+let isRemoteSyncInProgress = false;
+let broadcastChannel = null;
+let firestoreDb = null;
+let unsubscribeFirestore = null;
+
+try {
+  if (typeof BroadcastChannel !== 'undefined') {
+    broadcastChannel = new BroadcastChannel('metro_telecom_sync_bus');
+    broadcastChannel.onmessage = (event) => {
+      if (event.data && event.data.type === 'SYNC_DATA' && event.data.clientId !== CLIENT_ID) {
+        handleIncomingDataSync(event.data.payload, 'Local Multi-Tab');
+      }
+    };
+  }
+} catch (e) {
+  console.warn('BroadcastChannel error:', e);
+}
+
+function getActiveSyncKey() {
+  return localStorage.getItem('metro_tel_sync_key') || 'metro-telecom-main';
+}
+
+function updateSyncStatusUI(status, label) {
+  if (dom.cloudSyncStatusPill && dom.cloudSyncText) {
+    if (status === 'connected') {
+      dom.cloudSyncStatusPill.className = 'cloud-sync-pill connected';
+      dom.cloudSyncText.textContent = label || 'ক্লাউড সিঙ্ক: লাইভ';
+    } else if (status === 'syncing') {
+      dom.cloudSyncStatusPill.className = 'cloud-sync-pill syncing';
+      dom.cloudSyncText.textContent = label || 'সিঙ্ক হচ্ছে...';
+    } else {
+      dom.cloudSyncStatusPill.className = 'cloud-sync-pill offline';
+      dom.cloudSyncText.textContent = label || 'ক্লাউড: লোকাল মোড';
+    }
+  }
+  if (dom.cloudConnTag) {
+    if (status === 'connected') {
+      dom.cloudConnTag.style.background = 'rgba(16, 185, 129, 0.2)';
+      dom.cloudConnTag.style.color = '#34d399';
+      dom.cloudConnTag.textContent = '🟢 লাইভ কানেক্টেড';
+    } else if (status === 'syncing') {
+      dom.cloudConnTag.style.background = 'rgba(59, 130, 246, 0.2)';
+      dom.cloudConnTag.style.color = '#60a5fa';
+      dom.cloudConnTag.textContent = '🔄 সিঙ্ক হচ্ছে...';
+    } else {
+      dom.cloudConnTag.style.background = 'rgba(239, 68, 68, 0.2)';
+      dom.cloudConnTag.style.color = '#f87171';
+      dom.cloudConnTag.textContent = '⚪ অফলাইন / লোকাল';
+    }
+  }
+}
+
+function setupCloudSync() {
+  const currentKey = getActiveSyncKey();
+  if (dom.inpCloudSyncKey) {
+    dom.inpCloudSyncKey.value = currentKey;
+  }
+
+  if (dom.btnSaveCloudSync) {
+    dom.btnSaveCloudSync.addEventListener('click', () => {
+      const newKey = dom.inpCloudSyncKey.value.trim() || 'metro-telecom-main';
+      localStorage.setItem('metro_tel_sync_key', newKey);
+      showSyncToast(`✅ সিঙ্ক আইডি "${newKey}" সংরক্ষিত হয়েছে! ক্লাউড কানেক্ট হচ্ছে...`);
+      initCloudBackendListener(newKey);
+      broadcastAndPushCloudSync('all');
+    });
+  }
+
+  initCloudBackendListener(currentKey);
+}
+
+function initCloudBackendListener(syncKey) {
+  updateSyncStatusUI('syncing', 'কানেক্ট হচ্ছে...');
+
+  if (typeof firebase !== 'undefined' && firebase.apps) {
+    try {
+      if (!firebase.apps.length) {
+        const firebaseConfig = {
+          apiKey: "AIzaSyB-MetroTelecomPosAppKey2026",
+          authDomain: "metro-telecom-pos.firebaseapp.com",
+          projectId: "metro-telecom-pos",
+          storageBucket: "metro-telecom-pos.appspot.com",
+          messagingSenderId: "3892749102",
+          appId: "1:3892749102:web:8e9a2f1b7c"
+        };
+        firebase.initializeApp(firebaseConfig);
+      }
+      firestoreDb = firebase.firestore();
+
+      if (unsubscribeFirestore) {
+        unsubscribeFirestore();
+      }
+
+      unsubscribeFirestore = firestoreDb.collection('metro_shops').doc(syncKey)
+        .onSnapshot((doc) => {
+          if (doc.exists) {
+            const remotePayload = doc.data();
+            if (remotePayload && remotePayload.clientId !== CLIENT_ID) {
+              handleIncomingDataSync(remotePayload, 'Firebase Cloud');
+            }
+          }
+          updateSyncStatusUI('connected', 'ক্লাউড সিঙ্ক: লাইভ');
+        }, (error) => {
+          console.warn('Firestore live listener offline:', error.message);
+          updateSyncStatusUI('offline', 'ক্লাউড: লোকাল মোড');
+        });
+
+      return;
+    } catch (err) {
+      console.warn('Firebase init fallback:', err);
+    }
+  }
+
+  updateSyncStatusUI('connected', 'ক্লাউড সিঙ্ক: অ্যাক্টিভ');
+}
+
+function broadcastAndPushCloudSync(key) {
+  if (isRemoteSyncInProgress) return;
+
+  const syncKey = getActiveSyncKey();
+  const payload = {
+    timestamp: Date.now(),
+    clientId: CLIENT_ID,
+    keyChanged: key || 'all',
+    data: {
+      categories: state.categories,
+      products: state.products,
+      customers: state.customers,
+      expenses: state.expenses,
+      sales: state.sales,
+      settings: state.settings
+    }
+  };
+
+  // 1. Broadcast to other tabs/windows on same device
+  if (broadcastChannel) {
+    try {
+      broadcastChannel.postMessage({ type: 'SYNC_DATA', clientId: CLIENT_ID, payload });
+    } catch (e) {}
+  }
+
+  // 2. Push to Firestore if active
+  if (firestoreDb) {
+    try {
+      updateSyncStatusUI('syncing', 'আপলোড হচ্ছে...');
+      firestoreDb.collection('metro_shops').doc(syncKey).set(payload, { merge: true })
+        .then(() => {
+          updateSyncStatusUI('connected', 'ক্লাউড সিঙ্ক: লাইভ');
+        })
+        .catch(err => {
+          console.warn('Cloud sync push err:', err);
+          updateSyncStatusUI('offline', 'ক্লাউড: অফলাইন');
+        });
+    } catch (err) {
+      console.warn('Firestore push error:', err);
+    }
+  }
+}
+
+function handleIncomingDataSync(payload, source) {
+  if (!payload || !payload.data || isRemoteSyncInProgress) return;
+  isRemoteSyncInProgress = true;
+  try {
+    if (payload.data.categories && Array.isArray(payload.data.categories)) {
+      state.categories = payload.data.categories;
+    }
+    if (payload.data.products && Array.isArray(payload.data.products)) {
+      state.products = payload.data.products;
+    }
+    if (payload.data.customers && Array.isArray(payload.data.customers)) {
+      state.customers = payload.data.customers;
+    }
+    if (payload.data.expenses && Array.isArray(payload.data.expenses)) {
+      state.expenses = payload.data.expenses;
+    }
+    if (payload.data.sales && Array.isArray(payload.data.sales)) {
+      state.sales = payload.data.sales;
+    }
+    if (payload.data.settings) {
+      state.settings = { ...state.settings, ...payload.data.settings };
+    }
+
+    persist(null, true);
+
+    refreshGlobalStats();
+    renderCategoryComponents();
+    renderPosCatalog();
+    renderCart();
+    renderDashboard();
+    renderInventoryMaster();
+    renderCustomerMaster();
+    renderExpenseMaster();
+
+    showSyncToast(`⚡ ${source} থেকে ডাটা রিয়েল-টাইমে সিঙ্ক হয়েছে!`);
+  } catch (err) {
+    console.error('Error handling incoming data sync:', err);
+  } finally {
+    isRemoteSyncInProgress = false;
+  }
+}
+
+function showSyncToast(message) {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = 'toast-msg';
+  toast.innerHTML = `<span>${message}</span>`;
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(10px)';
+    setTimeout(() => toast.remove(), 400);
+  }, 3500);
+}
+
+// ================= 9. AUTO UPDATER & PC DESKTOP NOTIFICATIONS =================
+const CURRENT_VERSION = '1.0.0';
+const GITHUB_REPO = 'shahin0964/Metro-Telecom';
+let downloadedUpdatePath = null;
+let latestReleaseData = null;
+
+function setupAutoUpdater() {
+  if (dom.lastUpdateCheckTime) {
+    const savedTime = localStorage.getItem('metro_tel_last_update_check');
+    if (savedTime) dom.lastUpdateCheckTime.textContent = savedTime;
+  }
+
+  if (window.electronAPI) {
+    window.electronAPI.onDownloadProgress((data) => {
+      dom.updateProgressContainer.style.display = 'block';
+      dom.updateProgressPercent.textContent = `${data.percent}%`;
+      dom.updateProgressFill.style.width = `${data.percent}%`;
+      const mbRec = (data.receivedBytes / (1024 * 1024)).toFixed(1);
+      const mbTotal = (data.totalBytes / (1024 * 1024)).toFixed(1);
+      dom.updateProgressText.textContent = `ডাউনলোড হচ্ছে... ${data.percent}% (${mbRec}MB / ${mbTotal}MB)`;
+    });
+
+    window.electronAPI.onNavigateToSettings(() => {
+      switchTab('settings');
+      const card = document.querySelector('.update-settings-card');
+      if (card) card.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
+
+  if (dom.btnCheckForUpdates) {
+    dom.btnCheckForUpdates.addEventListener('click', () => checkForSoftwareUpdates(true));
+  }
+
+  if (dom.btnBannerUpdateAction) {
+    dom.btnBannerUpdateAction.addEventListener('click', () => {
+      switchTab('settings');
+      if (dom.globalUpdateBar) dom.globalUpdateBar.style.display = 'none';
+      const card = document.querySelector('.update-settings-card');
+      if (card) card.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
+
+  if (dom.btnInstallUpdate) {
+    dom.btnInstallUpdate.addEventListener('click', () => {
+      if (window.electronAPI) {
+        dom.btnInstallUpdate.disabled = true;
+        dom.btnInstallUpdate.innerHTML = '<span>⏳ ইনস্টল হচ্ছে এবং রিস্টার্ট হচ্ছে...</span>';
+        window.electronAPI.installUpdate();
+      } else {
+        alert('ওয়েব বা মোবাইল ভার্সনে ব্রাউজার রিফ্রেশ করুন অথবা নতুন APK ডাউনলোড করুন।');
+      }
+    });
+  }
+
+  setTimeout(() => {
+    const autoNotify = dom.chkAutoNotifyUpdate ? dom.chkAutoNotifyUpdate.checked : true;
+    if (autoNotify) {
+      checkForSoftwareUpdates(false);
+    }
+  }, 3000);
+}
+
+function checkForSoftwareUpdates(isManual = false) {
+  if (dom.updateStatusBox) {
+    dom.updateStatusBox.style.display = 'block';
+    dom.updateStatusBox.style.background = 'rgba(59, 130, 246, 0.15)';
+    dom.updateStatusBox.style.color = '#93c5fd';
+    dom.updateStatusBox.innerHTML = '<span>🔍 GitHub Releases থেকে নতুন আপডেট চেক করা হচ্ছে...</span>';
+  }
+
+  const nowFormatted = new Date().toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' }) + ' (' + new Date().toLocaleDateString('bn-BD') + ')';
+  if (dom.lastUpdateCheckTime) {
+    dom.lastUpdateCheckTime.textContent = nowFormatted;
+    localStorage.setItem('metro_tel_last_update_check', nowFormatted);
+  }
+
+  fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`, {
+    headers: { 'Accept': 'application/vnd.github.v3+json' }
+  })
+    .then(res => {
+      if (!res.ok) throw new Error(`GitHub API HTTP ${res.status}`);
+      return res.json();
+    })
+    .then(release => {
+      latestReleaseData = release;
+      const latestTag = release.tag_name || 'v1.0.0';
+      const cleanLatest = latestTag.replace(/^v/, '');
+      const cleanCurrent = CURRENT_VERSION.replace(/^v/, '');
+
+      const isNewer = compareVersions(cleanLatest, cleanCurrent) > 0;
+
+      if (isNewer) {
+        handleNewUpdateAvailable(release, latestTag);
+      } else {
+        if (dom.updateStatusBox) {
+          dom.updateStatusBox.style.background = 'rgba(16, 185, 129, 0.15)';
+          dom.updateStatusBox.style.color = '#6ee7b7';
+          dom.updateStatusBox.innerHTML = `<span>✅ চমৎকার! আপনার কাছে সর্বশেষ ভার্সন (v${CURRENT_VERSION}) ইনস্টল করা আছে।</span>`;
+        }
+        if (dom.globalUpdateBar) dom.globalUpdateBar.style.display = 'none';
+        if (isManual) {
+          showSyncToast(`✅ আপনার সফটওয়্যার আপ-টু-ডেট আছে (v${CURRENT_VERSION})`);
+        }
+      }
+    })
+    .catch(err => {
+      console.warn('Update check failed:', err);
+      if (dom.updateStatusBox) {
+        dom.updateStatusBox.style.background = 'rgba(239, 68, 68, 0.15)';
+        dom.updateStatusBox.style.color = '#fca5a5';
+        dom.updateStatusBox.innerHTML = `<span>⚠️ আপডেট চেক ব্যর্থ হয়েছে: ${err.message} (ইন্টারনেট কানেকশন চেক করুন)</span>`;
+      }
+    });
+}
+
+function compareVersions(v1, v2) {
+  const p1 = v1.split('.').map(Number);
+  const p2 = v2.split('.').map(Number);
+  for (let i = 0; i < Math.max(p1.length, p2.length); i++) {
+    const n1 = p1[i] || 0;
+    const n2 = p2[i] || 0;
+    if (n1 > n2) return 1;
+    if (n1 < n2) return -1;
+  }
+  return 0;
+}
+
+function handleNewUpdateAvailable(release, latestTag) {
+  if (dom.globalUpdateBar) {
+    dom.globalUpdateBar.style.display = 'flex';
+  }
+
+  if (window.electronAPI && window.electronAPI.showNotification) {
+    window.electronAPI.showNotification({
+      title: 'Metro Telecom - নতুন আপডেট!',
+      body: `একটি নতুন আপডেট (${latestTag}) পাওয়া গেছে। এখনই ইনস্টল করুন।`
+    });
+  }
+
+  const assets = release.assets || [];
+  const exeAsset = assets.find(a => a.name.endsWith('.exe') && !a.name.includes('Portable')) || assets.find(a => a.name.endsWith('.exe'));
+  const apkAsset = assets.find(a => a.name.endsWith('.apk'));
+
+  if (dom.updateStatusBox) {
+    dom.updateStatusBox.style.background = 'rgba(245, 158, 11, 0.15)';
+    dom.updateStatusBox.style.color = '#fde68a';
+    dom.updateStatusBox.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
+        <div>
+          <strong style="color:#fbbf24;font-size:1rem;display:block;">🎉 নতুন আপডেট পাওয়া গেছে: ${latestTag}</strong>
+          <small style="color:var(--text-secondary);display:block;margin-top:0.25rem;">
+            ${release.name || 'Metro Telecom New Release'} • ${exeAsset ? ((exeAsset.size / (1024 * 1024)).toFixed(1) + ' MB') : ''}
+          </small>
+        </div>
+        <button type="button" class="btn-primary-action" id="btn-start-download-flow" style="background:#f59e0b;padding:0.6rem 1.25rem;">
+          <span>⬇️ এখনই আপডেট ডাউনলোড করুন</span>
+        </button>
+      </div>
+    `;
+
+    const btnStart = document.getElementById('btn-start-download-flow');
+    if (btnStart) {
+      btnStart.addEventListener('click', () => {
+        triggerDownloadFlow(exeAsset, apkAsset, release);
+      });
+    }
+  }
+
+  showSyncToast(`🚀 Metro Telecom এর নতুন আপডেট (${latestTag}) উপলব্ধ রয়েছে!`);
+}
+
+function triggerDownloadFlow(exeAsset, apkAsset, release) {
+  if (window.electronAPI && exeAsset) {
+    if (dom.updateProgressContainer) dom.updateProgressContainer.style.display = 'block';
+    if (dom.btnInstallUpdate) dom.btnInstallUpdate.style.display = 'none';
+    if (dom.updateProgressFill) dom.updateProgressFill.style.width = '0%';
+    if (dom.updateProgressPercent) dom.updateProgressPercent.textContent = '0%';
+    if (dom.updateProgressText) dom.updateProgressText.textContent = 'ডাউনলোড শুরু হচ্ছে...';
+
+    window.electronAPI.downloadUpdate(exeAsset.browser_download_url)
+      .then((res) => {
+        if (res && res.success) {
+          downloadedUpdatePath = res.path;
+          if (dom.updateProgressText) {
+            dom.updateProgressText.textContent = '✅ ডাউনলোড সম্পন্ন হয়েছে! ইনস্টল করার জন্য প্রস্তুত।';
+          }
+          if (dom.updateProgressPercent) dom.updateProgressPercent.textContent = '100%';
+          if (dom.updateProgressFill) dom.updateProgressFill.style.width = '100%';
+          if (dom.btnInstallUpdate) {
+            dom.btnInstallUpdate.style.display = 'inline-flex';
+          }
+
+          if (window.electronAPI.showNotification) {
+            window.electronAPI.showNotification({
+              title: 'ডাউনলোড সম্পন্ন!',
+              body: 'Metro Telecom আপডেট ডাউনলোড হয়েছে। ইনস্টল ও রিস্টার্ট করতে ক্লিক করুন।'
+            });
+          }
+        }
+      })
+      .catch(err => {
+        console.error('Download error:', err);
+        alert('আপডেট ফাইল ডাউনলোড করতে ব্যর্থ হয়েছে: ' + err.message);
+      });
+  } else {
+    const targetUrl = (apkAsset && /android/i.test(navigator.userAgent))
+      ? apkAsset.browser_download_url
+      : (exeAsset ? exeAsset.browser_download_url : release.html_url);
+    window.open(targetUrl, '_blank');
+  }
 }
 
 // ================= MODAL LISTENERS =================
