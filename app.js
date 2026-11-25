@@ -1239,6 +1239,7 @@ function updateHeldBanner() {
 
 function renderPosCatalog() {
   const grid = dom.posItemsGrid;
+  if (!grid) return;
   grid.innerHTML = '';
 
   const filtered = state.products.filter(p => {
@@ -1262,30 +1263,37 @@ function renderPosCatalog() {
 
   filtered.forEach(p => {
     const card = document.createElement('div');
-    card.className = 'pos-item-card';
+    const cartItem = state.cart.find(i => i.id === p.id);
+    const cartQty = cartItem ? cartItem.qty : 0;
+
+    card.className = `pos-item-card ${cartQty > 0 ? 'selected-in-cart' : ''}`;
     card.onclick = () => onProductSelect(p);
 
     const isLow = p.stock > 0 && p.stock <= 5;
     const isOut = p.stock <= 0;
-    const stockClass = isOut ? 'item-stock-tag out' : (isLow ? 'item-stock-tag low' : 'item-stock-tag');
-    const stockText = isOut ? 'স্টক শেষ' : `${p.stock} ${p.unit}`;
+    const stockClass = isOut ? 'out' : (isLow ? 'low' : '');
+    const stockText = isOut ? 'শেষ' : `${p.stock} ${p.unit}`;
+
+    const catIcon = p.cat ? (p.cat.includes('Mobile') ? '📱' : (p.cat.includes('Headphone') ? '🎧' : (p.cat.includes('Toy') ? '🧸' : (p.cat.includes('Light') ? '💡' : (p.cat.includes('Electronic') ? '⚡' : (p.cat.includes('স্টেশনারি') ? '📚' : '📦')))))) : '📦';
 
     card.innerHTML = `
-      <div>
-        <div class="card-thumb-wrap">
-          ${p.image ? `<img src="${p.image}" alt="${p.name}">` : `<span class="default-thumb-icon">📦</span>`}
-          ${p.warranty && p.warranty !== 'কোন ওয়ারেন্টি নেই' ? `<span class="item-warranty-tag">🛡️ ${p.warranty}</span>` : ''}
+      <div class="card-pill-icon">${catIcon}</div>
+      <div class="card-pill-info">
+        <div class="card-pill-title-row">
+          <h4 class="card-pill-title" title="${p.name}">${p.name}</h4>
+          ${cartQty > 0 ? `<span class="card-pill-cart-count">🛒 ${cartQty}</span>` : ''}
         </div>
-        <div class="item-badge-row">
-          <span class="item-cat-label">${p.cat}</span>
-          ${p.hasSerial ? `<span style="font-size:0.68rem;color:#38bdf8;font-weight:700;">SN/IMEI</span>` : ''}
+        <div class="card-pill-meta">
+          <span>${p.brand || 'জেনেরিক'}</span>
+          <span>•</span>
+          <span>${p.cat}</span>
+          ${p.hasSerial ? `<span style="color:#38bdf8;font-weight:700;">[IMEI]</span>` : ''}
+          ${p.warranty && p.warranty !== 'কোন ওয়ারেন্টি নেই' ? `<span style="color:#a78bfa;">[${p.warranty}]</span>` : ''}
         </div>
-        <h4 class="item-main-title">${p.name}</h4>
-        <p class="item-brand-sub">${p.brand || 'জেনেরিক'}</p>
       </div>
-      <div class="item-card-bottom">
-        <span class="item-sell-price">${formatTk(p.price)}</span>
-        <span class="${stockClass}">স্টক: ${stockText}</span>
+      <div class="card-pill-right">
+        <span class="card-pill-price">${formatTk(p.price)}</span>
+        <span class="card-pill-stock ${stockClass}">স্টক: ${stockText}</span>
       </div>
     `;
     grid.appendChild(card);
@@ -1354,6 +1362,37 @@ function renderCart() {
   dom.cartTotalBadge.textContent = `${totalItems} আইটেম`;
   dom.navCartPill.textContent = totalItems;
   dom.navCartPill.style.display = totalItems > 0 ? 'inline-block' : 'none';
+
+  // Live update catalog product pill selection badges
+  if (dom.posItemsGrid && dom.posItemsGrid.children.length > 0) {
+    const cards = dom.posItemsGrid.querySelectorAll('.pos-item-card');
+    cards.forEach(card => {
+      // Fast class and badge sync without full re-render
+      const titleEl = card.querySelector('.card-pill-title');
+      if (titleEl) {
+        const prodName = titleEl.textContent;
+        const matched = state.cart.find(i => i.name === prodName);
+        const countSpan = card.querySelector('.card-pill-cart-count');
+        if (matched && matched.qty > 0) {
+          card.classList.add('selected-in-cart');
+          if (countSpan) {
+            countSpan.textContent = `🛒 ${matched.qty}`;
+          } else {
+            const row = card.querySelector('.card-pill-title-row');
+            if (row) {
+              const span = document.createElement('span');
+              span.className = 'card-pill-cart-count';
+              span.textContent = `🛒 ${matched.qty}`;
+              row.appendChild(span);
+            }
+          }
+        } else {
+          card.classList.remove('selected-in-cart');
+          if (countSpan) countSpan.remove();
+        }
+      }
+    });
+  }
 
   if (state.cart.length === 0) {
     container.innerHTML = `
