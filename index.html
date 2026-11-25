@@ -7,11 +7,14 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app-shell">
+  <div class="app-layout">
     
-    <!-- Top Professional Header -->
-    <header class="top-nav">
-      <div class="nav-brand">
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <!-- Main Left Professional Sidebar (Slidebar) -->
+    <aside class="app-sidebar" id="app-sidebar">
+      <div class="sidebar-brand-box">
         <div class="brand-logo-wrap">
           <span class="brand-avatar">MT</span>
         </div>
@@ -20,71 +23,110 @@
             <h1 class="brand-name">Metro Telecom</h1>
             <span class="pro-tag">PRO POS</span>
           </div>
-          <p class="brand-sub">মেট্রো টেলিকম ও কম্পিউটার হাব | স্মার্ট রিটেইল সলিউশন</p>
+          <p class="brand-sub">মেট্রো টেলিকম ও কম্পিউটার হাব</p>
         </div>
+        <button class="btn-close-sidebar" id="btn-close-sidebar" aria-label="মেনু বন্ধ করুন">✕</button>
       </div>
 
-      <div class="top-nav-right">
-        <div class="cloud-sync-pill" id="cloud-sync-status-pill" title="রিয়েল-টাইম ক্লাউড সিঙ্ক">
-          <span class="sync-dot"></span>
-          <span id="cloud-sync-text">ক্লাউড সিঙ্ক: লাইভ</span>
-        </div>
-        <div class="quick-stat-badge">
-          <span class="badge-dot"></span>
-          <span id="header-today-sale-mini">আজকের বিক্রি: ৳ 0</span>
-        </div>
-        <div class="user-chip">
-          <span class="user-avatar">👤</span>
-          <span class="user-name">ম্যানেজার</span>
+      <div class="sidebar-menu-heading">প্রধান মেনু তালিকা</div>
+
+      <nav class="sidebar-tabs-list">
+        <button class="tab-btn active" data-tab="dashboard">
+          <span class="t-serial">০১</span>
+          <span class="t-icon">📊</span>
+          <span class="t-text">ড্যাশবোর্ড</span>
+        </button>
+        <button class="tab-btn" data-tab="pos">
+          <span class="t-serial">০২</span>
+          <span class="t-icon">🛒</span>
+          <span class="t-text">দ্রুত বিক্রয় (POS)</span>
+          <span class="cart-pill-badge" id="nav-cart-pill" style="display:none;">0</span>
+        </button>
+        <button class="tab-btn" data-tab="inventory">
+          <span class="t-serial">০৩</span>
+          <span class="t-icon">📦</span>
+          <span class="t-text">স্টক ও মালামাল</span>
+          <span class="warn-pill-badge" id="nav-low-stock-pill">0</span>
+        </button>
+        <button class="tab-btn" data-tab="warranty">
+          <span class="t-serial">০৪</span>
+          <span class="t-icon">🛡️</span>
+          <span class="t-text">ওয়ারেন্টি চেক</span>
+        </button>
+        <button class="tab-btn" data-tab="customers">
+          <span class="t-serial">০৫</span>
+          <span class="t-icon">📒</span>
+          <span class="t-text">বাকির খাতা</span>
+        </button>
+        <button class="tab-btn" data-tab="expenses">
+          <span class="t-serial">০৬</span>
+          <span class="t-icon">💸</span>
+          <span class="t-text">দোকানের খরচ</span>
+        </button>
+        <button class="tab-btn" data-tab="reports">
+          <span class="t-serial">০৭</span>
+          <span class="t-icon">📈</span>
+          <span class="t-text">বার্ষিক ও মাসিক হিসাব</span>
+        </button>
+        <button class="tab-btn" data-tab="settings">
+          <span class="t-serial">০৮</span>
+          <span class="t-icon">⚙️</span>
+          <span class="t-text">সেটিংস ও সিঙ্ক</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer-box">
+        <div class="sidebar-version-row">
+          <span class="sidebar-ver-tag">Version 1.0.0</span>
+          <span class="sidebar-live-dot" title="ক্লাউড কানেক্টেড"></span>
         </div>
       </div>
-    </header>
+    </aside>
 
-    <!-- Global Update Banner (hidden by default) -->
-    <div class="global-update-alert-bar" id="global-update-bar" style="display:none;">
-      <div class="update-bar-left">
-        <span class="bell-anim">🔔</span>
-        <span><b>নতুন সফটওয়্যার আপডেট পাওয়া গেছে!</b> মেট্রো টেলিকমের নতুন ভার্সনটি এখনই ইনস্টল করতে ক্লিক করুন।</span>
+    <!-- Main Content Area -->
+    <div class="app-main-content">
+      
+      <!-- Top Professional Header -->
+      <header class="top-nav">
+        <div class="top-nav-left">
+          <button class="btn-sidebar-toggle" id="btn-toggle-sidebar" aria-label="মেনু খুলুন">
+            <span class="hamburger-bar"></span>
+            <span class="hamburger-bar"></span>
+            <span class="hamburger-bar"></span>
+          </button>
+          <div class="active-page-indicator">
+            <span class="page-title-icon" id="header-page-icon">📊</span>
+            <span class="page-title-text" id="header-page-title">ড্যাশবোর্ড</span>
+          </div>
+        </div>
+
+        <div class="top-nav-right">
+          <div class="cloud-sync-pill" id="cloud-sync-status-pill" title="রিয়েল-টাইম ক্লাউড সিঙ্ক">
+            <span class="sync-dot"></span>
+            <span id="cloud-sync-text">ক্লাউড সিঙ্ক: লাইভ</span>
+          </div>
+          <div class="quick-stat-badge">
+            <span class="badge-dot"></span>
+            <span id="header-today-sale-mini">আজকের বিক্রি: ৳ 0</span>
+          </div>
+          <div class="user-chip">
+            <span class="user-avatar">👤</span>
+            <span class="user-name">ম্যানেজার</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Global Update Banner (hidden by default) -->
+      <div class="global-update-alert-bar" id="global-update-bar" style="display:none;">
+        <div class="update-bar-left">
+          <span class="bell-anim">🔔</span>
+          <span><b>নতুন সফটওয়্যার আপডেট পাওয়া গেছে!</b> মেট্রো টেলিকমের নতুন ভার্সনটি এখনই ইনস্টল করতে ক্লিক করুন।</span>
+        </div>
+        <button class="btn-update-now" id="btn-banner-update-action">আপডেট দেখুন</button>
       </div>
-      <button class="btn-update-now" id="btn-banner-update-action">আপডেট দেখুন</button>
-    </div>
 
-    <!-- Main Navigation Bar -->
-    <nav class="main-tabs-bar">
-      <button class="tab-btn active" data-tab="dashboard">
-        <span class="t-icon">📊</span>
-        <span class="t-text">ড্যাশবোর্ড</span>
-      </button>
-      <button class="tab-btn" data-tab="pos">
-        <span class="t-icon">🛒</span>
-        <span class="t-text">দ্রুত বিক্রয় (POS)</span>
-        <span class="cart-pill-badge" id="nav-cart-pill" style="display:none;">0</span>
-      </button>
-      <button class="tab-btn" data-tab="inventory">
-        <span class="t-icon">📦</span>
-        <span class="t-text">স্টক ও মালামাল</span>
-        <span class="warn-pill-badge" id="nav-low-stock-pill">0</span>
-      </button>
-      <button class="tab-btn" data-tab="warranty">
-        <span class="t-icon">🛡️</span>
-        <span class="t-text">ওয়ারেন্টি চেক</span>
-      </button>
-      <button class="tab-btn" data-tab="customers">
-        <span class="t-icon">📒</span>
-        <span class="t-text">বাকির খাতা</span>
-      </button>
-      <button class="tab-btn" data-tab="expenses">
-        <span class="t-icon">💸</span>
-        <span class="t-text">দোকান খরচ</span>
-      </button>
-      <button class="tab-btn" data-tab="settings">
-        <span class="t-icon">⚙️</span>
-        <span class="t-text">সেটিংস</span>
-      </button>
-    </nav>
-
-    <!-- Main Views Area -->
-    <main class="page-viewport">
+      <!-- Main Views Area -->
+      <main class="page-viewport">
 
       <!-- ================= 1. EXECUTIVE DASHBOARD ================= -->
       <section class="tab-view active" id="view-dashboard">
@@ -151,16 +193,51 @@
 
           <!-- Dashboard Two Columns: Quick Trends & Low Stock Warning -->
           <div class="dash-split-grid">
-            <!-- 7-Day Sales Trend Bar Chart -->
-            <div class="content-panel">
-              <div class="panel-head">
-                <div class="head-title">
-                  <h3>📊 গত ৭ দিনের বিক্রয় চিত্র (Sales Trend)</h3>
-                  <p>দৈনিক বেচাকেনার গ্রাফিকাল পরিসংখ্যান</p>
+            <!-- 7-Day Sales Trend Bar Chart (Target Modern UI) -->
+            <div class="content-panel sales-trend-card">
+              <div class="trend-card-header">
+                <div class="trend-header-left">
+                  <div class="trend-icon-badge">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="18" y1="20" x2="18" y2="10"></line>
+                      <line x1="12" y1="20" x2="12" y2="4"></line>
+                      <line x1="6" y1="20" x2="6" y2="14"></line>
+                      <path d="M4 10l5-5 5 5 6-6"></path>
+                    </svg>
+                  </div>
+                  <div class="trend-title-box">
+                    <h3>গত ৭ দিনের বিক্রয় চিত্র (Sales Trend)</h3>
+                    <p>দৈনিক বেচাকেনার গ্রাফিকাল পরিসংখ্যান</p>
+                  </div>
+                </div>
+                <div class="trend-timeframe-pill" id="trend-timeframe-pill" title="সময়কাল নির্বাচন">
+                  <span class="tf-icon">📅</span>
+                  <span class="tf-text">৭ দিন</span>
+                  <span class="tf-arrow">▾</span>
                 </div>
               </div>
-              <div class="sales-chart-wrap" id="dash-chart-container">
-                <!-- Dynamically generated SVG Bar chart -->
+
+              <!-- Main SVG Canvas Area -->
+              <div class="trend-chart-canvas-wrap" id="dash-chart-container">
+                <!-- Dynamically generated SVG Bar chart with Spline curve & tags -->
+              </div>
+
+              <!-- Footer Summary Pill Bar -->
+              <div class="trend-card-footer">
+                <div class="trend-footer-left">
+                  <div class="trend-footer-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="10" width="4" height="11"></rect>
+                      <rect x="10" y="4" width="4" height="17"></rect>
+                      <rect x="18" y="8" width="4" height="13"></rect>
+                    </svg>
+                  </div>
+                  <span class="trend-total-label">সর্বমোট বিক্রয়:</span>
+                  <strong class="trend-total-value" id="trend-total-sales-text">৳ ০.০০</strong>
+                </div>
+                <div class="trend-footer-right">
+                  <span class="trend-growth-badge" id="trend-growth-badge">↗ +১২%</span>
+                </div>
               </div>
             </div>
 
@@ -244,16 +321,24 @@
             </div>
           </div>
 
-          <!-- Right: Cart & Multi-Item Fast Checkout -->
-          <div class="pos-cart-pane">
+          <!-- Mobile Cart Backdrop Overlay -->
+          <div class="pos-cart-backdrop" id="pos-cart-backdrop"></div>
+
+          <!-- Right: Cart & Multi-Item Fast Checkout (Mobile Slide-up Overlay Sheet / Desktop Pane) -->
+          <div class="pos-cart-pane" id="pos-cart-pane">
+            <div class="mobile-drawer-handle" id="mobile-drawer-handle">
+              <span class="drawer-handle-bar"></span>
+            </div>
+
             <div class="cart-header-row">
               <div class="cart-headline">
                 <h3>ক্যাশ মেমো কার্ট</h3>
                 <span class="cart-badge-count" id="cart-total-badge">০ আইটেম</span>
               </div>
               <div class="cart-tools">
-                <button class="btn-hold-cart" id="btn-hold-bill" title="সাময়িক হোল্ড করুন">⏸️ হোল্ড বিল</button>
+                <button class="btn-hold-cart" id="btn-hold-bill" title="সাময়িক হোল্ড করুন">⏸️ হোল্ড</button>
                 <button class="btn-clear-cart" id="btn-reset-cart" title="কার্ট খালি করুন">রিসেট</button>
+                <button class="btn-close-cart-overlay" id="btn-close-cart-overlay" title="কার্ট বন্ধ করুন">✕ বন্ধ</button>
               </div>
             </div>
 
@@ -336,6 +421,23 @@
               </button>
             </div>
           </div>
+        </div>
+
+        <!-- Floating Bottom Overlay Cart Bar (Visible on Mobile / Tablet) -->
+        <div class="pos-floating-cart-bar" id="pos-floating-cart-bar">
+          <div class="floating-cart-summary" id="btn-trigger-cart-sheet">
+            <div class="floating-cart-badge">
+              <span class="floating-cart-icon">🛒</span>
+              <span class="floating-cart-count" id="floating-cart-count">০</span>
+            </div>
+            <div class="floating-cart-text">
+              <span class="floating-cart-title" id="floating-cart-total">৳ 0.00</span>
+              <span class="floating-cart-sub">মেমো দেখতে ট্যাপ করুন</span>
+            </div>
+          </div>
+          <button class="btn-floating-checkout" id="btn-floating-checkout">
+            <span>মেমো ও পেমেন্ট ➔</span>
+          </button>
         </div>
       </section>
 
@@ -507,7 +609,154 @@
         </div>
       </section>
 
-      <!-- ================= 7. SETTINGS ================= -->
+      <!-- ================= 7. ANNUAL & MONTHLY FINANCIAL REPORTS ================= -->
+      <section class="tab-view" id="view-reports">
+        <div class="view-content">
+          <!-- Header and Filter Toolbar -->
+          <div class="reports-header-card">
+            <div class="reports-title-group">
+              <div class="reports-badge-icon">📈</div>
+              <div>
+                <h2>দোকানের বাৎসরিক ও মাসিক পূর্ণাঙ্গ হিসাব</h2>
+                <p>দৈনিক বিক্রি, মালের আসল ক্রয়মূল্য, দোকান খরচ এবং চূড়ান্ত নিট লাভ-ক্ষতির খতিয়ান</p>
+              </div>
+            </div>
+            
+            <div class="reports-filter-toolbar">
+              <!-- Period Selector -->
+              <div class="report-mode-tabs" id="report-period-toggle">
+                <button class="mode-tab-btn active" data-period="yearly">বাৎসরিক (Yearly)</button>
+                <button class="mode-tab-btn" data-period="monthly">মাসিক (Monthly)</button>
+                <button class="mode-tab-btn" data-period="daily">দৈনিক (Daily)</button>
+              </div>
+
+              <!-- Controls -->
+              <div class="report-controls-group">
+                <select id="sel-report-year" class="report-select-dropdown">
+                  <option value="2026" selected>২০২৬ সাল</option>
+                  <option value="2025">২০২৫ সাল</option>
+                </select>
+
+                <select id="sel-report-month" class="report-select-dropdown" style="display:none;">
+                  <option value="all">সব মাস (জানুয়ারি - ডিসেম্বর)</option>
+                  <option value="0">জানুয়ারি</option>
+                  <option value="1">ফেব্রুয়ারি</option>
+                  <option value="2">মার্চ</option>
+                  <option value="3">এপ্রিল</option>
+                  <option value="4">মে</option>
+                  <option value="5">জুন</option>
+                  <option value="6">জুলাই</option>
+                  <option value="7">আগস্ট</option>
+                  <option value="8">সেপ্টেম্বর</option>
+                  <option value="9">অক্টোবর</option>
+                  <option value="10" selected>নভেম্বর</option>
+                  <option value="11">ডিসেম্বর</option>
+                </select>
+
+                <input type="date" id="inp-report-date" class="report-date-input" style="display:none;">
+
+                <button type="button" class="btn-primary-action" id="btn-print-report" title="হিসাব প্রিন্ট করুন">
+                  <span>🖨️ প্রিন্ট রিপোর্ট</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4 Core Financial KPI Summary Cards -->
+          <div class="reports-kpi-grid">
+            <div class="report-kpi-card blue-glow">
+              <div class="rk-icon">💰</div>
+              <div class="rk-content">
+                <span class="rk-label" id="rk-label-sales">বাৎসরিক মোট বিক্রয়</span>
+                <h3 class="rk-value text-blue" id="report-total-sales">৳ 0.00</h3>
+                <small class="rk-sub" id="report-sales-sub">ক্যাশ ও বাকিসহ সর্বমোট টার্নওভার</small>
+              </div>
+            </div>
+
+            <div class="report-kpi-card purple-glow">
+              <div class="rk-icon">📦</div>
+              <div class="rk-content">
+                <span class="rk-label">বিক্রিত মালের ক্রয়মূল্য (COGS)</span>
+                <h3 class="rk-value text-purple" id="report-total-cogs">৳ 0.00</h3>
+                <small class="rk-sub">পণ্য ক্রয়ে আসল মূলধন খরচ</small>
+              </div>
+            </div>
+
+            <div class="report-kpi-card red-glow">
+              <div class="rk-icon">💸</div>
+              <div class="rk-content">
+                <span class="rk-label" id="rk-label-expenses">দোকানের মোট খরচ</span>
+                <h3 class="rk-value text-rose" id="report-total-expenses">৳ 0.00</h3>
+                <small class="rk-sub">ভাড়া, বিদ্যুৎ, স্টাফ বেতন ও অন্যান্য</small>
+              </div>
+            </div>
+
+            <div class="report-kpi-card green-glow">
+              <div class="rk-icon">🏆</div>
+              <div class="rk-content">
+                <span class="rk-label" id="rk-label-profit">বাৎসরিক চূড়ান্ত নিট লাভ</span>
+                <h3 class="rk-value text-emerald" id="report-net-profit">৳ 0.00</h3>
+                <div class="rk-profit-badge" id="report-profit-margin">মার্জিন: ০%</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Annual / Monthly Analytics Chart Panel -->
+          <div class="content-panel reports-chart-card">
+            <div class="panel-head">
+              <div class="head-title">
+                <h3 id="report-chart-title">📊 ১২ মাসের আয়, খরচ ও নিট লাভ তুলনা (Jan - Dec)</h3>
+                <p id="report-chart-sub">মাসওয়ারী বিক্রয় অগ্রগতি এবং লাভের অ্যানালাইসিস</p>
+              </div>
+              <div class="chart-legend-row">
+                <span class="legend-item"><span class="legend-dot bg-blue"></span> বিক্রয় (Sales)</span>
+                <span class="legend-item"><span class="legend-dot bg-red"></span> খরচ (Expenses)</span>
+                <span class="legend-item"><span class="legend-dot bg-green"></span> নিট লাভ (Profit)</span>
+              </div>
+            </div>
+            
+            <div class="reports-chart-container" id="reports-chart-container">
+              <!-- Dynamically populated 12-month combo chart -->
+            </div>
+          </div>
+
+          <!-- Detailed Ledger Data Table -->
+          <div class="content-panel reports-table-card">
+            <div class="panel-head">
+              <div class="head-title">
+                <h3 id="report-table-title">📑 মাসভিত্তিক পূর্ণাঙ্গ অডিট ও স্টেটমেন্ট ছক</h3>
+                <p>প্রতিটি মাসের পৃথক মোট বিক্রি, মূলধন, খরচ এবং নিট ব্যালেন্স</p>
+              </div>
+              <button type="button" class="btn-outline-action" id="btn-export-report-csv">📥 CSV ডাউনলোড</button>
+            </div>
+
+            <div class="table-compact-wrap">
+              <table class="simple-table report-summary-table">
+                <thead>
+                  <tr id="report-table-headers">
+                    <th>সময়কাল (মাস/তারিখ)</th>
+                    <th class="text-right">মোট বিক্রয় (৳)</th>
+                    <th class="text-right">মালের ক্রয়মূল্য (৳)</th>
+                    <th class="text-right">মোট খরচ (৳)</th>
+                    <th class="text-right">নিট লাভ (৳)</th>
+                    <th class="text-center">মার্জিন</th>
+                    <th class="text-center">স্ট্যাটাস</th>
+                  </tr>
+                </thead>
+                <tbody id="report-table-tbody">
+                  <!-- Populated dynamically -->
+                </tbody>
+                <tfoot id="report-table-tfoot">
+                  <!-- Totals summary row -->
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= 8. SETTINGS ================= -->
       <section class="tab-view" id="view-settings">
         <div class="view-content">
           <div class="section-header-box">
@@ -553,45 +802,6 @@
               <div class="backup-actions">
                 <button class="btn-outline-action" id="btn-export-data">📥 সম্পূর্ণ ডেটা ব্যাকআপ ডাউনলোড (JSON)</button>
                 <button class="btn-outline-action danger-outline" id="btn-reset-demo-data">🔄 ডেমো ডাটা পুনরায় সেট করুন</button>
-              </div>
-            </div>
-
-            <!-- Cloud Realtime Sync Card (One Backend for PC, Mobile and Web) -->
-            <div class="settings-card full-width" style="border: 1px solid #10b981; background: linear-gradient(135deg, rgba(16,185,129,0.06), rgba(37,99,235,0.06));">
-              <div class="update-header-row">
-                <div>
-                  <h3 style="color:#34d399;">☁️ এক হোস্টিং ও লাইভ সিঙ্ক (PC, Mobile & Web Realtime Sync)</h3>
-                  <p style="color:var(--text-muted);font-size:0.85rem;margin-top:0.25rem;">
-                    একই ডাটাবেসের সাথে সংযুক্ত থাকবে পিসি সফটওয়্যার, মোবাইল অ্যাপ এবং ওয়েব ভার্সন
-                  </p>
-                </div>
-                <span class="memo-paid-chip" id="cloud-connection-status-tag" style="background:#10b981;color:#fff;">🟢 লাইভ ক্লাউড সিঙ্ক চালু</span>
-              </div>
-
-              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1rem 0;">
-                <div style="background:var(--bg-card);padding:0.85rem;border-radius:8px;border:1px solid var(--border-subtle);">
-                  <strong style="color:#60a5fa;display:block;margin-bottom:0.2rem;">💻 PC Desktop App</strong>
-                  <small style="color:var(--text-muted);">উইন্ডোজ কম্পিউটারে অফলাইনে বা অনলাইনে সেল করলে সাথে সাথে মোবাইলে আপডেট হবে।</small>
-                </div>
-                <div style="background:var(--bg-card);padding:0.85rem;border-radius:8px;border:1px solid var(--border-subtle);">
-                  <strong style="color:#34d399;display:block;margin-bottom:0.2rem;">📱 Android Mobile App</strong>
-                  <small style="color:var(--text-muted);">মোবাইলে অ্যাপ চালিয়ে দোকানদার বা স্টাফ স্টক যোগ করলে পিসির মেমোতে চলে আসবে।</small>
-                </div>
-                <div style="background:var(--bg-card);padding:0.85rem;border-radius:8px;border:1px solid var(--border-subtle);">
-                  <strong style="color:#c084fc;display:block;margin-bottom:0.2rem;">🌐 Web Software</strong>
-                  <small style="color:var(--text-muted);">যেকোনো ব্রাউজার থেকে অনলাইনে লগইন করে দোকানের হিসাব ও স্টক লাইভ দেখা যাবে।</small>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label>দোকানের ক্লাউড সিঙ্ক আইডি (Shop Sync Key):</label>
-                <div style="display:flex;gap:0.5rem;">
-                  <input type="text" id="inp-cloud-sync-key" value="metro-telecom-main" style="flex:1;">
-                  <button type="button" class="btn-primary-action" id="btn-save-cloud-sync" style="background:#10b981;">
-                    <span>💾 সিঙ্ক আইডি সংরক্ষণ</span>
-                  </button>
-                </div>
-                <small class="hint-text">এই একই কি (Key) আপনার পিসি, মোবাইল ও ওয়েব ভার্সনে থাকলে ৩টিতেই রিয়েল-টাইম ডাটা সিঙ্ক হবে।</small>
               </div>
             </div>
 
@@ -654,7 +864,8 @@
       </section>
 
     </main>
-  </div>
+    </div> <!-- app-main-content -->
+  </div> <!-- app-layout -->
 
   <!-- ================= MODALS ================= -->
 
@@ -1053,9 +1264,7 @@
   <!-- Toast Notification Container -->
   <div id="toast-container" class="toast-container"></div>
 
-  <!-- Firebase SDK for Realtime Sync across PC, Mobile, and Web -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <!-- Dynamic Async Cloud Engine -->
   <script src="app.js"></script>
 </body>
 </html>

@@ -2,7 +2,8 @@
 
 // Sample SVG Icons for crisp offline thumbnails
 function createProductSvg(color, text) {
-  return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="${encodeURIComponent(color)}" rx="16"/><text x="50%" y="54%" font-family="sans-serif" font-weight="900" font-size="36" fill="%23ffffff" dominant-baseline="middle" text-anchor="middle">${encodeURIComponent(text)}</text></svg>`;
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='200' height='200' fill='${color}' rx='16'/><text x='50%' y='54%' font-family='sans-serif' font-weight='900' font-size='32' fill='%23ffffff' dominant-baseline='middle' text-anchor='middle'>${encodeURIComponent(text)}</text></svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
 // User-specified default categories (Mobile, Headphones, Toys, Light, Stationery subcategories, Electronics subcategories)
@@ -281,6 +282,105 @@ const SEED_SETTINGS = {
   shopTerms: '১. বিক্রিত মাল কোনো অবস্থাতেই ফেরত নেওয়া হয় না।\n২. ওয়ারেন্টির জন্য মেমো অবশ্যই সংরক্ষণ করতে হবে।\n৩. পোড়া বা ভাঙ্গা পণ্যে ওয়ারেন্টি প্রযোজ্য নয়।'
 };
 
+function getInitialSeedSales() {
+  const sales = [];
+  // 1. Prior 10 months of 2026 (Jan to Oct) for complete annual ledger
+  const monthlyData = [
+    { m: '01', days: 28, base: 42000, cost: 31500 },
+    { m: '02', days: 26, base: 38500, cost: 28800 },
+    { m: '03', days: 30, base: 51000, cost: 38000 },
+    { m: '04', days: 29, base: 48200, cost: 36000 },
+    { m: '05', days: 30, base: 55400, cost: 41500 },
+    { m: '06', days: 29, base: 59000, cost: 44000 },
+    { m: '07', days: 30, base: 46300, cost: 34700 },
+    { m: '08', days: 30, base: 53800, cost: 40200 },
+    { m: '09', days: 29, base: 62500, cost: 46800 },
+    { m: '10', days: 30, base: 68000, cost: 51000 }
+  ];
+
+  monthlyData.forEach(mo => {
+    const p1 = Math.round(mo.base * 0.4);
+    const p2 = Math.round(mo.base * 0.35);
+    const p3 = mo.base - p1 - p2;
+    const c1 = Math.round(mo.cost * 0.4);
+    const c2 = Math.round(mo.cost * 0.35);
+    const c3 = mo.cost - c1 - c2;
+    const items = [
+      { amt: p1, c: c1, day: '08' },
+      { amt: p2, c: c2, day: '18' },
+      { amt: p3, c: c3, day: '28' }
+    ];
+    items.forEach((it, idx) => {
+      sales.push({
+        id: `INV-2026${mo.m}${it.day}-${String(idx + 1).padStart(3, '0')}`,
+        customer: idx === 0 ? 'খুচরা ক্রেতা (নগদ)' : 'আরিফুল ইসলাম (নিয়মিত)',
+        customerId: idx === 0 ? 'cust-cash' : 'cust-1',
+        items: [
+          { id: `seed-m-${mo.m}-${idx}`, name: 'মোবাইল ও এক্সেসরিজ পাইকারি প্যাকেজ', qty: 1, unit: 'Pcs', price: it.amt, cost: it.c, total: it.amt, warranty: '১ বছর' }
+        ],
+        subtotal: it.amt,
+        discount: 0,
+        grandTotal: it.amt,
+        paidAmount: it.amt,
+        dueAmount: 0,
+        paymentMethod: 'cash',
+        timestamp: `2026-${mo.m}-${it.day}T14:30:00.000Z`,
+        itemsCount: 1
+      });
+    });
+  });
+
+  // 2. November (Nov 20 to Nov 26) 7-day sales matching user reference image exactly
+  const nov7Days = [
+    { d: '2026-11-20', amt: 1250, cost: 900, cust: 'খুচরা ক্রেতা (নগদ কাস্টমার)' },
+    { d: '2026-11-21', amt: 1850, cost: 1350, cust: 'আরিফুল ইসলাম (নিয়মিত ক্রেতা)' },
+    { d: '2026-11-22', amt: 2420, cost: 1800, cust: 'খুচরা ক্রেতা (নগদ কাস্টমার)' },
+    { d: '2026-11-23', amt: 3100, cost: 2300, cust: 'সুমন টেলিকম (খুচরা দোকানদার)' },
+    { d: '2026-11-24', amt: 2760, cost: 2050, cust: 'খুচরা ক্রেতা (নগদ কাস্টমার)' },
+    { d: '2026-11-25', amt: 2100, cost: 1550, cust: 'তানভীর আহমেদ (ছাত্র)' },
+    { d: '2026-11-26', amt: 2030, cost: 1500, cust: 'খুচরা ক্রেতা (নগদ কাস্টমার)' }
+  ];
+
+  nov7Days.forEach((it, idx) => {
+    sales.push({
+      id: `INV-${it.d.replace(/-/g, '')}-${String(idx + 1).padStart(3, '0')}`,
+      customer: it.cust,
+      customerId: idx % 2 === 0 ? 'cust-cash' : 'cust-1',
+      items: [
+        { id: `seed-nov-${idx}`, name: 'মোবাইল এক্সেসরিজ ও পার্টস', qty: 1, unit: 'Pcs', price: it.amt, cost: it.cost, total: it.amt, warranty: '৬ মাস' }
+      ],
+      subtotal: it.amt,
+      discount: 0,
+      grandTotal: it.amt,
+      paidAmount: it.amt,
+      dueAmount: 0,
+      paymentMethod: idx % 3 === 0 ? 'bkash' : 'cash',
+      timestamp: `${it.d}T11:${30 + idx * 4}:00.000Z`,
+      itemsCount: 1
+    });
+  });
+
+  return sales;
+}
+
+function getInitialSeedExpenses() {
+  return [
+    { id: 'exp-01', title: 'দোকান বিদ্যুৎ বিল (জানুয়ারি)', amount: 1550, date: '2026-01-20', note: 'পল্লী বিদ্যুৎ' },
+    { id: 'exp-02', title: 'দোকান বিদ্যুৎ বিল (ফেব্রুয়ারি)', amount: 1420, date: '2026-02-18', note: 'পল্লী বিদ্যুৎ' },
+    { id: 'exp-03', title: 'দোকান বিদ্যুৎ বিল (মার্চ)', amount: 1680, date: '2026-03-22', note: 'পল্লী বিদ্যুৎ' },
+    { id: 'exp-04', title: 'দোকান বিদ্যুৎ বিল (এপ্রিল)', amount: 1750, date: '2026-04-20', note: 'পল্লী বিদ্যুৎ' },
+    { id: 'exp-05', title: 'দোকান বিদ্যুৎ বিল (মে)', amount: 1900, date: '2026-05-21', note: 'পল্লী বিদ্যুৎ' },
+    { id: 'exp-06', title: 'দোকান বিদ্যুৎ বিল (জুন)', amount: 1850, date: '2026-06-20', note: 'পল্লী বিদ্যুৎ' },
+    { id: 'exp-07', title: 'দোকান বিদ্যুৎ বিল (জুলাই)', amount: 1700, date: '2026-07-22', note: 'পল্লী বিদ্যুৎ' },
+    { id: 'exp-08', title: 'দোকান বিদ্যুৎ বিল (আগস্ট)', amount: 1800, date: '2026-08-20', note: 'পল্লী বিদ্যুৎ' },
+    { id: 'exp-09', title: 'দোকান বিদ্যুৎ বিল (সেপ্টেম্বর)', amount: 1950, date: '2026-09-21', note: 'পল্লী বিদ্যুৎ' },
+    { id: 'exp-10', title: 'দোকান বিদ্যুৎ বিল (অক্টোবর)', amount: 1880, date: '2026-10-22', note: 'পল্লী বিদ্যুৎ' },
+    { id: 'exp-11', title: 'দোকান বিদ্যুৎ বিল (নভেম্বর)', amount: 1650, date: '2026-11-24', note: 'পল্লী বিদ্যুৎ অফিস' },
+    { id: 'exp-12', title: 'স্টাফের দুপুরের নাস্তা ও চা', amount: 220, date: '2026-11-25', note: 'আজকের খরচ' },
+    { id: 'exp-13', title: 'দোকান পরিষ্কার ও প্যাকেজিং ব্যাগ', amount: 450, date: '2026-11-26', note: 'প্যাকেজিং' }
+  ];
+}
+
 // Global App State
 const state = {
   categories: [],
@@ -311,10 +411,12 @@ function loadAllData() {
     state.customers = c ? JSON.parse(c) : SEED_CUSTOMERS;
 
     const e = localStorage.getItem('metro_tel_expenses');
-    state.expenses = e ? JSON.parse(e) : SEED_EXPENSES;
+    const parsedExp = e ? JSON.parse(e) : null;
+    state.expenses = (parsedExp && parsedExp.length > 0) ? parsedExp : getInitialSeedExpenses();
 
     const s = localStorage.getItem('metro_tel_sales');
-    state.sales = s ? JSON.parse(s) : [];
+    const parsedSales = s ? JSON.parse(s) : null;
+    state.sales = (parsedSales && parsedSales.length > 0) ? parsedSales : getInitialSeedSales();
 
     const set = localStorage.getItem('metro_tel_settings');
     state.settings = set ? JSON.parse(set) : SEED_SETTINGS;
@@ -326,8 +428,8 @@ function loadAllData() {
     state.categories = DEFAULT_CATEGORIES;
     state.products = SEED_PRODUCTS;
     state.customers = SEED_CUSTOMERS;
-    state.expenses = SEED_EXPENSES;
-    state.sales = [];
+    state.expenses = getInitialSeedExpenses();
+    state.sales = getInitialSeedSales();
     state.settings = SEED_SETTINGS;
   }
 }
@@ -407,6 +509,17 @@ const dom = {
   cartDueRow: document.getElementById('cart-due-row'),
   cartDueVal: document.getElementById('cart-due-val'),
   btnPosCheckout: document.getElementById('btn-pos-checkout'),
+
+  // Floating Mobile Cart Bar & Overlay Drawer
+  posCartPane: document.getElementById('pos-cart-pane'),
+  posCartBackdrop: document.getElementById('pos-cart-backdrop'),
+  btnCloseCartOverlay: document.getElementById('btn-close-cart-overlay'),
+  mobileDrawerHandle: document.getElementById('mobile-drawer-handle'),
+  posFloatingCartBar: document.getElementById('pos-floating-cart-bar'),
+  floatingCartCount: document.getElementById('floating-cart-count'),
+  floatingCartTotal: document.getElementById('floating-cart-total'),
+  btnTriggerCartSheet: document.getElementById('btn-trigger-cart-sheet'),
+  btnFloatingCheckout: document.getElementById('btn-floating-checkout'),
 
   // Inventory
   btnOpenCreateProduct: document.getElementById('btn-open-create-product'),
@@ -502,7 +615,36 @@ const dom = {
   printableMemoSheet: document.getElementById('printable-memo-sheet'),
   btnInvokePrint: document.getElementById('btn-invoke-print'),
   btnCloseInvoiceModal: document.getElementById('btn-close-invoice-modal'),
-  sizePills: document.querySelectorAll('.size-pill')
+  sizePills: document.querySelectorAll('.size-pill'),
+
+  // Reference Sales Trend Card
+  trendTotalSalesText: document.getElementById('trend-total-sales-text'),
+  trendGrowthBadge: document.getElementById('trend-growth-badge'),
+  trendTimeframePill: document.getElementById('trend-timeframe-pill'),
+
+  // Financial Reports & Annual/Monthly Ledger
+  reportPeriodToggle: document.getElementById('report-period-toggle'),
+  selReportYear: document.getElementById('sel-report-year'),
+  selReportMonth: document.getElementById('sel-report-month'),
+  inpReportDate: document.getElementById('inp-report-date'),
+  btnPrintReport: document.getElementById('btn-print-report'),
+  btnExportReportCsv: document.getElementById('btn-export-report-csv'),
+  reportTotalSales: document.getElementById('report-total-sales'),
+  reportTotalCogs: document.getElementById('report-total-cogs'),
+  reportTotalExpenses: document.getElementById('report-total-expenses'),
+  reportNetProfit: document.getElementById('report-net-profit'),
+  reportProfitMargin: document.getElementById('report-profit-margin'),
+  reportChartTitle: document.getElementById('report-chart-title'),
+  reportChartSub: document.getElementById('report-chart-sub'),
+  reportsChartContainer: document.getElementById('reports-chart-container'),
+  reportTableTitle: document.getElementById('report-table-title'),
+  reportTableHeaders: document.getElementById('report-table-headers'),
+  reportTableTbody: document.getElementById('report-table-tbody'),
+  reportTableTfoot: document.getElementById('report-table-tfoot'),
+  rkLabelSales: document.getElementById('rk-label-sales'),
+  rkLabelExpenses: document.getElementById('rk-label-expenses'),
+  rkLabelProfit: document.getElementById('rk-label-profit'),
+  reportSalesSub: document.getElementById('report-sales-sub')
 };
 
 // ================= INITIALIZE =================
@@ -517,6 +659,7 @@ function appInit() {
   setupWarranty();
   setupCustomers();
   setupExpenses();
+  setupReports();
   setupSettings();
   setupCloudSync();
   setupAutoUpdater();
@@ -532,8 +675,40 @@ function setupClock() {
   dom.liveClock.textContent = d.toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-// Tab Switching
+// Tab Switching & Sidebar Slidebar Navigation
 function setupTabs() {
+  const btnToggleSidebar = document.getElementById('btn-toggle-sidebar');
+  const btnCloseSidebar = document.getElementById('btn-close-sidebar');
+  const appSidebar = document.getElementById('app-sidebar');
+  const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+  const headerPageIcon = document.getElementById('header-page-icon');
+  const headerPageTitle = document.getElementById('header-page-title');
+
+  const pageMeta = {
+    dashboard: { icon: '📊', title: 'ড্যাশবোর্ড' },
+    pos: { icon: '🛒', title: 'দ্রুত বিক্রয় (POS)' },
+    inventory: { icon: '📦', title: 'স্টক ও মালামাল' },
+    warranty: { icon: '🛡️', title: 'ওয়ারেন্টি চেক' },
+    customers: { icon: '📒', title: 'বাকির খাতা' },
+    expenses: { icon: '💸', title: 'দোকানের খরচ' },
+    reports: { icon: '📈', title: 'বার্ষিক ও মাসিক হিসাব' },
+    settings: { icon: '⚙️', title: 'সেটিংস ও সিঙ্ক' }
+  };
+
+  function openSidebar() {
+    if (appSidebar) appSidebar.classList.add('open');
+    if (sidebarBackdrop) sidebarBackdrop.classList.add('open');
+  }
+
+  function closeSidebar() {
+    if (appSidebar) appSidebar.classList.remove('open');
+    if (sidebarBackdrop) sidebarBackdrop.classList.remove('open');
+  }
+
+  if (btnToggleSidebar) btnToggleSidebar.addEventListener('click', openSidebar);
+  if (btnCloseSidebar) btnCloseSidebar.addEventListener('click', closeSidebar);
+  if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', closeSidebar);
+
   dom.tabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.tab;
@@ -544,11 +719,21 @@ function setupTabs() {
       const view = document.getElementById(`view-${target}`);
       if (view) view.classList.add('active');
 
+      if (pageMeta[target]) {
+        if (headerPageIcon) headerPageIcon.textContent = pageMeta[target].icon;
+        if (headerPageTitle) headerPageTitle.textContent = pageMeta[target].title;
+      }
+
+      if (window.innerWidth <= 1024) {
+        closeSidebar();
+      }
+
       if (target === 'dashboard') renderDashboard();
       if (target === 'pos') renderPosCatalog();
       if (target === 'inventory') renderInventoryMaster();
       if (target === 'customers') renderCustomerMaster();
       if (target === 'expenses') renderExpenseMaster();
+      if (target === 'reports') renderReportsMaster();
       if (target === 'settings') populateSettingsForm();
     });
   });
@@ -746,8 +931,9 @@ function setupDashboard() {}
 function renderDashboard() {
   refreshGlobalStats();
 
-  // 7-day Sales Bar Chart
+  // 7-day Sales Combo Chart matching reference UI
   const days = ['রবি', 'সোম', 'মঙ্গল', 'বুধ', 'বৃহঃ', 'শুক্র', 'শনি'];
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const now = new Date();
   const past7Days = [];
 
@@ -756,33 +942,133 @@ function renderDashboard() {
     d.setDate(d.getDate() - i);
     const dateStr = d.toISOString().split('T')[0];
     const dayName = days[d.getDay()];
+    const shortDate = `${months[d.getMonth()]} ${d.getDate()}`;
 
     let daySales = 0;
     state.sales.forEach(s => {
       if (s.timestamp && s.timestamp.startsWith(dateStr)) {
-        daySales += s.grandTotal;
+        daySales += (s.grandTotal || 0);
       }
     });
 
-    past7Days.push({ date: dateStr, name: dayName, sales: daySales });
+    past7Days.push({ date: dateStr, name: dayName, shortDate, sales: daySales });
   }
 
-  const maxSale = Math.max(...past7Days.map(d => d.sales), 5000);
-  dom.chartContainer.innerHTML = '';
+  // Update total sales summary footer
+  const total7DaysSales = past7Days.reduce((acc, curr) => acc + curr.sales, 0);
+  if (dom.trendTotalSalesText) {
+    dom.trendTotalSalesText.textContent = `৳ ${total7DaysSales.toLocaleString('en-US')}.00`;
+  }
 
-  past7Days.forEach(d => {
-    const heightPercent = Math.min(100, Math.max(10, Math.round((d.sales / maxSale) * 100)));
-    const col = document.createElement('div');
-    col.className = 'chart-bar-col';
-    col.innerHTML = `
-      <span class="chart-val-label">${d.sales > 0 ? '৳' + Math.round(d.sales / 1000) + 'k' : '০'}</span>
-      <div class="chart-bar-track">
-        <div class="chart-bar-fill" style="height: ${heightPercent}%;"></div>
-      </div>
-      <span class="chart-day-label">${d.name}</span>
+  // Determine scale ceiling
+  const maxSale = Math.max(...past7Days.map(d => d.sales), 1000);
+  let ceiling = Math.ceil(maxSale / 1000) * 1000;
+  if (ceiling < 4000) ceiling = 4000;
+
+  const chartWidth = 560;
+  const chartHeight = 260;
+  const leftMargin = 48;
+  const rightMargin = 20;
+  const plotWidth = chartWidth - leftMargin - rightMargin;
+  const baselineY = 195;
+  const topY = 40;
+  const usableHeight = baselineY - topY;
+  const step = plotWidth / past7Days.length;
+  const barWidth = 38;
+  const radius = 10;
+
+  const gridLevels = [
+    { val: ceiling, y: 40, label: Math.round(ceiling / 1000) + 'k' },
+    { val: Math.round(ceiling * 0.75), y: 78.75, label: Math.round(ceiling * 0.75 / 1000) + 'k' },
+    { val: Math.round(ceiling * 0.5), y: 117.5, label: Math.round(ceiling * 0.5 / 1000) + 'k' },
+    { val: Math.round(ceiling * 0.25), y: 156.25, label: Math.round(ceiling * 0.25 / 1000) + 'k' },
+    { val: 0, y: 195, label: '0' }
+  ];
+
+  let gridSvg = '';
+  gridLevels.forEach(lvl => {
+    gridSvg += `
+      <line x1="${leftMargin}" y1="${lvl.y}" x2="${chartWidth - rightMargin}" y2="${lvl.y}" stroke="rgba(255,255,255,0.07)" stroke-dasharray="4,4" stroke-width="1" />
+      <text x="${leftMargin - 10}" y="${lvl.y + 4}" fill="#64748b" font-size="11" font-weight="600" text-anchor="end">${lvl.label}</text>
     `;
-    dom.chartContainer.appendChild(col);
   });
+
+  const points = [];
+  past7Days.forEach((d, i) => {
+    const cx = leftMargin + (step * i) + (step / 2);
+    const barHeight = Math.max(12, Math.round((d.sales / ceiling) * usableHeight));
+    const barY = baselineY - barHeight;
+    points.push({ cx, barY, barHeight, data: d });
+  });
+
+  let barsSvg = '';
+  points.forEach(pt => {
+    const barX = pt.cx - (barWidth / 2);
+    const r = Math.min(radius, pt.barHeight, barWidth / 2);
+    const barPath = `M ${barX} ${baselineY} L ${barX} ${pt.barY + r} Q ${barX} ${pt.barY} ${barX + r} ${pt.barY} L ${barX + barWidth - r} ${pt.barY} Q ${barX + barWidth} ${pt.barY} ${barX + barWidth} ${pt.barY + r} L ${barX + barWidth} ${baselineY} Z`;
+    barsSvg += `
+      <path d="${barPath}" fill="url(#trendBarGrad)" opacity="0.9" filter="url(#barShadow)"/>
+    `;
+  });
+
+  let splinePath = '';
+  if (points.length > 0) {
+    splinePath = `M ${points[0].cx.toFixed(1)} ${points[0].barY.toFixed(1)}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i === 0 ? 0 : i - 1];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[i + 2 < points.length ? i + 2 : i + 1];
+      const cp1x = p1.cx + (p2.cx - p0.cx) * 0.18;
+      const cp1y = p1.barY + (p2.barY - p0.barY) * 0.18;
+      const cp2x = p2.cx - (p3.cx - p1.cx) * 0.18;
+      const cp2y = p2.barY + (p3.barY - p1.barY) * 0.18;
+      splinePath += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.cx.toFixed(1)} ${p2.barY.toFixed(1)}`;
+    }
+  }
+
+  let overlaySvg = '';
+  points.forEach(pt => {
+    const d = pt.data;
+    const valText = d.sales > 0 ? `৳ ${d.sales.toLocaleString('en-US')}` : '৳ ০';
+    overlaySvg += `
+      <circle cx="${pt.cx}" cy="${pt.barY}" r="6.5" fill="#ffffff" stroke="#0ea5e9" stroke-width="3" filter="url(#nodeGlow)" />
+      <text x="${pt.cx}" y="${pt.barY - 14}" fill="#ffffff" font-size="11.5" font-weight="700" text-anchor="middle" filter="url(#textShadow)">${valText}</text>
+      <text x="${pt.cx}" y="218" fill="#ffffff" font-size="13" font-weight="700" text-anchor="middle">${d.name}</text>
+      <text x="${pt.cx}" y="236" fill="#94a3b8" font-size="10.5" font-weight="500" text-anchor="middle">(${d.shortDate})</text>
+    `;
+  });
+
+  const fullSvg = `
+    <svg class="trend-chart-svg" viewBox="0 0 ${chartWidth} ${chartHeight}" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="trendBarGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.95" />
+          <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0.85" />
+        </linearGradient>
+        <filter id="nodeGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0284c7" flood-opacity="0.6" />
+        </filter>
+        <filter id="lineGlow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#38bdf8" flood-opacity="0.65" />
+        </filter>
+        <filter id="barShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.3" />
+        </filter>
+        <filter id="textShadow">
+          <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000000" flood-opacity="0.8" />
+        </filter>
+      </defs>
+      ${gridSvg}
+      ${barsSvg}
+      <path d="${splinePath}" fill="none" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round" filter="url(#lineGlow)" />
+      ${overlaySvg}
+    </svg>
+  `;
+
+  if (dom.chartContainer) {
+    dom.chartContainer.innerHTML = fullSvg;
+  }
 
   // Low Stock Table
   const lowStockItems = state.products.filter(p => p.stock <= 5);
@@ -915,6 +1201,23 @@ function setupPos() {
 
   // Checkout
   dom.btnPosCheckout.addEventListener('click', handlePosCheckout);
+
+  // Floating Cart Drawer (Mobile / Tablet Overlay)
+  function openMobileCart() {
+    if (dom.posCartPane) dom.posCartPane.classList.add('open');
+    if (dom.posCartBackdrop) dom.posCartBackdrop.classList.add('open');
+  }
+
+  function closeMobileCart() {
+    if (dom.posCartPane) dom.posCartPane.classList.remove('open');
+    if (dom.posCartBackdrop) dom.posCartBackdrop.classList.remove('open');
+  }
+
+  if (dom.btnTriggerCartSheet) dom.btnTriggerCartSheet.addEventListener('click', openMobileCart);
+  if (dom.btnFloatingCheckout) dom.btnFloatingCheckout.addEventListener('click', openMobileCart);
+  if (dom.btnCloseCartOverlay) dom.btnCloseCartOverlay.addEventListener('click', closeMobileCart);
+  if (dom.mobileDrawerHandle) dom.mobileDrawerHandle.addEventListener('click', closeMobileCart);
+  if (dom.posCartBackdrop) dom.posCartBackdrop.addEventListener('click', closeMobileCart);
 }
 
 function updateHeldBanner() {
@@ -1026,6 +1329,13 @@ function addItemToCart(product, serialNumber) {
 
   recalculateCart();
   renderCart();
+
+  if (dom.posFloatingCartBar) {
+    dom.posFloatingCartBar.classList.add('bounce');
+    setTimeout(() => {
+      if (dom.posFloatingCartBar) dom.posFloatingCartBar.classList.remove('bounce');
+    }, 280);
+  }
 }
 
 function renderCart() {
@@ -1097,12 +1407,26 @@ window.stepCartQty = function(idx, delta) {
   it.qty = nextQty;
   recalculateCart();
   renderCart();
+
+  if (dom.posFloatingCartBar) {
+    dom.posFloatingCartBar.classList.add('bounce');
+    setTimeout(() => {
+      if (dom.posFloatingCartBar) dom.posFloatingCartBar.classList.remove('bounce');
+    }, 280);
+  }
 };
 
 window.removeCartPosItem = function(idx) {
   state.cart.splice(idx, 1);
   recalculateCart();
   renderCart();
+
+  if (dom.posFloatingCartBar) {
+    dom.posFloatingCartBar.classList.add('bounce');
+    setTimeout(() => {
+      if (dom.posFloatingCartBar) dom.posFloatingCartBar.classList.remove('bounce');
+    }, 280);
+  }
 };
 
 function recalculateCart() {
@@ -1124,6 +1448,10 @@ function recalculateCart() {
 
   dom.cartDueVal.textContent = formatTk(due);
   dom.cartDueRow.style.display = due > 0 ? 'flex' : 'none';
+
+  const totalItems = state.cart.reduce((s, it) => s + it.qty, 0);
+  if (dom.floatingCartCount) dom.floatingCartCount.textContent = `${totalItems}`;
+  if (dom.floatingCartTotal) dom.floatingCartTotal.textContent = formatTk(grandTotal);
 }
 
 dom.cartPaidInput.addEventListener('focus', () => {
@@ -1189,6 +1517,10 @@ function handlePosCheckout() {
   // 3. Save Sale
   state.sales.unshift(saleRecord);
   persist();
+
+  // Close Mobile Cart Overlay if open
+  if (dom.posCartPane) dom.posCartPane.classList.remove('open');
+  if (dom.posCartBackdrop) dom.posCartBackdrop.classList.remove('open');
 
   // 4. Show Printable Cash Memo
   renderAndShowMemo(saleRecord);
@@ -1731,7 +2063,492 @@ window.deleteExpenseEntry = function(id) {
   }
 };
 
-// ================= 7. SETTINGS =================
+// ================= 7. ANNUAL & MONTHLY FINANCIAL REPORTS =================
+let currentReportPeriod = 'yearly';
+
+function setupReports() {
+  if (dom.reportPeriodToggle) {
+    const btns = dom.reportPeriodToggle.querySelectorAll('.mode-tab-btn');
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        btns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentReportPeriod = btn.dataset.period;
+
+        if (currentReportPeriod === 'yearly') {
+          if (dom.selReportYear) dom.selReportYear.style.display = 'block';
+          if (dom.selReportMonth) dom.selReportMonth.style.display = 'none';
+          if (dom.inpReportDate) dom.inpReportDate.style.display = 'none';
+        } else if (currentReportPeriod === 'monthly') {
+          if (dom.selReportYear) dom.selReportYear.style.display = 'block';
+          if (dom.selReportMonth) dom.selReportMonth.style.display = 'block';
+          if (dom.inpReportDate) dom.inpReportDate.style.display = 'none';
+        } else if (currentReportPeriod === 'daily') {
+          if (dom.selReportYear) dom.selReportYear.style.display = 'none';
+          if (dom.selReportMonth) dom.selReportMonth.style.display = 'none';
+          if (dom.inpReportDate) {
+            dom.inpReportDate.style.display = 'block';
+            if (!dom.inpReportDate.value) {
+              dom.inpReportDate.value = new Date().toISOString().split('T')[0];
+            }
+          }
+        }
+        renderReportsMaster();
+      });
+    });
+  }
+
+  if (dom.selReportYear) dom.selReportYear.addEventListener('change', renderReportsMaster);
+  if (dom.selReportMonth) dom.selReportMonth.addEventListener('change', renderReportsMaster);
+  if (dom.inpReportDate) dom.inpReportDate.addEventListener('change', renderReportsMaster);
+
+  if (dom.btnPrintReport) {
+    dom.btnPrintReport.addEventListener('click', printFinancialReport);
+  }
+
+  if (dom.btnExportReportCsv) {
+    dom.btnExportReportCsv.addEventListener('click', exportFinancialReportCsv);
+  }
+}
+
+function renderReportsMaster() {
+  const selectedYear = dom.selReportYear ? dom.selReportYear.value : '2026';
+  const selectedMonth = dom.selReportMonth ? dom.selReportMonth.value : '10';
+  const selectedDate = dom.inpReportDate && dom.inpReportDate.value ? dom.inpReportDate.value : new Date().toISOString().split('T')[0];
+
+  const monthNamesBn = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
+  const monthNamesEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  if (currentReportPeriod === 'yearly') {
+    renderYearlyReport(selectedYear, monthNamesBn, monthNamesEn);
+  } else if (currentReportPeriod === 'monthly') {
+    renderMonthlyReport(selectedYear, selectedMonth, monthNamesBn, monthNamesEn);
+  } else if (currentReportPeriod === 'daily') {
+    renderDailyReport(selectedDate);
+  }
+}
+
+function renderYearlyReport(year, monthNamesBn, monthNamesEn) {
+  if (dom.rkLabelSales) dom.rkLabelSales.textContent = `${year} বাৎসরিক মোট বিক্রয়`;
+  if (dom.rkLabelExpenses) dom.rkLabelExpenses.textContent = `${year} মোট দোকান খরচ`;
+  if (dom.rkLabelProfit) dom.rkLabelProfit.textContent = `${year} চূড়ান্ত নিট লাভ`;
+  if (dom.reportSalesSub) dom.reportSalesSub.textContent = `১২ মাসের সর্বমোট টার্নওভার`;
+  if (dom.reportChartTitle) dom.reportChartTitle.textContent = `📊 ${year} সালের ১২ মাসের আয়, খরচ ও নিট লাভ তুলনা`;
+  if (dom.reportChartSub) dom.reportChartSub.textContent = `জানুয়ারি থেকে ডিসেম্বর পর্যন্ত মাসওয়ারী বিক্রয় ও লাভের অ্যানালাইসিস`;
+  if (dom.reportTableTitle) dom.reportTableTitle.textContent = `📑 ${year} সালের মাসভিত্তিক পূর্ণাঙ্গ আর্থিক অডিট ছক`;
+
+  let totalSales = 0;
+  let totalCogs = 0;
+  let totalExpenses = 0;
+
+  const monthlyBreakdown = [];
+
+  for (let m = 0; m < 12; m++) {
+    const monthKey = `${year}-${String(m + 1).padStart(2, '0')}`;
+    let mSales = 0;
+    let mCogs = 0;
+    let mExpenses = 0;
+
+    state.sales.forEach(s => {
+      if (s.timestamp && s.timestamp.startsWith(monthKey)) {
+        mSales += (s.grandTotal || 0);
+        if (s.items && Array.isArray(s.items)) {
+          s.items.forEach(it => {
+            const cost = it.cost || (it.price ? Math.round(it.price * 0.75) : 0);
+            mCogs += (cost * (it.qty || 1));
+          });
+        }
+      }
+    });
+
+    state.expenses.forEach(e => {
+      if (e.date && e.date.startsWith(monthKey)) {
+        mExpenses += (e.amount || 0);
+      }
+    });
+
+    const mProfit = mSales - mCogs - mExpenses;
+    const mMargin = mSales > 0 ? ((mProfit / mSales) * 100) : 0;
+
+    totalSales += mSales;
+    totalCogs += mCogs;
+    totalExpenses += mExpenses;
+
+    monthlyBreakdown.push({
+      monthIdx: m,
+      nameBn: monthNamesBn[m],
+      nameEn: monthNamesEn[m],
+      sales: mSales,
+      cogs: mCogs,
+      expenses: mExpenses,
+      profit: mProfit,
+      margin: mMargin
+    });
+  }
+
+  const netProfit = totalSales - totalCogs - totalExpenses;
+  const netMargin = totalSales > 0 ? ((netProfit / totalSales) * 100) : 0;
+
+  if (dom.reportTotalSales) dom.reportTotalSales.textContent = formatTk(totalSales);
+  if (dom.reportTotalCogs) dom.reportTotalCogs.textContent = formatTk(totalCogs);
+  if (dom.reportTotalExpenses) dom.reportTotalExpenses.textContent = formatTk(totalExpenses);
+  if (dom.reportNetProfit) {
+    dom.reportNetProfit.textContent = formatTk(netProfit);
+    dom.reportNetProfit.className = netProfit >= 0 ? 'rk-value text-emerald' : 'rk-value text-rose';
+  }
+  if (dom.reportProfitMargin) {
+    dom.reportProfitMargin.textContent = `মার্জিন: ${netMargin.toFixed(1)}%`;
+    dom.reportProfitMargin.style.background = netMargin >= 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(244, 63, 94, 0.15)';
+    dom.reportProfitMargin.style.color = netMargin >= 0 ? '#34d399' : '#fb7185';
+  }
+
+  render12MonthSvgChart(monthlyBreakdown);
+
+  // Render Table
+  if (dom.reportTableHeaders) {
+    dom.reportTableHeaders.innerHTML = `
+      <th>মাস (Month)</th>
+      <th class="text-right">মোট বিক্রয় (৳)</th>
+      <th class="text-right">মালের ক্রয়মূল্য (৳)</th>
+      <th class="text-right">মোট খরচ (৳)</th>
+      <th class="text-right">নিট লাভ (৳)</th>
+      <th class="text-center">মার্জিন</th>
+      <th class="text-center">স্ট্যাটাস</th>
+    `;
+  }
+
+  if (dom.reportTableTbody) {
+    dom.reportTableTbody.innerHTML = '';
+    monthlyBreakdown.forEach(m => {
+      const tr = document.createElement('tr');
+      const isProfitable = m.profit > 0;
+      const isZero = m.sales === 0 && m.expenses === 0;
+      const statusBadge = isZero
+        ? '<span class="status-pill status-neutral">⚪ অফ</span>'
+        : (isProfitable
+          ? '<span class="status-pill status-paid">🟢 লাভ</span>'
+          : '<span class="status-pill status-due">🔴 লোকসান</span>');
+
+      tr.innerHTML = `
+        <td><strong>${m.nameBn} (${m.nameEn})</strong></td>
+        <td class="text-right"><b>${formatTk(m.sales)}</b></td>
+        <td class="text-right" style="color:var(--text-muted);">${formatTk(m.cogs)}</td>
+        <td class="text-right" style="color:#fb7185;">${formatTk(m.expenses)}</td>
+        <td class="text-right" style="color:${isProfitable ? '#34d399' : (isZero ? 'var(--text-muted)' : '#fb7185')};font-weight:700;">${formatTk(m.profit)}</td>
+        <td class="text-center"><span class="rk-profit-badge" style="font-size:0.75rem;">${m.margin.toFixed(1)}%</span></td>
+        <td class="text-center">${statusBadge}</td>
+      `;
+      dom.reportTableTbody.appendChild(tr);
+    });
+  }
+
+  if (dom.reportTableTfoot) {
+    dom.reportTableTfoot.innerHTML = `
+      <tr>
+        <td><strong>মোট বাৎসরিক সর্বমোট (${year})</strong></td>
+        <td class="text-right" style="color:#38bdf8;font-size:1.05rem;">${formatTk(totalSales)}</td>
+        <td class="text-right" style="color:#c084fc;">${formatTk(totalCogs)}</td>
+        <td class="text-right" style="color:#fb7185;">${formatTk(totalExpenses)}</td>
+        <td class="text-right" style="color:#34d399;font-size:1.05rem;">${formatTk(netProfit)}</td>
+        <td class="text-center"><span class="rk-profit-badge" style="font-size:0.8rem;padding:3px 10px;">${netMargin.toFixed(1)}%</span></td>
+        <td class="text-center"><span class="status-pill status-paid">🏆 সফল বছর</span></td>
+      </tr>
+    `;
+  }
+}
+
+function render12MonthSvgChart(data) {
+  if (!dom.reportsChartContainer) return;
+
+  const maxVal = Math.max(...data.map(d => Math.max(d.sales, d.expenses, d.profit)), 10000);
+  const ceiling = Math.ceil(maxVal / 10000) * 10000;
+
+  const width = 760;
+  const height = 280;
+  const left = 55;
+  const right = 25;
+  const top = 35;
+  const baseline = 220;
+  const plotW = width - left - right;
+  const usableH = baseline - top;
+  const step = plotW / 12;
+
+  let gridLines = '';
+  [1, 0.75, 0.5, 0.25, 0].forEach(ratio => {
+    const y = baseline - (ratio * usableH);
+    const label = ratio === 0 ? '0' : Math.round((ceiling * ratio) / 1000) + 'k';
+    gridLines += `
+      <line x1="${left}" y1="${y}" x2="${width - right}" y2="${y}" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4,4"/>
+      <text x="${left - 10}" y="${y + 4}" fill="#64748b" font-size="11" text-anchor="end">${label}</text>
+    `;
+  });
+
+  let barsSvg = '';
+  const points = [];
+  data.forEach((d, i) => {
+    const cx = left + (step * i) + (step / 2);
+    const sH = Math.max(0, Math.round((d.sales / ceiling) * usableH));
+    const eH = Math.max(0, Math.round((d.expenses / ceiling) * usableH));
+    const pH = Math.max(0, Math.round((Math.max(0, d.profit) / ceiling) * usableH));
+
+    const sY = baseline - sH;
+    const eY = baseline - eH;
+    const pY = baseline - pH;
+
+    barsSvg += `
+      <rect x="${cx - 16}" y="${sY}" width="14" height="${sH}" rx="4" fill="url(#repBlueBarGrad)" opacity="0.9" />
+      <rect x="${cx + 2}" y="${eY}" width="14" height="${eH}" rx="4" fill="url(#repRedBarGrad)" opacity="0.9" />
+    `;
+
+    points.push({ cx, pY, d });
+  });
+
+  let curvePath = '';
+  if (points.length > 0) {
+    curvePath = `M ${points[0].cx.toFixed(1)} ${points[0].pY.toFixed(1)}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i === 0 ? 0 : i - 1];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[i + 2 < points.length ? i + 2 : i + 1];
+      const cp1x = p1.cx + (p2.cx - p0.cx) * 0.18;
+      const cp1y = p1.pY + (p2.pY - p0.pY) * 0.18;
+      const cp2x = p2.cx - (p3.cx - p1.cx) * 0.18;
+      const cp2y = p2.pY - (p3.pY - p1.pY) * 0.18;
+      curvePath += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.cx.toFixed(1)} ${p2.pY.toFixed(1)}`;
+    }
+  }
+
+  let overlaySvg = '';
+  points.forEach(pt => {
+    overlaySvg += `
+      <circle cx="${pt.cx}" cy="${pt.pY}" r="4.5" fill="#ffffff" stroke="#10b981" stroke-width="2.5" />
+      <text x="${pt.cx}" y="244" fill="#ffffff" font-size="11.5" font-weight="700" text-anchor="middle">${pt.d.nameBn.slice(0, 4)}</text>
+      <text x="${pt.cx}" y="260" fill="#94a3b8" font-size="9.5" text-anchor="middle">${pt.d.nameEn}</text>
+    `;
+  });
+
+  const svg = `
+    <svg class="reports-month-svg" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="repBlueBarGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#38bdf8"/>
+          <stop offset="100%" stop-color="#1d4ed8"/>
+        </linearGradient>
+        <linearGradient id="repRedBarGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#fb7185"/>
+          <stop offset="100%" stop-color="#be123c"/>
+        </linearGradient>
+        <filter id="repGreenGlow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#10b981" flood-opacity="0.5"/>
+        </filter>
+      </defs>
+      ${gridLines}
+      ${barsSvg}
+      <path d="${curvePath}" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" filter="url(#repGreenGlow)"/>
+      ${overlaySvg}
+    </svg>
+  `;
+
+  dom.reportsChartContainer.innerHTML = svg;
+}
+
+function renderMonthlyReport(year, monthIdx, monthNamesBn, monthNamesEn) {
+  const m = parseInt(monthIdx, 10);
+  const mStr = String(m + 1).padStart(2, '0');
+  const monthKey = `${year}-${mStr}`;
+  const mName = monthNamesBn[m] || 'চলতি মাস';
+
+  if (dom.rkLabelSales) dom.rkLabelSales.textContent = `${mName} মাসের মোট বিক্রয়`;
+  if (dom.rkLabelExpenses) dom.rkLabelExpenses.textContent = `${mName} মাসের মোট খরচ`;
+  if (dom.rkLabelProfit) dom.rkLabelProfit.textContent = `${mName} মাসের নিট লাভ`;
+  if (dom.reportSalesSub) dom.reportSalesSub.textContent = `${year} সালের ${mName} মাস`;
+  if (dom.reportChartTitle) dom.reportChartTitle.textContent = `📊 ${mName} (${year}) এর দৈনিক বিক্রয় চিত্র`;
+  if (dom.reportChartSub) dom.reportChartSub.textContent = `চলতি মাসের প্রতিদিনের বেচাকেনা ও খরচের গ্রাফ`;
+  if (dom.reportTableTitle) dom.reportTableTitle.textContent = `📑 ${mName} মাসের তারিখভিত্তিক লেনদেন বিবরণী`;
+
+  const mSales = state.sales.filter(s => s.timestamp && s.timestamp.startsWith(monthKey));
+  const mExpenses = state.expenses.filter(e => e.date && e.date.startsWith(monthKey));
+
+  let totSales = 0, totCogs = 0, totExp = 0;
+  mSales.forEach(s => {
+    totSales += (s.grandTotal || 0);
+    if (s.items) s.items.forEach(it => {
+      const cost = it.cost || Math.round((it.price || 0) * 0.75);
+      totCogs += (cost * (it.qty || 1));
+    });
+  });
+  mExpenses.forEach(e => { totExp += (e.amount || 0); });
+
+  const netProf = totSales - totCogs - totExp;
+  const netMarg = totSales > 0 ? (netProf / totSales) * 100 : 0;
+
+  if (dom.reportTotalSales) dom.reportTotalSales.textContent = formatTk(totSales);
+  if (dom.reportTotalCogs) dom.reportTotalCogs.textContent = formatTk(totCogs);
+  if (dom.reportTotalExpenses) dom.reportTotalExpenses.textContent = formatTk(totExp);
+  if (dom.reportNetProfit) {
+    dom.reportNetProfit.textContent = formatTk(netProf);
+    dom.reportNetProfit.className = netProf >= 0 ? 'rk-value text-emerald' : 'rk-value text-rose';
+  }
+  if (dom.reportProfitMargin) {
+    dom.reportProfitMargin.textContent = `মার্জিন: ${netMarg.toFixed(1)}%`;
+  }
+
+  if (dom.reportTableHeaders) {
+    dom.reportTableHeaders.innerHTML = `
+      <th>ইনভয়েস / ভাউচার ID</th>
+      <th>কাস্টমার / খরচের খাত</th>
+      <th class="text-center">পদ্ধতি</th>
+      <th class="text-right">টাকার পরিমাণ (৳)</th>
+      <th class="text-center">ধরন</th>
+      <th class="text-right">সময় ও তারিখ</th>
+    `;
+  }
+
+  if (dom.reportTableTbody) {
+    dom.reportTableTbody.innerHTML = '';
+    const combined = [];
+    mSales.forEach(s => combined.push({ id: s.id, title: s.customer || 'খুচরা ক্রেতা', type: 'বিক্রয়', amount: s.grandTotal, method: s.paymentMethod, time: s.timestamp }));
+    mExpenses.forEach(e => combined.push({ id: e.id, title: e.title, type: 'দোকান খরচ', amount: e.amount, method: 'ক্যাশ', time: e.date }));
+
+    combined.sort((a, b) => (b.time || '').localeCompare(a.time || ''));
+
+    if (combined.length === 0) {
+      dom.reportTableTbody.innerHTML = `<tr><td colspan="6" class="text-center" style="padding:1.5rem;color:var(--text-dim);">এই মাসে এখনও কোনো লেনদেন রেকর্ড নেই</td></tr>`;
+    } else {
+      combined.forEach(item => {
+        const tr = document.createElement('tr');
+        const isSale = item.type === 'বিক্রয়';
+        tr.innerHTML = `
+          <td><strong>${item.id}</strong></td>
+          <td>${item.title}</td>
+          <td class="text-center"><span class="memo-paid-chip" style="font-size:0.75rem;">${item.method === 'bkash' ? 'বিকাশ' : (item.method === 'due' ? 'বাকি' : 'নগদ')}</span></td>
+          <td class="text-right" style="font-weight:700;color:${isSale ? '#38bdf8' : '#fb7185'};">${formatTk(item.amount)}</td>
+          <td class="text-center"><span class="status-pill ${isSale ? 'status-paid' : 'status-due'}">${item.type}</span></td>
+          <td class="text-right" style="color:var(--text-muted);font-size:0.8rem;">${item.time ? item.time.slice(0, 10) : ''}</td>
+        `;
+        dom.reportTableTbody.appendChild(tr);
+      });
+    }
+  }
+
+  if (dom.reportTableTfoot) {
+    dom.reportTableTfoot.innerHTML = `
+      <tr>
+        <td colspan="3"><strong>${mName} সর্বমোট সারাংশ</strong></td>
+        <td class="text-right" style="color:#34d399;font-weight:800;font-size:1.05rem;">নিট লাভ: ${formatTk(netProf)}</td>
+        <td colspan="2" class="text-center">বিক্রি: ${formatTk(totSales)} | খরচ: ${formatTk(totExp)}</td>
+      </tr>
+    `;
+  }
+}
+
+function renderDailyReport(dateStr) {
+  if (dom.rkLabelSales) dom.rkLabelSales.textContent = `দিনের মোট বিক্রয় (${dateStr})`;
+  if (dom.rkLabelExpenses) dom.rkLabelExpenses.textContent = `দিনের মোট দোকান খরচ`;
+  if (dom.rkLabelProfit) dom.rkLabelProfit.textContent = `দিনের নিট লাভ`;
+  if (dom.reportSalesSub) dom.reportSalesSub.textContent = `সারাদিনের লেনদেন`;
+  if (dom.reportChartTitle) dom.reportChartTitle.textContent = `📊 দৈনিক লেনদেন অডিট (${dateStr})`;
+  if (dom.reportChartSub) dom.reportChartSub.textContent = `সারাদিনের সকল মেমো এবং খরচের সমন্বিত হিসাব`;
+  if (dom.reportTableTitle) dom.reportTableTitle.textContent = `📑 ${dateStr} তারিখের সম্পূর্ণ খতিয়ান`;
+
+  const dSales = state.sales.filter(s => s.timestamp && s.timestamp.startsWith(dateStr));
+  const dExpenses = state.expenses.filter(e => e.date && e.date.startsWith(dateStr));
+
+  let totSales = 0, totCogs = 0, totExp = 0;
+  dSales.forEach(s => {
+    totSales += (s.grandTotal || 0);
+    if (s.items) s.items.forEach(it => {
+      const cost = it.cost || Math.round((it.price || 0) * 0.75);
+      totCogs += (cost * (it.qty || 1));
+    });
+  });
+  dExpenses.forEach(e => { totExp += (e.amount || 0); });
+
+  const netProf = totSales - totCogs - totExp;
+  const netMarg = totSales > 0 ? (netProf / totSales) * 100 : 0;
+
+  if (dom.reportTotalSales) dom.reportTotalSales.textContent = formatTk(totSales);
+  if (dom.reportTotalCogs) dom.reportTotalCogs.textContent = formatTk(totCogs);
+  if (dom.reportTotalExpenses) dom.reportTotalExpenses.textContent = formatTk(totExp);
+  if (dom.reportNetProfit) {
+    dom.reportNetProfit.textContent = formatTk(netProf);
+    dom.reportNetProfit.className = netProf >= 0 ? 'rk-value text-emerald' : 'rk-value text-rose';
+  }
+  if (dom.reportProfitMargin) {
+    dom.reportProfitMargin.textContent = `মার্জিন: ${netMarg.toFixed(1)}%`;
+  }
+
+  if (dom.reportTableHeaders) {
+    dom.reportTableHeaders.innerHTML = `
+      <th>মেমো / খরচ ভাউচার</th>
+      <th>বিবরণ ও কাস্টমার</th>
+      <th class="text-center">মাধ্যম</th>
+      <th class="text-right">টাকা (৳)</th>
+      <th class="text-center">ধরন</th>
+    `;
+  }
+
+  if (dom.reportTableTbody) {
+    dom.reportTableTbody.innerHTML = '';
+    const list = [];
+    dSales.forEach(s => list.push({ id: s.id, desc: s.customer || 'খুচরা সেল', method: s.paymentMethod, amt: s.grandTotal, type: 'বিক্রয়' }));
+    dExpenses.forEach(e => list.push({ id: e.id, desc: e.title, method: 'ক্যাশ', amt: e.amount, type: 'খরচ' }));
+
+    if (list.length === 0) {
+      dom.reportTableTbody.innerHTML = `<tr><td colspan="5" class="text-center" style="padding:1.5rem;color:var(--text-dim);">এই তারিখে কোনো লেনদেন হয়নি</td></tr>`;
+    } else {
+      list.forEach(item => {
+        const tr = document.createElement('tr');
+        const isSale = item.type === 'বিক্রয়';
+        tr.innerHTML = `
+          <td><strong>${item.id}</strong></td>
+          <td>${item.desc}</td>
+          <td class="text-center">${item.method === 'bkash' ? 'বিকাশ' : (item.method === 'due' ? 'বাকি' : 'ক্যাশ')}</td>
+          <td class="text-right" style="font-weight:700;color:${isSale ? '#38bdf8' : '#fb7185'};">${formatTk(item.amt)}</td>
+          <td class="text-center"><span class="status-pill ${isSale ? 'status-paid' : 'status-due'}">${item.type}</span></td>
+        `;
+        dom.reportTableTbody.appendChild(tr);
+      });
+    }
+  }
+
+  if (dom.reportTableTfoot) {
+    dom.reportTableTfoot.innerHTML = `
+      <tr>
+        <td colspan="3"><strong>আজকের সর্বমোট নিট লাভ (Net Profit)</strong></td>
+        <td class="text-right" style="color:#34d399;font-weight:800;font-size:1.1rem;">${formatTk(netProf)}</td>
+        <td class="text-center"><span class="status-pill status-paid">দৈনিক ব্যালেন্স</span></td>
+      </tr>
+    `;
+  }
+}
+
+function printFinancialReport() {
+  window.print();
+}
+
+function exportFinancialReportCsv() {
+  let csv = 'Timeframe,Sales,COGS,Expenses,NetProfit\n';
+  const rows = dom.reportTableTbody.querySelectorAll('tr');
+  rows.forEach(r => {
+    const cols = r.querySelectorAll('td');
+    if (cols.length >= 5) {
+      const line = Array.from(cols).slice(0, 5).map(c => `"${c.textContent.replace(/"/g, '""').trim()}"`).join(',');
+      csv += line + '\n';
+    }
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Metro_Telecom_Financial_Report_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+// ================= 8. SETTINGS =================
 function setupSettings() {
   dom.formShopSettings.addEventListener('submit', e => {
     e.preventDefault();
@@ -1864,49 +2681,73 @@ function setupCloudSync() {
   initCloudBackendListener(currentKey);
 }
 
+function loadFirebaseScriptsAsync() {
+  if (typeof firebase !== 'undefined') return Promise.resolve();
+  if (typeof window.AntiGem !== 'undefined') return Promise.resolve();
+  return new Promise((resolve) => {
+    try {
+      const s1 = document.createElement('script');
+      s1.src = 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js';
+      s1.onload = () => {
+        const s2 = document.createElement('script');
+        s2.src = 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js';
+        s2.onload = resolve;
+        s2.onerror = () => resolve();
+        document.head.appendChild(s2);
+      };
+      s1.onerror = () => resolve();
+      document.head.appendChild(s1);
+    } catch (e) {
+      resolve();
+    }
+  });
+}
+
 function initCloudBackendListener(syncKey) {
   updateSyncStatusUI('syncing', 'কানেক্ট হচ্ছে...');
 
-  if (typeof firebase !== 'undefined' && firebase.apps) {
-    try {
-      if (!firebase.apps.length) {
-        const firebaseConfig = {
-          apiKey: "AIzaSyB-MetroTelecomPosAppKey2026",
-          authDomain: "metro-telecom-pos.firebaseapp.com",
-          projectId: "metro-telecom-pos",
-          storageBucket: "metro-telecom-pos.appspot.com",
-          messagingSenderId: "3892749102",
-          appId: "1:3892749102:web:8e9a2f1b7c"
-        };
-        firebase.initializeApp(firebaseConfig);
-      }
-      firestoreDb = firebase.firestore();
+  loadFirebaseScriptsAsync().then(() => {
+    if (typeof firebase !== 'undefined' && firebase.apps) {
+      try {
+        if (!firebase.apps.length) {
+          const firebaseConfig = {
+            apiKey: "AIzaSyB-MetroTelecomPosAppKey2026",
+            authDomain: "metro-telecom-pos.firebaseapp.com",
+            projectId: "metro-telecom-pos",
+            storageBucket: "metro-telecom-pos.appspot.com",
+            messagingSenderId: "3892749102",
+            appId: "1:3892749102:web:8e9a2f1b7c"
+          };
+          firebase.initializeApp(firebaseConfig);
+        }
+        firestoreDb = firebase.firestore();
 
-      if (unsubscribeFirestore) {
-        unsubscribeFirestore();
-      }
+        if (unsubscribeFirestore) {
+          unsubscribeFirestore();
+        }
 
-      unsubscribeFirestore = firestoreDb.collection('metro_shops').doc(syncKey)
-        .onSnapshot((doc) => {
-          if (doc.exists) {
-            const remotePayload = doc.data();
-            if (remotePayload && remotePayload.clientId !== CLIENT_ID) {
-              handleIncomingDataSync(remotePayload, 'Firebase Cloud');
+        unsubscribeFirestore = firestoreDb.collection('metro_shops').doc(syncKey)
+          .onSnapshot((doc) => {
+            if (doc.exists) {
+              const remotePayload = doc.data();
+              if (remotePayload && remotePayload.clientId !== CLIENT_ID) {
+                handleIncomingDataSync(remotePayload, 'Firebase Cloud');
+              }
             }
-          }
-          updateSyncStatusUI('connected', 'ক্লাউড সিঙ্ক: লাইভ');
-        }, (error) => {
-          console.warn('Firestore live listener offline:', error.message);
-          updateSyncStatusUI('offline', 'ক্লাউড: লোকাল মোড');
-        });
+            updateSyncStatusUI('connected', 'ক্লাউড সিঙ্ক: লাইভ');
+          }, (error) => {
+            console.warn('Firestore live listener offline:', error.message);
+            updateSyncStatusUI('offline', 'ক্লাউড: লোকাল মোড');
+          });
 
-      return;
-    } catch (err) {
-      console.warn('Firebase init fallback:', err);
+        return;
+      } catch (err) {
+        console.warn('Firebase init fallback:', err);
+      }
     }
-  }
 
-  updateSyncStatusUI('connected', 'ক্লাউড সিঙ্ক: অ্যাক্টিভ');
+    updateSyncStatusUI('connected', 'ক্লাউড সিঙ্ক: অ্যাক্টিভ');
+  });
 }
 
 function broadcastAndPushCloudSync(key) {
@@ -2079,6 +2920,9 @@ function setupAutoUpdater() {
 }
 
 function checkForSoftwareUpdates(isManual = false) {
+  if (typeof window.AntiGem !== 'undefined' && !isManual) {
+    return;
+  }
   if (dom.updateStatusBox) {
     dom.updateStatusBox.style.display = 'block';
     dom.updateStatusBox.style.background = 'rgba(59, 130, 246, 0.15)';
