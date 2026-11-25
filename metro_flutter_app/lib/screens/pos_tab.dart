@@ -84,11 +84,10 @@ class PosTab extends StatelessWidget {
           ],
         ),
 
-        // Floating Bottom Cart Bar
+        // Floating Bottom-Left Compact Pill Cart Bar
         if (provider.cartCount > 0)
           Positioned(
             left: 16,
-            right: 16,
             bottom: 16,
             child: GestureDetector(
               onTap: () {
@@ -100,59 +99,66 @@ class PosTab extends StatelessWidget {
                 );
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+                    colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
                   ),
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: const Color(0xFF38BDF8), width: 1.5),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF2563EB).withOpacity(0.4),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
+                      color: Colors.black.withOpacity(0.55),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: const BoxDecoration(
-                            color: Colors.white24,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.shopping_bag_rounded, color: Colors.white, size: 20),
-                        ),
-                        const SizedBox(width: 12),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              '${provider.cartCount} টি পণ্য কার্টে',
-                              style: const TextStyle(color: Colors.white70, fontSize: 11),
-                            ),
-                            Text(
-                              '৳ ${provider.cartSubtotal.toStringAsFixed(0)}',
-                              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ],
+                    Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF2563EB),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.shopping_cart_rounded, color: Colors.white, size: 15),
                     ),
-                    const Row(
-                      children: [
-                        Text(
-                          'মেমো দেখুন',
-                          style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(width: 4),
-                        Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 16),
-                      ],
+                    const SizedBox(width: 8),
+                    Text(
+                      '${provider.cartCount}',
+                      style: const TextStyle(
+                        color: Color(0xFF10B981),
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      '৳ ${provider.cartSubtotal.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                        color: Color(0xFF38BDF8),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2563EB),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'মেমো ➔',
+                            style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

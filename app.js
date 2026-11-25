@@ -1221,6 +1221,7 @@ function setupPos() {
     if (dom.posCartBackdrop) dom.posCartBackdrop.classList.remove('open');
   }
 
+  if (dom.posFloatingCartBar) dom.posFloatingCartBar.addEventListener('click', openMobileCart);
   if (dom.btnTriggerCartSheet) dom.btnTriggerCartSheet.addEventListener('click', openMobileCart);
   if (dom.btnFloatingCheckout) dom.btnFloatingCheckout.addEventListener('click', openMobileCart);
   if (dom.btnCloseCartOverlay) dom.btnCloseCartOverlay.addEventListener('click', closeMobileCart);
@@ -2585,23 +2586,45 @@ function printFinancialReport() {
 }
 
 function exportFinancialReportCsv() {
-  let csv = 'Timeframe,Sales,COGS,Expenses,NetProfit\n';
+  const selectedYear = dom.selReportYear ? dom.selReportYear.value : '2026';
+  
+  // Clean CSV header with bilingual titles
+  let csv = 'সময়কাল / মাস (Timeframe),মোট বিক্রয় (Total Sales Tk),মালের ক্রয়মূল্য (COGS Tk),দোকানের মোট খরচ (Expenses Tk),নিট লাভ (Net Profit Tk),মুনাফার মার্জিন (Margin),স্ট্যাটাস (Status)\n';
+
   const rows = dom.reportTableTbody.querySelectorAll('tr');
   rows.forEach(r => {
     const cols = r.querySelectorAll('td');
     if (cols.length >= 5) {
-      const line = Array.from(cols).slice(0, 5).map(c => `"${c.textContent.replace(/"/g, '""').trim()}"`).join(',');
+      const line = Array.from(cols).map(c => {
+        let text = c.textContent.replace(/"/g, '""').replace(/\s+/g, ' ').trim();
+        return `"${text}"`;
+      }).join(',');
       csv += line + '\n';
     }
   });
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+
+  // Append Annual Total Summary Row
+  if (dom.reportTotalSales && dom.reportTotalCogs && dom.reportTotalExpenses && dom.reportNetProfit) {
+    const totalSales = dom.reportTotalSales.textContent.replace(/"/g, '""').trim();
+    const totalCogs = dom.reportTotalCogs.textContent.replace(/"/g, '""').trim();
+    const totalExpenses = dom.reportTotalExpenses.textContent.replace(/"/g, '""').trim();
+    const netProfit = dom.reportNetProfit.textContent.replace(/"/g, '""').trim();
+    const margin = dom.reportProfitMargin ? dom.reportProfitMargin.textContent.replace(/"/g, '""').trim() : '';
+
+    csv += `\n"সর্বমোট (YEAR TOTAL)","${totalSales}","${totalCogs}","${totalExpenses}","${netProfit}","${margin}","-"\n`;
+  }
+
+  // Prepend UTF-8 Byte Order Mark (\uFEFF) so Microsoft Excel opens Bengali cleanly without mojibake
+  const BOM = '\uFEFF';
+  const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `Metro_Telecom_Financial_Report_${new Date().toISOString().slice(0,10)}.csv`;
+  a.download = `Metro_Telecom_Financial_Report_${selectedYear}_${new Date().toISOString().slice(0, 10)}.csv`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 // ================= 8. SETTINGS =================

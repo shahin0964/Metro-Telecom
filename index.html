@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Metro Telecom - POS & Stock System</title>
-  <link rel="stylesheet" href="style.css?v=1.0.7">
+  <link rel="stylesheet" href="style.css?v=1.0.8">
 </head>
 <body>
   <div class="app-layout">
@@ -427,7 +427,7 @@
         </div>
 
         <!-- Floating Bottom Overlay Cart Bar (Visible on Mobile / Tablet) -->
-        <div class="pos-floating-cart-bar" id="pos-floating-cart-bar">
+        <div class="pos-floating-cart-bar" id="pos-floating-cart-bar" title="ক্লিক করে মেমো ও পেমেন্ট দেখুন">
           <div class="floating-cart-summary" id="btn-trigger-cart-sheet">
             <div class="floating-cart-badge">
               <span class="floating-cart-icon">🛒</span>
@@ -438,8 +438,8 @@
               <span class="floating-cart-sub">মেমো দেখতে ট্যাপ করুন</span>
             </div>
           </div>
-          <button class="btn-floating-checkout" id="btn-floating-checkout">
-            <span>মেমো ও পেমেন্ট ➔</span>
+          <button class="btn-floating-checkout" id="btn-floating-checkout" title="মেমো ও পেমেন্ট">
+            <span>মেমো ➔</span>
           </button>
         </div>
       </section>
@@ -1268,6 +1268,6 @@
   <div id="toast-container" class="toast-container"></div>
 
   <!-- Dynamic Async Cloud Engine -->
-  <script src="app.js?v=1.0.7"></script>
+  <script src="app.js?v=1.0.8"></script>
 </body>
 </html>
