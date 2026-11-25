@@ -192,6 +192,9 @@ input, button, select, textarea {
   white-space: nowrap !important;
   letter-spacing: 0.2px !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  flex-shrink: 0 !important;
+  align-self: flex-start !important;
+  margin-top: 2px !important;
 }
 
 .btn-sm-action:hover {
@@ -719,18 +722,26 @@ input, button, select, textarea {
 .panel-head {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 0.85rem;
   margin-bottom: 1rem;
+}
+
+.head-title {
+  flex: 1;
+  min-width: 0;
 }
 
 .head-title h3 {
   font-size: 1.05rem;
   font-weight: 700;
   color: #fff;
+  line-height: 1.3;
 }
 .head-title p {
   font-size: 0.78rem;
   color: var(--text-muted);
+  margin-top: 0.2rem;
 }
 
 /* ================= REFERENCE SALES TREND CARD ================= */
