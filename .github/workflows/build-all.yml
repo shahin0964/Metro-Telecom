@@ -101,10 +101,10 @@ jobs:
       - name: Prepare Flutter Project
         run: |
           cd metro_flutter_app
-          flutter create . --org com.metro --project-name metro_flutter_app --platforms=android
+          flutter create . --org com.metro --project-name telecom --platforms=android
+          rm -rf test/
           cat << 'EOF' > android/app/src/main/AndroidManifest.xml
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-              package="com.metro.telecom">
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
               <uses-permission android:name="android.permission.INTERNET"/>
               <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
