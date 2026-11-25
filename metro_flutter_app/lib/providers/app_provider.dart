@@ -103,6 +103,8 @@ class AppProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
+    await _storageService.checkAndPurgeDemoData();
+
     final syncKey = await _storageService.getSyncKey();
     _cloudSyncService = CloudSyncService(syncKey: syncKey);
 

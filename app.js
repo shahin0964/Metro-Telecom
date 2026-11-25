@@ -22,363 +22,26 @@ const DEFAULT_CATEGORIES = [
   { id: 'cat-elec-gadget', name: 'Electronic (অন্যান্য গ্যাজেট)', label: '⚙️ ইলেকট্রনিক্স গ্যাজেট' }
 ];
 
-const SEED_PRODUCTS = [
-  {
-    id: 'prod-101',
-    name: 'Xiaomi Redmi Note 13 (8GB / 256GB)',
-    cat: 'Mobile',
-    brand: 'Xiaomi',
-    unit: 'Pcs',
-    barcode: '880192837461',
-    cost: 19500,
-    price: 22499,
-    stock: 8,
-    warranty: '১ বছর অফিসিয়াল ওয়ারেন্টি',
-    hasSerial: true,
-    image: createProductSvg('#2563EB', 'Redmi Note 13')
-  },
-  {
-    id: 'prod-102',
-    name: 'Samsung Galaxy A15 4G (6GB / 128GB)',
-    cat: 'Mobile',
-    brand: 'Samsung',
-    unit: 'Pcs',
-    barcode: '880192837462',
-    cost: 16200,
-    price: 18999,
-    stock: 6,
-    warranty: '১ বছর অফিসিয়াল ওয়ারেন্টি',
-    hasSerial: true,
-    image: createProductSvg('#1D4ED8', 'Galaxy A15')
-  },
-  {
-    id: 'prod-103',
-    name: 'Realme Buds T110 True Wireless Earbuds',
-    cat: 'Headphones',
-    brand: 'Realme',
-    unit: 'Pcs',
-    barcode: '694176442111',
-    cost: 1450,
-    price: 1950,
-    stock: 12,
-    warranty: '৬ মাস ওয়ারেন্টি',
-    hasSerial: true,
-    image: createProductSvg('#7C3AED', 'TWS Buds')
-  },
-  {
-    id: 'prod-104',
-    name: 'Mpow Foldable Wireless Bluetooth Headphone',
-    cat: 'Headphones',
-    brand: 'Mpow',
-    unit: 'Pcs',
-    barcode: '740617310931',
-    cost: 1850,
-    price: 2400,
-    stock: 7,
-    warranty: '১ বছর ওয়ারেন্টি',
-    hasSerial: true,
-    image: createProductSvg('#4F46E5', 'Headphones')
-  },
-  {
-    id: 'prod-105',
-    name: 'Rechargeable 4WD Remote Control Stunt Car',
-    cat: 'Toys',
-    brand: 'Super Toys',
-    unit: 'Box',
-    barcode: '894110300222',
-    cost: 1200,
-    price: 1650,
-    stock: 9,
-    warranty: '১ মাস রিপ্লেসমেন্ট',
-    hasSerial: false,
-    image: createProductSvg('#DC2626', 'RC Car Toy')
-  },
-  {
-    id: 'prod-106',
-    name: 'Musical Dancing Duck with 3D Flash Lights',
-    cat: 'Toys',
-    brand: 'Baby Land',
-    unit: 'Pcs',
-    barcode: '894110300333',
-    cost: 380,
-    price: 550,
-    stock: 14,
-    warranty: 'কোন ওয়ারেন্টি নেই',
-    hasSerial: false,
-    image: createProductSvg('#F59E0B', 'Dancing Duck')
-  },
-  {
-    id: 'prod-107',
-    name: 'DP 20W LED Rechargeable Emergency Tube Light',
-    cat: 'Light',
-    brand: 'DP Light',
-    unit: 'Pcs',
-    barcode: '695485128777',
-    cost: 580,
-    price: 820,
-    stock: 16,
-    warranty: '৬ মাস ওয়ারেন্টি',
-    hasSerial: false,
-    image: createProductSvg('#EAB308', 'Emergency Light')
-  },
-  {
-    id: 'prod-108',
-    name: 'Kamisafe Long Range LED Flashlight Torch',
-    cat: 'Light',
-    brand: 'Kamisafe',
-    unit: 'Pcs',
-    barcode: '695485128888',
-    cost: 320,
-    price: 480,
-    stock: 20,
-    warranty: '৬ মাস ওয়ারেন্টি',
-    hasSerial: false,
-    image: createProductSvg('#CA8A04', 'LED Torch')
-  },
-  {
-    id: 'prod-109',
-    name: 'Deluxe Hardcover 120 Pages Ruled Note Khata',
-    cat: 'স্টেশনারি (খাতা ও ডায়েরি)',
-    brand: 'Bashundhara',
-    unit: 'Pcs',
-    barcode: '8851960000111',
-    cost: 75,
-    price: 95,
-    stock: 50,
-    warranty: 'কোন ওয়ারেন্টি নেই',
-    hasSerial: false,
-    image: createProductSvg('#059669', 'Note Khata')
-  },
-  {
-    id: 'prod-110',
-    name: 'Matador Pin-Point Ball Pen Box (20 Pcs)',
-    cat: 'স্টেশনারি (কলম ও জ্যামিতি)',
-    brand: 'Matador',
-    unit: 'Box',
-    barcode: '894110300101',
-    cost: 95,
-    price: 120,
-    stock: 40,
-    warranty: 'কোন ওয়ারেন্টি নেই',
-    hasSerial: false,
-    image: createProductSvg('#BE185D', 'Matador Pen')
-  },
-  {
-    id: 'prod-111',
-    name: 'Double A 80GSM A4 Paper Rim (500 Sheets)',
-    cat: 'স্টেশনারি (কাগজ ও রিম)',
-    brand: 'Double A',
-    unit: 'Rim',
-    barcode: '8851960000049',
-    cost: 430,
-    price: 495,
-    stock: 45,
-    warranty: 'কোন ওয়ারেন্টি নেই',
-    hasSerial: false,
-    image: createProductSvg('#047857', 'A4 Paper')
-  },
-  {
-    id: 'prod-112',
-    name: 'Executive Display File Folder (40 Pockets)',
-    cat: 'স্টেশনারি (ফাইল ও অফিস)',
-    brand: 'Good Luck',
-    unit: 'Pcs',
-    barcode: '894110300555',
-    cost: 110,
-    price: 150,
-    stock: 25,
-    warranty: 'কোন ওয়ারেন্টি নেই',
-    hasSerial: false,
-    image: createProductSvg('#0E7490', 'Office File')
-  },
-  {
-    id: 'prod-113',
-    name: 'Remax 20W PD+QC Fast Type-C Charger',
-    cat: 'Electronic (চার্জার ও পাওয়ার ব্যাংক)',
-    brand: 'Remax',
-    unit: 'Pcs',
-    barcode: '695485128391',
-    cost: 480,
-    price: 680,
-    stock: 22,
-    warranty: '৬ মাস ওয়ারেন্টি',
-    hasSerial: true,
-    image: createProductSvg('#D97706', 'Fast Charger')
-  },
-  {
-    id: 'prod-114',
-    name: 'Anker PowerCore 10000mAh Slim Power Bank',
-    cat: 'Electronic (চার্জার ও পাওয়ার ব্যাংক)',
-    brand: 'Anker',
-    unit: 'Pcs',
-    barcode: '848061053999',
-    cost: 1650,
-    price: 2150,
-    stock: 10,
-    warranty: '১ বছর অফিসিয়াল ওয়ারেন্টি',
-    hasSerial: true,
-    image: createProductSvg('#B45309', 'Power Bank')
-  },
-  {
-    id: 'prod-115',
-    name: 'Baseus 100W Fast Charging Type-C Cable',
-    cat: 'Electronic (ক্যাবল ও কনভার্টার)',
-    brand: 'Baseus',
-    unit: 'Pcs',
-    barcode: '848061053128',
-    cost: 340,
-    price: 490,
-    stock: 25,
-    warranty: '১ বছর অফিসিয়াল ওয়ারেন্টি',
-    hasSerial: false,
-    image: createProductSvg('#EA580C', 'Type-C Cable')
-  },
-  {
-    id: 'prod-116',
-    name: 'Defender 4-Socket Surge Protector Multiplug',
-    cat: 'Electronic (মাল্টিপ্লাগ ও ইলেকট্রিক)',
-    brand: 'Defender',
-    unit: 'Pcs',
-    barcode: '619659124489',
-    cost: 450,
-    price: 650,
-    stock: 15,
-    warranty: '২ বছর ওয়ারেন্টি',
-    hasSerial: false,
-    image: createProductSvg('#4338CA', 'Multiplug')
-  },
-  {
-    id: 'prod-117',
-    name: 'Portable USB Rechargeable Mini Desk Fan',
-    cat: 'Electronic (অন্যান্য গ্যাজেট)',
-    brand: 'Jiteng',
-    unit: 'Pcs',
-    barcode: '619659124999',
-    cost: 480,
-    price: 690,
-    stock: 8,
-    warranty: '৩ মাস রিপ্লেসমেন্ট',
-    hasSerial: false,
-    image: createProductSvg('#0284C7', 'Mini Fan')
-  }
-];
+const SEED_PRODUCTS = [];
 
-const SEED_CUSTOMERS = [
-  { id: 'cust-1', name: 'মোঃ রফিকুল ইসলাম (টেলিকম মার্ট)', phone: '01711-223344', address: 'কলেজ রোড, শেরপুর', due: 4500 },
-  { id: 'cust-2', name: 'সুমন আহমেদ (কম্পিউটার পয়েন্ট)', phone: '01822-334455', address: 'সিটি মার্কেট, শপ #৫', due: 2800 },
-  { id: 'cust-3', name: 'প্রকৌশলী সাজ্জাদ হোসেন', phone: '01933-445566', address: 'সদর হাসপাতাল রোড', due: 0 }
-];
+const SEED_CUSTOMERS = [];
 
-const SEED_EXPENSES = [
-  { id: 'exp-1', title: 'দোকান বিদ্যুৎ বিল (নভেম্বর)', amount: 1650, date: '2026-11-24', note: 'পল্লী বিদ্যুৎ অফিস' },
-  { id: 'exp-2', title: 'স্টাফের দুপুরের নাস্তা ও চা', amount: 220, date: '2026-11-25', note: 'আজকের খরচ' }
-];
+const SEED_EXPENSES = [];
 
 const SEED_SETTINGS = {
   shopNameBn: 'মেট্রো টেলিকম ও কম্পিউটার হাব',
   shopNameEn: 'METRO TELECOM & COMPUTER HUB',
   shopAddress: 'শপ নং #১২, সিটি সেন্টার প্লাজা, কলেজ রোড',
   shopPhone: '০১৭১১-০০১১২২, ০১৮২২-৩৩৪৪৫৫',
-  shopTerms: '১. বিক্রিত মাল কোনো অবস্থাতেই ফেরত নেওয়া হয় না।\n২. ওয়ারেন্টির জন্য মেমো অবশ্যই সংরক্ষণ করতে হবে।\n৩. পোড়া বা ভাঙ্গা পণ্যে ওয়ারেন্টি প্রযোজ্য নয়।'
+  shopTerms: '১. বিক্রিত মাল কোনো অবস্থাতেই ফেরত নেওয়া হয় না。\n২. ওয়ারেন্টির জন্য মেমো অবশ্যই সংরক্ষণ করতে হবে।\n৩. পোড়া বা ভাঙ্গা পণ্যে ওয়ারেন্টি প্রযোজ্য নয়।'
 };
 
 function getInitialSeedSales() {
-  const sales = [];
-  // 1. Prior 10 months of 2026 (Jan to Oct) for complete annual ledger
-  const monthlyData = [
-    { m: '01', days: 28, base: 42000, cost: 31500 },
-    { m: '02', days: 26, base: 38500, cost: 28800 },
-    { m: '03', days: 30, base: 51000, cost: 38000 },
-    { m: '04', days: 29, base: 48200, cost: 36000 },
-    { m: '05', days: 30, base: 55400, cost: 41500 },
-    { m: '06', days: 29, base: 59000, cost: 44000 },
-    { m: '07', days: 30, base: 46300, cost: 34700 },
-    { m: '08', days: 30, base: 53800, cost: 40200 },
-    { m: '09', days: 29, base: 62500, cost: 46800 },
-    { m: '10', days: 30, base: 68000, cost: 51000 }
-  ];
-
-  monthlyData.forEach(mo => {
-    const p1 = Math.round(mo.base * 0.4);
-    const p2 = Math.round(mo.base * 0.35);
-    const p3 = mo.base - p1 - p2;
-    const c1 = Math.round(mo.cost * 0.4);
-    const c2 = Math.round(mo.cost * 0.35);
-    const c3 = mo.cost - c1 - c2;
-    const items = [
-      { amt: p1, c: c1, day: '08' },
-      { amt: p2, c: c2, day: '18' },
-      { amt: p3, c: c3, day: '28' }
-    ];
-    items.forEach((it, idx) => {
-      sales.push({
-        id: `INV-2026${mo.m}${it.day}-${String(idx + 1).padStart(3, '0')}`,
-        customer: idx === 0 ? 'খুচরা ক্রেতা (নগদ)' : 'আরিফুল ইসলাম (নিয়মিত)',
-        customerId: idx === 0 ? 'cust-cash' : 'cust-1',
-        items: [
-          { id: `seed-m-${mo.m}-${idx}`, name: 'মোবাইল ও এক্সেসরিজ পাইকারি প্যাকেজ', qty: 1, unit: 'Pcs', price: it.amt, cost: it.c, total: it.amt, warranty: '১ বছর' }
-        ],
-        subtotal: it.amt,
-        discount: 0,
-        grandTotal: it.amt,
-        paidAmount: it.amt,
-        dueAmount: 0,
-        paymentMethod: 'cash',
-        timestamp: `2026-${mo.m}-${it.day}T14:30:00.000Z`,
-        itemsCount: 1
-      });
-    });
-  });
-
-  // 2. November (Nov 20 to Nov 26) 7-day sales matching user reference image exactly
-  const nov7Days = [
-    { d: '2026-11-20', amt: 1250, cost: 900, cust: 'খুচরা ক্রেতা (নগদ কাস্টমার)' },
-    { d: '2026-11-21', amt: 1850, cost: 1350, cust: 'আরিফুল ইসলাম (নিয়মিত ক্রেতা)' },
-    { d: '2026-11-22', amt: 2420, cost: 1800, cust: 'খুচরা ক্রেতা (নগদ কাস্টমার)' },
-    { d: '2026-11-23', amt: 3100, cost: 2300, cust: 'সুমন টেলিকম (খুচরা দোকানদার)' },
-    { d: '2026-11-24', amt: 2760, cost: 2050, cust: 'খুচরা ক্রেতা (নগদ কাস্টমার)' },
-    { d: '2026-11-25', amt: 2100, cost: 1550, cust: 'তানভীর আহমেদ (ছাত্র)' },
-    { d: '2026-11-26', amt: 2030, cost: 1500, cust: 'খুচরা ক্রেতা (নগদ কাস্টমার)' }
-  ];
-
-  nov7Days.forEach((it, idx) => {
-    sales.push({
-      id: `INV-${it.d.replace(/-/g, '')}-${String(idx + 1).padStart(3, '0')}`,
-      customer: it.cust,
-      customerId: idx % 2 === 0 ? 'cust-cash' : 'cust-1',
-      items: [
-        { id: `seed-nov-${idx}`, name: 'মোবাইল এক্সেসরিজ ও পার্টস', qty: 1, unit: 'Pcs', price: it.amt, cost: it.cost, total: it.amt, warranty: '৬ মাস' }
-      ],
-      subtotal: it.amt,
-      discount: 0,
-      grandTotal: it.amt,
-      paidAmount: it.amt,
-      dueAmount: 0,
-      paymentMethod: idx % 3 === 0 ? 'bkash' : 'cash',
-      timestamp: `${it.d}T11:${30 + idx * 4}:00.000Z`,
-      itemsCount: 1
-    });
-  });
-
-  return sales;
+  return [];
 }
 
 function getInitialSeedExpenses() {
-  return [
-    { id: 'exp-01', title: 'দোকান বিদ্যুৎ বিল (জানুয়ারি)', amount: 1550, date: '2026-01-20', note: 'পল্লী বিদ্যুৎ' },
-    { id: 'exp-02', title: 'দোকান বিদ্যুৎ বিল (ফেব্রুয়ারি)', amount: 1420, date: '2026-02-18', note: 'পল্লী বিদ্যুৎ' },
-    { id: 'exp-03', title: 'দোকান বিদ্যুৎ বিল (মার্চ)', amount: 1680, date: '2026-03-22', note: 'পল্লী বিদ্যুৎ' },
-    { id: 'exp-04', title: 'দোকান বিদ্যুৎ বিল (এপ্রিল)', amount: 1750, date: '2026-04-20', note: 'পল্লী বিদ্যুৎ' },
-    { id: 'exp-05', title: 'দোকান বিদ্যুৎ বিল (মে)', amount: 1900, date: '2026-05-21', note: 'পল্লী বিদ্যুৎ' },
-    { id: 'exp-06', title: 'দোকান বিদ্যুৎ বিল (জুন)', amount: 1850, date: '2026-06-20', note: 'পল্লী বিদ্যুৎ' },
-    { id: 'exp-07', title: 'দোকান বিদ্যুৎ বিল (জুলাই)', amount: 1700, date: '2026-07-22', note: 'পল্লী বিদ্যুৎ' },
-    { id: 'exp-08', title: 'দোকান বিদ্যুৎ বিল (আগস্ট)', amount: 1800, date: '2026-08-20', note: 'পল্লী বিদ্যুৎ' },
-    { id: 'exp-09', title: 'দোকান বিদ্যুৎ বিল (সেপ্টেম্বর)', amount: 1950, date: '2026-09-21', note: 'পল্লী বিদ্যুৎ' },
-    { id: 'exp-10', title: 'দোকান বিদ্যুৎ বিল (অক্টোবর)', amount: 1880, date: '2026-10-22', note: 'পল্লী বিদ্যুৎ' },
-    { id: 'exp-11', title: 'দোকান বিদ্যুৎ বিল (নভেম্বর)', amount: 1650, date: '2026-11-24', note: 'পল্লী বিদ্যুৎ অফিস' },
-    { id: 'exp-12', title: 'স্টাফের দুপুরের নাস্তা ও চা', amount: 220, date: '2026-11-25', note: 'আজকের খরচ' },
-    { id: 'exp-13', title: 'দোকান পরিষ্কার ও প্যাকেজিং ব্যাগ', amount: 450, date: '2026-11-26', note: 'প্যাকেজিং' }
-  ];
+  return [];
 }
 
 // Global App State
@@ -401,22 +64,31 @@ const state = {
 // Storage load / save
 function loadAllData() {
   try {
+    // Migration: Purge legacy mock/seed data for clean fresh start
+    const isCleaned = localStorage.getItem('metro_tel_cleaned_v1');
+    if (!isCleaned) {
+      localStorage.removeItem('metro_tel_products');
+      localStorage.removeItem('metro_tel_customers');
+      localStorage.removeItem('metro_tel_expenses');
+      localStorage.removeItem('metro_tel_sales');
+      localStorage.removeItem('metro_tel_held');
+      localStorage.setItem('metro_tel_cleaned_v1', 'true');
+    }
+
     const cat = localStorage.getItem('metro_tel_categories');
     state.categories = cat ? JSON.parse(cat) : DEFAULT_CATEGORIES;
 
     const p = localStorage.getItem('metro_tel_products');
-    state.products = p ? JSON.parse(p) : SEED_PRODUCTS;
+    state.products = p ? JSON.parse(p) : [];
 
     const c = localStorage.getItem('metro_tel_customers');
-    state.customers = c ? JSON.parse(c) : SEED_CUSTOMERS;
+    state.customers = c ? JSON.parse(c) : [];
 
     const e = localStorage.getItem('metro_tel_expenses');
-    const parsedExp = e ? JSON.parse(e) : null;
-    state.expenses = (parsedExp && parsedExp.length > 0) ? parsedExp : getInitialSeedExpenses();
+    state.expenses = e ? JSON.parse(e) : [];
 
     const s = localStorage.getItem('metro_tel_sales');
-    const parsedSales = s ? JSON.parse(s) : null;
-    state.sales = (parsedSales && parsedSales.length > 0) ? parsedSales : getInitialSeedSales();
+    state.sales = s ? JSON.parse(s) : [];
 
     const set = localStorage.getItem('metro_tel_settings');
     state.settings = set ? JSON.parse(set) : SEED_SETTINGS;
@@ -426,10 +98,10 @@ function loadAllData() {
   } catch (err) {
     console.error('Storage error:', err);
     state.categories = DEFAULT_CATEGORIES;
-    state.products = SEED_PRODUCTS;
-    state.customers = SEED_CUSTOMERS;
-    state.expenses = getInitialSeedExpenses();
-    state.sales = getInitialSeedSales();
+    state.products = [];
+    state.customers = [];
+    state.expenses = [];
+    state.sales = [];
     state.settings = SEED_SETTINGS;
   }
 }
@@ -500,6 +172,8 @@ const dom = {
   heldCountText: document.getElementById('held-bills-count'),
   btnRestoreHeld: document.getElementById('btn-restore-held-bill'),
   posCustomerSelect: document.getElementById('pos-customer-select'),
+  posCustNameInput: document.getElementById('pos-cust-name-input'),
+  posCustPhoneInput: document.getElementById('pos-cust-phone-input'),
   btnPosAddCustomer: document.getElementById('btn-pos-add-customer'),
   cartSubtotalVal: document.getElementById('cart-subtotal-val'),
   cartDiscountInput: document.getElementById('cart-discount-input'),
@@ -1154,7 +828,11 @@ function setupPos() {
   });
 
   dom.cartDiscountInput.addEventListener('input', recalculateCart);
+  dom.cartDiscountInput.addEventListener('focus', e => e.target.select());
+  dom.cartDiscountInput.addEventListener('click', e => e.target.select());
   dom.cartPaidInput.addEventListener('input', recalculateCart);
+  dom.cartPaidInput.addEventListener('focus', e => e.target.select());
+  dom.cartPaidInput.addEventListener('click', e => e.target.select());
 
   // Clear Cart
   dom.btnResetCart.addEventListener('click', () => {
@@ -1176,6 +854,8 @@ function setupPos() {
     state.heldBills.push({
       id: 'held-' + Date.now(),
       customerId: customerId,
+      customName: dom.posCustNameInput ? dom.posCustNameInput.value : '',
+      customPhone: dom.posCustPhoneInput ? dom.posCustPhoneInput.value : '',
       cart: JSON.parse(JSON.stringify(state.cart)),
       discount: dom.cartDiscountInput.value,
       time: new Date().toLocaleTimeString('bn-BD')
@@ -1183,6 +863,8 @@ function setupPos() {
     persist('held');
     state.cart = [];
     dom.cartDiscountInput.value = 0;
+    if (dom.posCustNameInput) dom.posCustNameInput.value = '';
+    if (dom.posCustPhoneInput) dom.posCustPhoneInput.value = '';
     recalculateCart();
     renderCart();
     updateHeldBanner();
@@ -1195,16 +877,43 @@ function setupPos() {
     persist('held');
     state.cart = lastHeld.cart;
     dom.posCustomerSelect.value = lastHeld.customerId || 'walk-in';
+    if (dom.posCustNameInput) dom.posCustNameInput.value = lastHeld.customName || '';
+    if (dom.posCustPhoneInput) dom.posCustPhoneInput.value = lastHeld.customPhone || '';
     dom.cartDiscountInput.value = lastHeld.discount || 0;
     recalculateCart();
     renderCart();
     updateHeldBanner();
   });
 
+  // Handle POS customer dropdown change (auto-fill or clear on-the-fly inputs)
+  if (dom.posCustomerSelect) {
+    dom.posCustomerSelect.addEventListener('change', () => {
+      const customerId = dom.posCustomerSelect.value;
+      if (customerId === 'walk-in') {
+        if (dom.posCustNameInput) dom.posCustNameInput.value = '';
+        if (dom.posCustPhoneInput) dom.posCustPhoneInput.value = '';
+      } else {
+        const c = state.customers.find(item => item.id === customerId);
+        if (c) {
+          if (dom.posCustNameInput) dom.posCustNameInput.value = c.name || '';
+          if (dom.posCustPhoneInput) dom.posCustPhoneInput.value = c.phone || '';
+        }
+      }
+    });
+  }
+
   // Quick Add customer from POS
   dom.btnPosAddCustomer.addEventListener('click', () => {
+    closeMobileCart();
     dom.formCreateCustomer.reset();
     dom.modalAddCustomer.classList.add('show');
+    setTimeout(() => {
+      const inp = document.getElementById('inp-c-name');
+      if (inp) {
+        inp.focus();
+        inp.select();
+      }
+    }, 120);
   });
 
   // Checkout
@@ -1214,11 +923,13 @@ function setupPos() {
   function openMobileCart() {
     if (dom.posCartPane) dom.posCartPane.classList.add('open');
     if (dom.posCartBackdrop) dom.posCartBackdrop.classList.add('open');
+    if (dom.posFloatingCartBar) dom.posFloatingCartBar.classList.add('cart-open');
   }
 
   function closeMobileCart() {
     if (dom.posCartPane) dom.posCartPane.classList.remove('open');
     if (dom.posCartBackdrop) dom.posCartBackdrop.classList.remove('open');
+    if (dom.posFloatingCartBar) dom.posFloatingCartBar.classList.remove('cart-open');
   }
 
   if (dom.posFloatingCartBar) dom.posFloatingCartBar.addEventListener('click', openMobileCart);
@@ -1526,8 +1237,28 @@ function handlePosCheckout() {
     customerObj = state.customers.find(c => c.id === customerId);
   }
 
+  const typedName = dom.posCustNameInput ? dom.posCustNameInput.value.trim() : '';
+  const typedPhone = dom.posCustPhoneInput ? dom.posCustPhoneInput.value.trim() : '';
+
+  let customerData;
+  if (customerObj) {
+    customerData = {
+      id: customerObj.id,
+      name: typedName || customerObj.name,
+      phone: typedPhone || customerObj.phone,
+      address: customerObj.address || 'লোকাল'
+    };
+  } else {
+    customerData = {
+      name: typedName || 'খুচরা নগদ ক্রেতা',
+      phone: typedPhone || 'প্রযোজ্য নয়',
+      address: 'লোকাল'
+    };
+  }
+
   if (due > 0 && customerId === 'walk-in') {
-    const proceed = confirm('বাকি বিলের জন্য কাস্টমার সিলেক্ট করা নিরাপদ। আপনি কি নগদ কাস্টমার হিসেবেই বাকি রাখতে চান?');
+    const custDesc = typedName ? `"${typedName}"` : 'নগদ ক্রেতা';
+    const proceed = confirm(`বাকি বিলের জন্য (${custDesc}) আপনি কি কাস্টমার তালিকায় যুক্ত না করেই ক্যাশ মেমোতে বাকি হিসাব তৈরি করতে চান?`);
     if (!proceed) return;
   }
 
@@ -1539,7 +1270,7 @@ function handlePosCheckout() {
     invoiceNo: invoiceNo,
     timestamp: now.toISOString(),
     formattedDate: now.toLocaleDateString('bn-BD', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
-    customer: customerObj ? { id: customerObj.id, name: customerObj.name, phone: customerObj.phone, address: customerObj.address } : { name: 'খুচরা নগদ ক্রেতা', phone: 'প্রযোজ্য নয়', address: 'লোকাল' },
+    customer: customerData,
     items: JSON.parse(JSON.stringify(state.cart)),
     subtotal: subtotal,
     discount: discount,
@@ -1569,6 +1300,7 @@ function handlePosCheckout() {
   // Close Mobile Cart Overlay if open
   if (dom.posCartPane) dom.posCartPane.classList.remove('open');
   if (dom.posCartBackdrop) dom.posCartBackdrop.classList.remove('open');
+  if (dom.posFloatingCartBar) dom.posFloatingCartBar.classList.remove('cart-open');
 
   // 4. Show Printable Cash Memo
   renderAndShowMemo(saleRecord);
@@ -1578,6 +1310,9 @@ function handlePosCheckout() {
   dom.cartDiscountInput.value = 0;
   dom.cartPaidInput.value = 0;
   delete dom.cartPaidInput.dataset.userTouched;
+  if (dom.posCustNameInput) dom.posCustNameInput.value = '';
+  if (dom.posCustPhoneInput) dom.posCustPhoneInput.value = '';
+  if (dom.posCustomerSelect) dom.posCustomerSelect.value = 'walk-in';
   recalculateCart();
   renderCart();
   renderPosCatalog();
@@ -1944,6 +1679,13 @@ function setupCustomers() {
   dom.btnOpenCreateCustomer.addEventListener('click', () => {
     dom.formCreateCustomer.reset();
     dom.modalAddCustomer.classList.add('show');
+    setTimeout(() => {
+      const inp = document.getElementById('inp-c-name');
+      if (inp) {
+        inp.focus();
+        inp.select();
+      }
+    }, 120);
   });
 
   dom.formCreateCustomer.addEventListener('submit', e => {
@@ -2024,7 +1766,7 @@ function renderCustomerMaster() {
 function updatePosCustomerDropdown() {
   const sel = dom.posCustomerSelect;
   const cur = sel.value;
-  sel.innerHTML = `<option value="walk-in">খুচরা ক্রেতা (নগদ কাস্টমার)</option>`;
+  sel.innerHTML = `<option value="walk-in">খুচরা ক্রেতা (সরাসরি নাম/ফোন লিখুন)</option>`;
 
   state.customers.forEach(c => {
     const opt = document.createElement('option');
@@ -2661,10 +2403,11 @@ function setupSettings() {
     a.click();
   });
 
-  // Reset to Demo data
+  // Factory Reset / Clear all data to start fresh
   dom.btnResetDemoData.addEventListener('click', () => {
-    if (confirm('আপনি কি নিশ্চিত যে ডেমো ক্যাটাগরি, পণ্য ও কাস্টমার ডাটা পুনরায় লোড করতে চান?')) {
+    if (confirm('আপনি কি নিশ্চিত যে সকল প্রোডাক্ট, বিক্রয় ও কাস্টমার ডাটা মুছে সম্পূর্ণ নতুন ও ফ্রেশ স্টোর হিসেবে শুরু করতে চান?')) {
       localStorage.clear();
+      localStorage.setItem('metro_tel_cleaned_v1', 'true');
       loadAllData();
       refreshGlobalStats();
       renderCategoryComponents();
@@ -2674,7 +2417,7 @@ function setupSettings() {
       renderInventoryMaster();
       renderCustomerMaster();
       renderExpenseMaster();
-      alert('ডেমো ক্যাটাগরি ও পণ্য সফলভাবে লোড হয়েছে!');
+      alert('সকল পুরনো ডেমো ডাটা মুছে ফ্রেশ স্টোর প্রস্তুত করা হয়েছে!');
     }
   });
 }

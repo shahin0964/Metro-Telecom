@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Metro Telecom - POS & Stock System</title>
-  <link rel="stylesheet" href="style.css?v=1.0.8">
+  <link rel="stylesheet" href="style.css?v=1.0.9">
 </head>
 <body>
   <div class="app-layout">
@@ -341,7 +341,7 @@
               <div class="cart-tools">
                 <button class="btn-hold-cart" id="btn-hold-bill" title="সাময়িক হোল্ড করুন">⏸️ হোল্ড</button>
                 <button class="btn-clear-cart" id="btn-reset-cart" title="কার্ট খালি করুন">রিসেট</button>
-                <button class="btn-close-cart-overlay" id="btn-close-cart-overlay" title="কার্ট বন্ধ করুন">✕ বন্ধ</button>
+                <button class="btn-close-cart-overlay" id="btn-close-cart-overlay" title="মিনিমাইজ করুন">⬇ মিনিমাইজ</button>
               </div>
             </div>
 
@@ -351,15 +351,27 @@
               <button class="btn-link-action" id="btn-restore-held-bill">পুনরায় আনুন</button>
             </div>
 
-            <!-- Customer Selector Bar -->
+            <!-- Customer Selector Bar (Supports on-the-fly random customer details) -->
             <div class="pos-customer-bar">
               <div class="cust-label-row">
-                <label>👤 কাস্টমার:</label>
-                <button class="btn-mini-add" id="btn-pos-add-customer">+ নতুন কাস্টমার</button>
+                <label>👤 কাস্টমার নির্বাচন / নাম-ফোন:</label>
+                <button type="button" class="btn-mini-add" id="btn-pos-add-customer" title="খাতায় স্থায়ীভাবে সংরক্ষণ করুন">+ স্থায়ী কাস্টমার তৈরি</button>
               </div>
               <select id="pos-customer-select">
-                <option value="walk-in">খুচরা ক্রেতা (নগদ কাস্টমার)</option>
+                <option value="walk-in">খুচরা ক্রেতা (সরাসরি নাম/ফোন লিখুন)</option>
               </select>
+              
+              <!-- Quick Ad-hoc Customer Inputs (Name & Phone for Cash Memo) -->
+              <div class="pos-adhoc-cust-row" id="pos-adhoc-cust-row">
+                <div class="adhoc-input-wrap">
+                  <span class="adhoc-icon">👤</span>
+                  <input type="text" id="pos-cust-name-input" placeholder="ক্রেতার নাম (যেমন: শফিক ইসলাম)">
+                </div>
+                <div class="adhoc-input-wrap">
+                  <span class="adhoc-icon">📞</span>
+                  <input type="tel" id="pos-cust-phone-input" placeholder="মোবাইল নম্বর (ঐচ্ছিক)">
+                </div>
+              </div>
             </div>
 
             <!-- Cart Table Items -->
@@ -804,7 +816,7 @@
               </p>
               <div class="backup-actions">
                 <button class="btn-outline-action" id="btn-export-data">📥 সম্পূর্ণ ডেটা ব্যাকআপ ডাউনলোড (JSON)</button>
-                <button class="btn-outline-action danger-outline" id="btn-reset-demo-data">🔄 ডেমো ডাটা পুনরায় সেট করুন</button>
+                <button class="btn-outline-action danger-outline" id="btn-reset-demo-data">🗑️ সকল ডাটা মুছে ফ্রেশ শুরু করুন</button>
               </div>
             </div>
 
@@ -990,7 +1002,7 @@
       </div>
       <div class="modal-body">
         <div class="modal-info-box" id="serial-prod-info-text">
-          পণ্য: Xiaomi Redmi Note 13 | ওয়ারেন্টি: ১ বছর
+          পণ্য: — | ওয়ারেন্টি: —
         </div>
         <div class="form-group" style="margin-top: 1rem;">
           <label>ডিভাইসের Serial Number বা IMEI লিখুন বা বারকোড স্ক্যানার দিয়ে স্ক্যান করুন:</label>
@@ -1137,17 +1149,17 @@
       <div class="inv-top-toolbar no-print">
         <div class="inv-title-wrap">
           <span class="ico">📄</span>
-          <h3>মেট্রো টেলিকম ক্যাশ মেমো / ইনভয়েস প্রিভিউ</h3>
+          <h3>ক্যাশ মেমো প্রিভিউ</h3>
           <div class="inv-size-switch">
-            <button class="size-pill active" data-size="a4">A4 সাইজ</button>
-            <button class="size-pill" data-size="a5">A5 সাইজ</button>
+            <button class="size-pill active" data-size="a4">A4</button>
+            <button class="size-pill" data-size="a5">A5</button>
           </div>
         </div>
         <div class="inv-actions-wrap">
           <button class="btn-print-action" id="btn-invoke-print">
-            <span>🖨️ প্রিন্ট করুন (Print Memo)</span>
+            <span>🖨️ প্রিন্ট</span>
           </button>
-          <button class="modal-close-btn" id="btn-close-invoice-modal">✕</button>
+          <button class="modal-close-btn" id="btn-close-invoice-modal" title="বন্ধ করুন">✕</button>
         </div>
       </div>
 
@@ -1268,6 +1280,6 @@
   <div id="toast-container" class="toast-container"></div>
 
   <!-- Dynamic Async Cloud Engine -->
-  <script src="app.js?v=1.0.8"></script>
+  <script src="app.js?v=1.0.9"></script>
 </body>
 </html>

@@ -84,83 +84,86 @@ class PosTab extends StatelessWidget {
           ],
         ),
 
-        // Floating Bottom-Left Compact Pill Cart Bar
+        // Floating Bottom-Center Compact Pill Cart Bar
         if (provider.cartCount > 0)
           Positioned(
-            left: 16,
+            left: 0,
+            right: 0,
             bottom: 16,
-            child: GestureDetector(
-              onTap: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (_) => const CartBottomSheet(),
-                );
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+            child: Center(
+              child: GestureDetector(
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (_) => const CartBottomSheet(),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+                    ),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: const Color(0xFF38BDF8), width: 1.5),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.55),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: const Color(0xFF38BDF8), width: 1.5),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.55),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(5),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF2563EB),
-                        shape: BoxShape.circle,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF2563EB),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.shopping_cart_rounded, color: Colors.white, size: 15),
                       ),
-                      child: const Icon(Icons.shopping_cart_rounded, color: Colors.white, size: 15),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${provider.cartCount}',
-                      style: const TextStyle(
-                        color: Color(0xFF10B981),
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
+                      const SizedBox(width: 8),
+                      Text(
+                        '${provider.cartCount}',
+                        style: const TextStyle(
+                          color: Color(0xFF10B981),
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '৳ ${provider.cartSubtotal.toStringAsFixed(0)}',
-                      style: const TextStyle(
-                        color: Color(0xFF38BDF8),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
+                      const SizedBox(width: 6),
+                      Text(
+                        '৳ ${provider.cartSubtotal.toStringAsFixed(0)}',
+                        style: const TextStyle(
+                          color: Color(0xFF38BDF8),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF2563EB),
-                        borderRadius: BorderRadius.circular(999),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2563EB),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'মেমো ➔',
+                              style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
                       ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'মেমো ➔',
-                            style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
