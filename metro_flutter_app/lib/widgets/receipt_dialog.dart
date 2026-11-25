@@ -13,7 +13,7 @@ class ReceiptDialog extends StatelessWidget {
       backgroundColor: const Color(0xFF0F172A),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: Border.all(color: const Color(0xFF38BDF8).withOpacity(0.3)),
+        side: BorderSide(color: const Color(0xFF38BDF8).withOpacity(0.3)),
       ),
       child: Container(
         padding: const EdgeInsets.all(20),
