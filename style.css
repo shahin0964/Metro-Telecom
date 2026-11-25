@@ -38,12 +38,14 @@
   padding: 0;
 }
 
-body {
+html, body {
   font-family: var(--font-stack);
   background-color: var(--bg-dark);
   color: var(--text-main);
   line-height: 1.5;
   overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
   user-select: none;
   -webkit-font-smoothing: antialiased;
 }
@@ -58,6 +60,7 @@ input, button, select, textarea {
   display: flex;
   min-height: 100vh;
   width: 100%;
+  max-width: 100vw;
   background-color: var(--bg-main);
   overflow-x: hidden;
   position: relative;
@@ -180,29 +183,42 @@ input, button, select, textarea {
   display: inline-flex !important;
   align-items: center !important;
   gap: 0.35rem !important;
-  background: rgba(30, 41, 59, 0.9) !important;
-  border: 1px solid rgba(56, 189, 248, 0.4) !important;
+  background-color: #1e293b !important;
+  border: 1px solid #38bdf8 !important;
   color: #38bdf8 !important;
   font-size: 0.78rem !important;
   font-weight: 700 !important;
-  padding: 0.38rem 0.8rem !important;
+  padding: 0.32rem 0.75rem !important;
   border-radius: 9999px !important;
   cursor: pointer !important;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
   white-space: nowrap !important;
   letter-spacing: 0.2px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
   flex-shrink: 0 !important;
   align-self: flex-start !important;
   margin-top: -2px !important;
+  outline: none !important;
+  text-decoration: none !important;
+}
+
+.btn-sm-action span,
+.btn-sm-action .btn-arrow {
+  color: #38bdf8 !important;
+  font-weight: 700 !important;
 }
 
 .btn-sm-action:hover {
-  background: rgba(56, 189, 248, 0.25) !important;
+  background-color: rgba(56, 189, 248, 0.25) !important;
   border-color: #38bdf8 !important;
   color: #ffffff !important;
-  box-shadow: 0 0 14px rgba(56, 189, 248, 0.4) !important;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.5) !important;
   transform: translateY(-1px);
+}
+
+.btn-sm-action:hover span,
+.btn-sm-action:hover .btn-arrow {
+  color: #ffffff !important;
 }
 
 .btn-sm-action:active {
@@ -819,8 +835,8 @@ input, button, select, textarea {
 
 .trend-chart-canvas-wrap {
   width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
+  max-width: 100%;
+  overflow: hidden;
   position: relative;
   border-radius: var(--radius-md);
   padding: 0.25rem 0;
@@ -828,7 +844,8 @@ input, button, select, textarea {
 
 .trend-chart-svg {
   width: 100%;
-  min-width: 460px;
+  max-width: 100%;
+  min-width: 0;
   height: auto;
   display: block;
 }
@@ -2087,10 +2104,20 @@ input, button, select, textarea {
   font-size: 1.4rem;
 }
 
+.table-compact-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  display: block;
+  position: relative;
+}
+
 .simple-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.88rem;
+  white-space: nowrap;
 }
 .simple-table th {
   padding: 0.65rem 0.85rem;
@@ -2871,6 +2898,294 @@ input, button, select, textarea {
   background: linear-gradient(90deg, #3b82f6, #10b981);
   border-radius: 999px;
   transition: width 0.25s ease;
+}
+
+/* ================= MOBILE VIEW (SMARTPHONES & WEBVIEW <= 768PX) ================= */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    width: 100% !important;
+    font-size: 13.5px;
+  }
+
+  .app-layout, .app-main-content, .page-viewport {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+  }
+
+  .page-viewport {
+    padding: 0.55rem 0.5rem !important;
+  }
+
+  .view-content {
+    gap: 0.6rem !important;
+  }
+
+  /* Top Navigation Bar on Mobile */
+  .top-nav {
+    padding: 0 0.65rem !important;
+    height: 50px !important;
+    gap: 0.35rem !important;
+    max-width: 100vw !important;
+    overflow: hidden !important;
+  }
+
+  .active-page-indicator {
+    gap: 0.35rem !important;
+    min-width: 0 !important;
+  }
+
+  .page-title-text {
+    font-size: 0.9rem !important;
+    white-space: nowrap !important;
+  }
+
+  .top-nav-right {
+    gap: 0.3rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  .user-chip {
+    display: none !important; /* Hide manager chip on small mobile screens */
+  }
+
+  .cloud-sync-pill {
+    padding: 0.2rem 0.5rem !important;
+    font-size: 0.7rem !important;
+    border-radius: 999px !important;
+  }
+
+  .quick-stat-badge {
+    padding: 0.2rem 0.5rem !important;
+    font-size: 0.72rem !important;
+  }
+
+  /* Welcome Banner on Mobile */
+  .dash-welcome-card {
+    padding: 0.75rem 0.85rem !important;
+    border-radius: 12px !important;
+    gap: 0.5rem !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .welcome-left h2 {
+    font-size: 1.05rem !important;
+  }
+
+  .welcome-left p {
+    font-size: 0.72rem !important;
+    margin-top: 0.15rem !important;
+  }
+
+  .welcome-right {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    gap: 0.5rem !important;
+    margin-top: 0.25rem !important;
+  }
+
+  .btn-hero-pos {
+    flex: 1 !important;
+    justify-content: center !important;
+    padding: 0.45rem 0.75rem !important;
+    font-size: 0.82rem !important;
+    border-radius: 8px !important;
+  }
+
+  .live-clock-badge {
+    padding: 0.45rem 0.65rem !important;
+    font-size: 0.72rem !important;
+    border-radius: 8px !important;
+  }
+
+  /* KPI Grid: Clean 2x2 Grid + 1 Full Width Card */
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.45rem !important;
+  }
+
+  .kpi-card {
+    padding: 0.6rem 0.65rem !important;
+    gap: 0.5rem !important;
+    border-radius: 10px !important;
+    min-width: 0 !important;
+  }
+
+  .kpi-card:last-child {
+    grid-column: span 2 !important;
+  }
+
+  .kpi-icon-box {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 1.25rem !important;
+    border-radius: 8px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .kpi-title {
+    font-size: 0.68rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .kpi-num {
+    font-size: 1.05rem !important;
+    margin: 0.1rem 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .kpi-sub {
+    font-size: 0.62rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Split Grid for Trends & Alerts */
+  .dash-split-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.6rem !important;
+    min-width: 0 !important;
+  }
+
+  /* Content Panel */
+  .content-panel {
+    padding: 0.75rem 0.8rem !important;
+    border-radius: 12px !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .panel-head {
+    margin-bottom: 0.5rem !important;
+    gap: 0.5rem !important;
+  }
+
+  .head-title h3 {
+    font-size: 0.92rem !important;
+  }
+
+  .head-title p {
+    font-size: 0.7rem !important;
+  }
+
+  /* Sales Trend Card on Mobile */
+  .sales-trend-card {
+    padding: 0.75rem 0.8rem !important;
+    border-radius: 12px !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    gap: 0.5rem !important;
+  }
+
+  .trend-card-header {
+    flex-wrap: wrap !important;
+    gap: 0.4rem !important;
+  }
+
+  .trend-header-left {
+    gap: 0.5rem !important;
+  }
+
+  .trend-icon-badge {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 8px !important;
+  }
+
+  .trend-icon-badge svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .trend-title-box h3 {
+    font-size: 0.92rem !important;
+  }
+
+  .trend-title-box p {
+    font-size: 0.7rem !important;
+  }
+
+  .trend-timeframe-pill {
+    padding: 0.25rem 0.55rem !important;
+    font-size: 0.72rem !important;
+  }
+
+  /* SVG Chart Scaled 100% Perfectly to Mobile Screen */
+  .trend-chart-canvas-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+  }
+
+  .trend-chart-svg {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    display: block !important;
+  }
+
+  .trend-card-footer {
+    padding: 0.45rem 0.7rem !important;
+    border-radius: 8px !important;
+    gap: 0.5rem !important;
+  }
+
+  .trend-total-label {
+    font-size: 0.72rem !important;
+  }
+
+  .trend-total-value {
+    font-size: 0.82rem !important;
+  }
+
+  .trend-growth-badge {
+    padding: 0.15rem 0.45rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  /* Scrollable Table Isolated Container */
+  .table-compact-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-height: 280px !important;
+    border-radius: 8px !important;
+    margin: 0 !important;
+    position: relative !important;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .simple-table {
+    min-width: 580px !important; /* Table scrolls smoothly INSIDE .table-compact-wrap */
+    white-space: nowrap !important;
+  }
+
+  .simple-table th, .simple-table td {
+    padding: 0.45rem 0.55rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .btn-memo-view {
+    padding: 0.2rem 0.5rem !important;
+    font-size: 0.72rem !important;
+  }
 }
 
 /* ================= DESKTOP COMPACT & SLEEK DENSITY (HIGH-RES PC FIT) ================= */

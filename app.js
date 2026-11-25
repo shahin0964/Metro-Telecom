@@ -1553,11 +1553,15 @@ function renderAndShowMemo(sale) {
   document.getElementById('out-memo-shop-phone').textContent = state.settings.shopPhone;
 
   // Invoice Meta
-  document.getElementById('out-memo-no').textContent = sale.invoiceNo;
-  document.getElementById('out-memo-date').textContent = sale.formattedDate;
-  document.getElementById('out-memo-cust-name').textContent = sale.customer.name;
-  document.getElementById('out-memo-cust-phone').textContent = sale.customer.phone;
-  document.getElementById('out-memo-cust-address').textContent = sale.customer.address;
+  const custName = (typeof sale.customer === 'object' && sale.customer !== null) ? (sale.customer.name || 'খুচরা ক্রেতা') : (sale.customer || 'খুচরা ক্রেতা');
+  const custPhone = (typeof sale.customer === 'object' && sale.customer !== null) ? (sale.customer.phone || '—') : '—';
+  const custAddr = (typeof sale.customer === 'object' && sale.customer !== null) ? (sale.customer.address || '—') : '—';
+
+  document.getElementById('out-memo-no').textContent = sale.invoiceNo || sale.id || 'INV-001';
+  document.getElementById('out-memo-date').textContent = sale.formattedDate || (sale.timestamp ? sale.timestamp.slice(0, 10) : 'আজ');
+  document.getElementById('out-memo-cust-name').textContent = custName;
+  document.getElementById('out-memo-cust-phone').textContent = custPhone;
+  document.getElementById('out-memo-cust-address').textContent = custAddr;
 
   // Table items
   const tbody = document.getElementById('out-memo-tbody');
@@ -1864,6 +1868,11 @@ function runWarrantyVerification() {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     const isValid = days > 0 && diffDays > 0;
 
+    const wCustName = (typeof m.sale.customer === 'object' && m.sale.customer !== null) ? (m.sale.customer.name || 'খুচরা ক্রেতা') : (m.sale.customer || 'খুচরা ক্রেতা');
+    const wCustPhone = (typeof m.sale.customer === 'object' && m.sale.customer !== null) ? (m.sale.customer.phone || '') : '';
+    const wInvoiceNo = m.sale.invoiceNo || m.sale.id || 'INV-001';
+    const wDate = m.sale.formattedDate || (m.sale.timestamp ? m.sale.timestamp.slice(0, 10) : 'আজ');
+
     const card = document.createElement('div');
     card.className = `warranty-result-card ${isValid ? '' : 'expired'}`;
     card.innerHTML = `
@@ -1879,11 +1888,11 @@ function runWarrantyVerification() {
       </div>
       <hr style="border:none;border-top:1px solid rgba(255,255,255,0.08);margin:1rem 0;">
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;font-size:0.88rem;">
-        <div><strong>ইনভয়েস নং:</strong> <br>${m.sale.invoiceNo}</div>
-        <div><strong>বিক্রয় তারিখ:</strong> <br>${m.sale.formattedDate}</div>
+        <div><strong>ইনভয়েস নং:</strong> <br>${wInvoiceNo}</div>
+        <div><strong>বিক্রয় তারিখ:</strong> <br>${wDate}</div>
         <div><strong>ওয়ারেন্টি মেয়াদ:</strong> <br>${m.item.warranty}</div>
         <div><strong>মেয়াদ শেষ হওয়ার তারিখ:</strong> <br>${days > 0 ? expiryDate.toLocaleDateString('bn-BD', { year:'numeric', month:'long', day:'numeric' }) : 'প্রযোজ্য নয়'}</div>
-        <div><strong>কাস্টমারের নাম:</strong> <br>${m.sale.customer.name} (${m.sale.customer.phone})</div>
+        <div><strong>কাস্টমারের নাম:</strong> <br>${wCustName} ${wCustPhone ? `(${wCustPhone})` : ''}</div>
       </div>
     `;
     resContainer.appendChild(card);
