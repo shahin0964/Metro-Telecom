@@ -210,26 +210,52 @@ class _MainScreenState extends State<MainScreen> {
             const SizedBox(height: 10),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 children: [
-                  _drawerItem('০১. ড্যাশবোর্ড', Icons.dashboard_rounded, 0),
-                  _drawerItem('০২. দ্রুত বিক্রয় (POS)', Icons.point_of_sale_rounded, 1),
-                  _drawerItem('০৩. স্টক ও মালামাল', Icons.inventory_2_rounded, 2),
-                  _drawerItem('০৪. বার্ষিক ও মাসিক হিসাব', Icons.query_stats_rounded, 3),
-                  _drawerItem('০৫. বাকির খাতা', Icons.menu_book_rounded, 4),
-                  const Divider(color: Colors.white12, height: 20),
                   ListTile(
                     leading: const Icon(Icons.receipt_long_rounded, color: Color(0xFF38BDF8), size: 20),
-                    title: const Text('০৬. দোকানের খরচ', style: TextStyle(color: Colors.white, fontSize: 13)),
+                    title: const Text('দোকানের খরচ তালিকা', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+                    subtitle: const Text('বিদ্যুৎ, নাস্তা ও দৈনন্দিন খরচ', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 10)),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(context, MaterialPageRoute(builder: (_) => const ExpensesScreen()));
                     },
                   ),
+                  const SizedBox(height: 6),
+                  ListTile(
+                    leading: const Icon(Icons.verified_user_rounded, color: Color(0xFF10B981), size: 20),
+                    title: const Text('ডিজিটাল ওয়ারেন্টি ও সিরিয়াল', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+                    subtitle: const Text('IMEI ও সিরিয়াল দিয়ে ওয়ারেন্টি যাচাই', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 10)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _showWarrantyDialog(context, provider);
+                    },
+                  ),
+                  const SizedBox(height: 6),
+                  ListTile(
+                    leading: const Icon(Icons.sync_rounded, color: Color(0xFFA855F7), size: 20),
+                    title: const Text('এখনই ক্লাউড সিঙ্ক করুন', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+                    subtitle: const Text('পিসি ও ওয়েব সফটওয়্যারের সাথে ডাটা মিলান', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 10)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    onTap: () {
+                      Navigator.pop(context);
+                      provider.syncWithCloud();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('ক্লাউড সিঙ্ক সম্পন্ন হয়েছে ✅'),
+                          backgroundColor: Color(0xFF10B981),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 6),
                   ListTile(
                     leading: const Icon(Icons.settings_rounded, color: Color(0xFF38BDF8), size: 20),
-                    title: const Text('০৭. সেটিংস ও সিঙ্ক', style: TextStyle(color: Colors.white, fontSize: 13)),
+                    title: const Text('সেটিংস ও ক্লাউড কনফিগ', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+                    subtitle: const Text('দোকানের নাম, ব্যাকআপ ও সিঙ্ক কী', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 10)),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     onTap: () {
                       Navigator.pop(context);
@@ -311,24 +337,78 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Widget _drawerItem(String title, IconData icon, int index) {
-    final isSelected = _currentIndex == index;
-    return ListTile(
-      leading: Icon(icon, color: isSelected ? const Color(0xFF38BDF8) : Colors.white70, size: 20),
-      title: Text(
-        title,
-        style: TextStyle(
-          color: isSelected ? const Color(0xFF38BDF8) : Colors.white,
-          fontSize: 13,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        ),
-      ),
-      selected: isSelected,
-      selectedTileColor: const Color(0xFF1E293B),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      onTap: () {
-        setState(() => _currentIndex = index);
-        Navigator.pop(context);
+  void _showWarrantyDialog(BuildContext context, AppProvider provider) {
+    final searchCtrl = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        String resultText = '';
+        Color resultColor = Colors.white70;
+
+        return StatefulBuilder(
+          builder: (context, setState) => AlertDialog(
+            backgroundColor: const Color(0xFF0F172A),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: const Row(
+              children: [
+                Icon(Icons.verified_user_rounded, color: Color(0xFF10B981), size: 22),
+                SizedBox(width: 8),
+                Text('ওয়ারেন্টি ও সিরিয়াল যাচাই', style: TextStyle(color: Colors.white, fontSize: 16)),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  controller: searchCtrl,
+                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                  decoration: const InputDecoration(
+                    labelText: 'বারকোড বা IMEI / সিরিয়াল লিখুন',
+                    labelStyle: TextStyle(color: Colors.white60, fontSize: 12),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2563EB)),
+                  onPressed: () {
+                    final query = searchCtrl.text.trim();
+                    if (query.isEmpty) return;
+                    final match = provider.products.where((p) =>
+                        p.barcode == query ||
+                        p.serials.contains(query) ||
+                        p.name.toLowerCase().contains(query.toLowerCase())).firstOrNull;
+                    setState(() {
+                      if (match != null) {
+                        resultText = 'পণ্য: ${match.name}\nওয়ারেন্টি: ${match.warranty.isEmpty ? "কোন ওয়ারেন্টি নেই" : match.warranty}\nস্টক: ${match.stock} ${match.unit}';
+                        resultColor = const Color(0xFF10B981);
+                      } else {
+                        resultText = 'এই সিরিয়াল বা বারকোডের কোনো পণ্য পাওয়া যায়নি!';
+                        resultColor = const Color(0xFFEF4444);
+                      }
+                    });
+                  },
+                  child: const Text('যাচাই করুন', style: TextStyle(color: Colors.white)),
+                ),
+                if (resultText.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E293B),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: resultColor.withOpacity(0.4)),
+                    ),
+                    child: Text(resultText, style: TextStyle(color: resultColor, fontSize: 12)),
+                  ),
+                ],
+              ],
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('বন্ধ করুন', style: TextStyle(color: Colors.white60))),
+            ],
+          ),
+        );
       },
     );
   }

@@ -2873,6 +2873,241 @@ input, button, select, textarea {
   transition: width 0.25s ease;
 }
 
+/* ================= DESKTOP COMPACT & SLEEK DENSITY (HIGH-RES PC FIT) ================= */
+@media (min-width: 1025px) {
+  html {
+    font-size: 13.5px;
+  }
+  body {
+    line-height: 1.4;
+  }
+
+  /* Compact Sidebar */
+  .app-sidebar {
+    width: 230px !important;
+  }
+  .sidebar-brand-box {
+    padding: 0.7rem 0.85rem !important;
+  }
+  .brand-logo-wrap {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  .brand-name {
+    font-size: 0.96rem !important;
+  }
+  .sidebar-menu {
+    padding: 0.4rem !important;
+    gap: 0.15rem !important;
+  }
+  .menu-item {
+    padding: 0.45rem 0.75rem !important;
+    font-size: 0.82rem !important;
+    gap: 0.65rem !important;
+    border-radius: 8px !important;
+  }
+  .menu-icon {
+    font-size: 1.05rem !important;
+  }
+  .sidebar-menu-heading {
+    padding: 0.75rem 0.9rem 0.3rem !important;
+    font-size: 0.68rem !important;
+  }
+  .sidebar-footer {
+    padding: 0.6rem 0.9rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Compact Top Bar */
+  .top-nav {
+    height: 48px !important;
+    padding: 0 1.25rem !important;
+  }
+  .page-title-text {
+    font-size: 0.95rem !important;
+  }
+  .cloud-sync-pill, .quick-stat-badge, .user-chip {
+    padding: 0.25rem 0.65rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Compact Page Viewport */
+  .page-viewport {
+    padding: 0.75rem 1.15rem !important;
+    max-width: 1600px !important;
+  }
+  .view-content {
+    gap: 0.75rem !important;
+  }
+
+  /* Compact Welcome Banner */
+  .dash-welcome-card {
+    padding: 0.65rem 1.1rem !important;
+    border-radius: 12px !important;
+  }
+  .welcome-left h2 {
+    font-size: 1.1rem !important;
+  }
+  .welcome-left p {
+    font-size: 0.75rem !important;
+    margin-top: 0.1rem !important;
+  }
+  .btn-hero-pos {
+    padding: 0.4rem 0.85rem !important;
+    font-size: 0.8rem !important;
+    border-radius: 8px !important;
+  }
+  .live-clock-badge {
+    padding: 0.35rem 0.65rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* KPI Cards: Exactly 5 items in a single horizontal row */
+  .kpi-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 0.65rem !important;
+  }
+  .kpi-card {
+    padding: 0.65rem 0.75rem !important;
+    gap: 0.65rem !important;
+    border-radius: 10px !important;
+  }
+  .kpi-icon-box {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 1.3rem !important;
+    border-radius: 8px !important;
+  }
+  .kpi-title {
+    font-size: 0.72rem !important;
+  }
+  .kpi-num {
+    font-size: 1.18rem !important;
+    margin: 0.1rem 0 !important;
+  }
+  .kpi-sub {
+    font-size: 0.68rem !important;
+  }
+
+  /* Split Grid for Trends & Low stock */
+  .dash-split-grid {
+    grid-template-columns: 1.35fr 1fr !important;
+    gap: 0.75rem !important;
+  }
+  .content-panel {
+    padding: 0.75rem 1rem !important;
+    border-radius: 12px !important;
+  }
+  .panel-head {
+    margin-bottom: 0.6rem !important;
+  }
+  .head-title h3 {
+    font-size: 0.95rem !important;
+  }
+  .head-title p {
+    font-size: 0.72rem !important;
+    margin-top: 0.1rem !important;
+  }
+
+  /* Compact Sales Trend Chart */
+  .sales-trend-card {
+    padding: 0.75rem 1rem !important;
+    gap: 0.5rem !important;
+    border-radius: 12px !important;
+  }
+  .trend-icon-badge {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 8px !important;
+  }
+  .trend-icon-badge svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  .trend-title-box h3 {
+    font-size: 0.95rem !important;
+  }
+  .trend-title-box p {
+    font-size: 0.72rem !important;
+    margin-top: 0.1rem !important;
+  }
+  .trend-timeframe-pill {
+    padding: 0.25rem 0.65rem !important;
+    font-size: 0.72rem !important;
+  }
+  .trend-chart-canvas-wrap {
+    padding: 0 !important;
+  }
+  .trend-chart-svg {
+    height: 180px !important;
+  }
+  .trend-card-footer {
+    padding: 0.4rem 0.75rem !important;
+    border-radius: 8px !important;
+  }
+  .trend-total-label {
+    font-size: 0.75rem !important;
+  }
+  .trend-total-value {
+    font-size: 0.85rem !important;
+  }
+  .trend-growth-badge {
+    padding: 0.18rem 0.5rem !important;
+    font-size: 0.72rem !important;
+  }
+
+  /* Tables */
+  .simple-table th, .data-table th {
+    padding: 0.45rem 0.65rem !important;
+    font-size: 0.75rem !important;
+  }
+  .simple-table td, .data-table td {
+    padding: 0.38rem 0.65rem !important;
+    font-size: 0.78rem !important;
+  }
+  .table-compact-wrap {
+    max-height: 220px !important;
+    overflow-y: auto !important;
+  }
+  .btn-memo-view {
+    padding: 0.2rem 0.55rem !important;
+    font-size: 0.72rem !important;
+  }
+
+  /* Reports View Compact */
+  .report-kpi-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 0.65rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+  .report-kpi-card {
+    padding: 0.65rem 0.85rem !important;
+    border-radius: 10px !important;
+  }
+  .rep-kpi-num {
+    font-size: 1.25rem !important;
+  }
+
+  /* POS View on PC */
+  .pos-catalog-column {
+    padding-right: 0.75rem !important;
+  }
+  .pos-cart-panel {
+    padding: 0.85rem !important;
+    border-radius: 12px !important;
+  }
+  .product-card {
+    padding: 0.65rem !important;
+    border-radius: 10px !important;
+  }
+  .prod-name {
+    font-size: 0.82rem !important;
+  }
+  .prod-price {
+    font-size: 0.92rem !important;
+  }
+}
+
 /* ================= PRINT MEDIA QUERY ================= */
 @media print {
   body * {
