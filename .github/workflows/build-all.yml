@@ -106,17 +106,7 @@ jobs:
           cd metro_flutter_app
           flutter create . --org com.metro --project-name telecom --platforms=android
           rm -rf test/
-          python3 -c '
-import os
-for path in ["android/settings.gradle.kts", "android/settings.gradle"]:
-    if os.path.exists(path):
-        with open(path, "r") as f:
-            c = f.read()
-        if "mavenCentral()" not in c:
-            c = c.replace("repositories {", "repositories {\n        google()\n        mavenCentral()\n        gradlePluginPortal()")
-            with open(path, "w") as f:
-                f.write(c)
-'
+          sed -i 's/gradlePluginPortal()/google()\n        mavenCentral()\n        gradlePluginPortal()/' android/settings.gradle.kts 2>/dev/null || true
           cat << 'EOF' > android/app/src/main/AndroidManifest.xml
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
