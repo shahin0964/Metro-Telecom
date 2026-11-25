@@ -45,6 +45,9 @@ jobs:
         with:
           path: 'www/'
 
+      - name: Wait for Artifact Sync
+        run: sleep 5
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
@@ -159,7 +162,7 @@ jobs:
       - name: Build Flutter Release APK
         run: |
           cd metro_flutter_app
-          flutter build apk --release
+          flutter build apk --release || (echo "Retrying Gradle build after cooldown..." && sleep 12 && flutter build apk --release)
           mkdir -p ../dist-apk
           cp build/app/outputs/flutter-apk/app-release.apk ../dist-apk/Metro-Telecom.apk
 
