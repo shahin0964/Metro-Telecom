@@ -1100,16 +1100,24 @@ function renderDashboard() {
   if (state.sales.length === 0) {
     recTbody.innerHTML = `<tr><td colspan="8" class="text-center" style="padding:1.5rem;color:var(--text-dim);">এখনো কোনো বিক্রয় রেকর্ড নেই</td></tr>`;
   } else {
-    state.sales.slice(0, 10).forEach(s => {
+    const recentSales = [...state.sales].sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || '')).slice(0, 10);
+    recentSales.forEach(s => {
       const tr = document.createElement('tr');
+      const invoiceNum = s.invoiceNo || s.id || 'INV-001';
+      const custName = (typeof s.customer === 'object' && s.customer !== null) ? (s.customer.name || 'খুচরা ক্রেতা') : (s.customer || 'খুচরা ক্রেতা');
+      const dateText = s.formattedDate || (s.timestamp ? s.timestamp.slice(0, 10) : 'আজ');
+      const methodText = s.paymentMethod === 'bkash' ? 'বিকাশ' : (s.paymentMethod === 'due' ? 'বাকি' : 'নগদ');
+      const paidVal = s.paidAmount !== undefined ? s.paidAmount : (s.paid !== undefined ? s.paid : (s.grandTotal || 0));
+      const dueVal = s.dueAmount !== undefined ? s.dueAmount : (s.due !== undefined ? s.due : 0);
+
       tr.innerHTML = `
-        <td><strong>${s.invoiceNo}</strong></td>
-        <td>${s.formattedDate}</td>
-        <td>${s.customer.name}</td>
-        <td><span class="item-cat-label">${s.paymentMethod}</span></td>
+        <td><strong>${invoiceNum}</strong></td>
+        <td style="color:var(--text-muted);font-size:0.8rem;">${dateText}</td>
+        <td><strong>${custName}</strong></td>
+        <td><span class="memo-paid-chip" style="font-size:0.75rem;">${methodText}</span></td>
         <td class="text-right"><strong>${formatTk(s.grandTotal)}</strong></td>
-        <td class="text-right text-green">${formatTk(s.paid)}</td>
-        <td class="text-right ${s.due > 0 ? 'text-danger' : ''}">${formatTk(s.due)}</td>
+        <td class="text-right" style="color:#34d399;font-weight:700;">${formatTk(paidVal)}</td>
+        <td class="text-right ${dueVal > 0 ? 'text-danger' : ''}" style="color:${dueVal > 0 ? '#fb7185' : 'var(--text-muted)'};font-weight:700;">${formatTk(dueVal)}</td>
         <td class="text-center">
           <button class="btn-table-action" onclick="viewInvoice('${s.id}')">📄 মেমো</button>
         </td>
