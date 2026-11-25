@@ -25,7 +25,8 @@
       "**/*",
       "!dist/**",
       "!.github/**",
-      "!*.md"
+      "!*.md",
+      "!metro_flutter_app/**"
     ],
     "win": {
       "target": [

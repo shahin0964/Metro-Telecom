@@ -194,7 +194,7 @@ input, button, select, textarea {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
   flex-shrink: 0 !important;
   align-self: flex-start !important;
-  margin-top: 2px !important;
+  margin-top: -2px !important;
 }
 
 .btn-sm-action:hover {
