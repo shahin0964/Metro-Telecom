@@ -2680,7 +2680,7 @@ function showSyncToast(message) {
 }
 
 // ================= 9. AUTO UPDATER & PC DESKTOP NOTIFICATIONS =================
-const CURRENT_VERSION = '1.0.0';
+const CURRENT_VERSION = '1.0.1';
 const GITHUB_REPO = 'shahin0964/Metro-Telecom';
 let downloadedUpdatePath = null;
 let latestReleaseData = null;

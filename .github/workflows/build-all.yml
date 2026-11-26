@@ -181,6 +181,15 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Read Package Version
+        id: pkg_info
+        run: |
+          VER=$(node -p "require('./package.json').version")
+          echo "version=${VER}" >> $GITHUB_OUTPUT
+
       - name: Download Windows Artifacts
         uses: actions/download-artifact@v4
         with:
@@ -199,10 +208,10 @@ jobs:
       - name: Publish or Update GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0
-          name: "Metro Telecom v1.0.0 (Windows PC, Android Mobile & Web)"
+          tag_name: v${{ steps.pkg_info.outputs.version }}
+          name: "Metro Telecom v${{ steps.pkg_info.outputs.version }} (Windows PC, Android Mobile & Web)"
           body: |
-            # 🏪 Metro Telecom - Unified Multi-Platform Release (v1.0.0)
+            # 🏪 Metro Telecom - Unified Multi-Platform Release (v${{ steps.pkg_info.outputs.version }})
             > **"এক হোস্টিং, এক মাথা, পথ ৩টা"** — PC, Android Mobile ও Web সফটওয়্যার একই ক্লাউড ডাটাবেজে রিয়েল-টাইমে সংযুক্ত!
 
             ---
@@ -211,8 +220,8 @@ jobs:
             * **Android APK**: `Metro-Telecom.apk` (লেটেস্ট ফ্ল্যাটার ও মেটেরিয়াল ৩ ডার্ক থিমে নির্মিত নেটিভ অ্যান্ড্রয়েড অ্যাপ — মোবাইলে ক্যাশ মেমো, ব্লুটুথ থার্মাল প্রিন্ট, বারকোড এবং ক্লাউড সিঙ্কসহ পরিচালনা করুন)
 
             ### 💻 2. Windows PC Software:
-            * **Installer**: `Metro-Telecom-Setup-1.0.0.exe` (ইনস্টল করুন, ডেস্কটপ আইকন তৈরি হবে)
-            * **Portable**: `Metro-Telecom-Portable-1.0.0.exe` (কোনো ইনস্টলেশন ছাড়াই সরাসরি রান করুন)
+            * **Installer**: `Metro-Telecom-Setup-${{ steps.pkg_info.outputs.version }}.exe` (ইনস্টল করুন, ডেস্কটপ আইকন তৈরি হবে)
+            * **Portable**: `Metro-Telecom-Portable-${{ steps.pkg_info.outputs.version }}.exe` (কোনো ইনস্টলেশন ছাড়াই সরাসরি রান করুন)
 
             ### 🌐 3. Live Web Software:
             * **Web App URL**: [https://shahin0964.github.io/Metro-Telecom/](https://shahin0964.github.io/Metro-Telecom/)
@@ -220,17 +229,16 @@ jobs:
 
             ---
 
-            ### 🌟 প্রধান সুবিধাসমূহ:
-            * ☁️ **রিয়েল-টাইম ক্লাউড সিঙ্ক**: মোবাইলে সেল বা স্টক যোগ করলে সাথে সাথে পিসির সফটওয়্যার ও ওয়েব ভার্সনে আপডেট।
-            * 📱 **নেটিভ ফ্ল্যাটার অ্যান্ড্রয়েড আর্কিটেকচার**: ফুল মেটেরিয়াল ৩ ডিজাইন, হাইপার-ফ্লুয়েন্ট বটম শীট মেমো এবং অফলাইন-ফার্স্ট ক্যাশিং।
-            * 🔄 **ইন-অ্যাপ অটো-আপডেট**: সফটওয়্যারের ভেতর থেকেই ১-ক্লিকে নতুন ভার্সন ডাউনলোড ও ইনস্টল।
-            * 🔔 **পিসি ডেস্কটপ নোটিফিকেশন**: নতুন আপডেট আসলে উইন্ডোজ পিসিতে নোটিফিকেশন অ্যালার্ট।
-            * 📦 **কাস্টম ও ডাইনামিক ক্যাটাগরি**: মোবাইল, হেডফোন, খেলনা, লাইট, স্টেশনারি, ইলেকট্রনিক্স ও আনলিমিটেড নতুন ক্যাটাগরি।
-            * ⚡ **দ্রুত POS বিলিং ও ক্যাশ মেমো**: একসাথে একাধিক পণ্য বিক্রি ও A4/A5/Thermal প্রিন্ট।
-            * 🛡️ **ডিজিটাল ওয়ারেন্টি ও সিরিয়াল ট্র্যাকিং**: IMEI/Serial ট্র্যাকিং ও মেয়াদ যাচাই।
-            * 📒 **বার্ষিক ও মাসিক হিসাব খাতা**: সম্পূর্ণ বাৎসরিক ও মাসিক টার্নওভার, আসল ক্রয়মূল্য, খরচ ও নিট লাভ অডিট।
+            ### 🌟 প্রধান ফিক্স ও নতুন ফিচারসমূহ (v${{ steps.pkg_info.outputs.version }}):
+            * 🧹 **সম্পূর্ণ ডামি ও ফেক ডাটা পরিষ্কার**: সমস্ত পরীক্ষামূলক পণ্য, সেলস ও ডামি হিসাব মুছে ফ্রেশ স্টোর ডাটাবেজ প্রস্তুত।
+            * 🛒 **সেন্টার্ড ও অ্যানিমেটেড কার্ট ওভারলে**: কার্ট বারটি নিচে একদম সেন্টারে স্মুথ স্প্রিং ট্রানজিশনসহ ওপেন/মিনিমাইজ।
+            * 👤 **POS-এ সরাসরি নাম-মোবাইল এন্ট্রি**: খুচরা ক্রেতাদের বাকির খাতায় যোগ না করেও মেমোতে নাম-ফোন প্রিন্ট করার সুবিধা।
+            * 🖨️ **ক্যাশ মেমো প্রিন্ট ও প্রিভিউ ফিক্স**: প্রিন্টে সাদা পাতা আসার সমস্যা সম্পূর্ণ সমাধান।
+            * 📊 **বাৎসরিক ও মাসিক হিসাব রিপোর্ট**: CSV ডাউনলোড বাটনের মার্জিন ও হেডার চেপে যাওয়া ঠিক করা হয়েছে।
+            * 🔄 **ইন-অ্যাপ অটো-আপডেট ও ডেস্কটপ নোটিফিকেশন**: পিসিতে নতুন আপডেট আসলে তাৎক্ষণিক নোটিফিকেশন অ্যালার্ট।
           files: release-assets/*
           draft: false
           prerelease: false
+          make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
