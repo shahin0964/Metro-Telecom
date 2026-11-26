@@ -206,7 +206,7 @@ jobs:
         run: ls -la release-assets/
 
       - name: Publish or Update GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ steps.pkg_info.outputs.version }}
           name: "Metro Telecom v${{ steps.pkg_info.outputs.version }} (Windows PC, Android Mobile & Web)"
