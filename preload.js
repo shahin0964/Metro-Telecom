@@ -5,6 +5,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   platform: process.platform,
   isElectron: true,
   showNotification: (data) => ipcRenderer.invoke('show-native-notification', data),
+  openExternal: (url) => ipcRenderer.invoke('open-external-url', url),
+  printPage: (options) => ipcRenderer.invoke('print-page', options),
+  printToPDF: (options) => ipcRenderer.invoke('print-to-pdf', options),
   downloadUpdate: (url) => ipcRenderer.invoke('download-update-file', url),
   installUpdate: () => ipcRenderer.invoke('install-and-restart'),
   onDownloadProgress: (callback) => {

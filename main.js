@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain, Notification, shell } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, Notification, shell, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const https = require('https');
@@ -22,6 +22,39 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js')
     }
   });
+
+  // Windows Edit and View Accelerators (Enables Typing, Backspace, Copy, Paste, Undo, Select All)
+  const template = [
+    {
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
+        { role: 'delete' },
+        { role: 'selectAll' }
+      ]
+    },
+    {
+      label: 'View',
+      submenu: [
+        { role: 'reload' },
+        { role: 'forceReload' },
+        { role: 'toggleDevTools' },
+        { type: 'separator' },
+        { role: 'resetZoom' },
+        { role: 'zoomIn' },
+        { role: 'zoomOut' },
+        { type: 'separator' },
+        { role: 'togglefullscreen' }
+      ]
+    }
+  ];
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
 
   mainWindow.loadFile('index.html');
 
@@ -106,16 +139,91 @@ ipcMain.handle('download-update-file', (event, downloadUrl) => {
   });
 });
 
-// IPC: Execute downloaded installer and quit current app
-ipcMain.handle('install-and-restart', () => {
-  if (downloadedInstallerPath && fs.existsSync(downloadedInstallerPath)) {
-    const child = spawn(downloadedInstallerPath, [], {
-      detached: true,
-      stdio: 'ignore'
-    });
-    child.unref();
-    app.quit();
+// IPC: Open external web URL in default browser
+ipcMain.handle('open-external-url', (event, url) => {
+  if (url && (url.startsWith('https://') || url.startsWith('http://'))) {
+    shell.openExternal(url);
     return true;
+  }
+  return false;
+});
+
+// IPC: Native System Print (Bypasses unsupported Chromium web preview dialog)
+ipcMain.handle('print-page', async (event, options = {}) => {
+  const win = BrowserWindow.fromWebContents(event.sender) || mainWindow;
+  if (!win) return { success: false, error: 'No active window' };
+
+  return new Promise((resolve) => {
+    win.webContents.print(
+      {
+        silent: options.silent || false,
+        printBackground: true,
+        color: true,
+        deviceName: options.deviceName || '',
+        pageSize: options.pageSize || 'A4',
+        margins: {
+          marginType: 'default'
+        }
+      },
+      (success, failureReason) => {
+        if (!success) {
+          console.warn('Native print cancelled or failed:', failureReason);
+          resolve({ success: false, reason: failureReason });
+        } else {
+          resolve({ success: true });
+        }
+      }
+    );
+  });
+});
+
+// IPC: Native Print to PDF (Direct file export)
+ipcMain.handle('print-to-pdf', async (event, options = {}) => {
+  const win = BrowserWindow.fromWebContents(event.sender) || mainWindow;
+  if (!win) return { success: false, error: 'No active window' };
+
+  try {
+    const pdfData = await win.webContents.printToPDF({
+      printBackground: true,
+      pageSize: options.pageSize || 'A4'
+    });
+
+    const defaultFilename = options.filename || `Metro-Telecom-Memo-${Date.now()}.pdf`;
+    const { filePath, canceled } = await dialog.showSaveDialog(win, {
+      title: 'ক্যাশ মেমো / রিপোর্ট PDF হিসেবে সেভ করুন',
+      defaultPath: path.join(app.getPath('documents'), defaultFilename),
+      filters: [{ name: 'PDF Documents (*.pdf)', extensions: ['pdf'] }]
+    });
+
+    if (!canceled && filePath) {
+      await fs.promises.writeFile(filePath, pdfData);
+      return { success: true, filePath };
+    }
+    return { success: false, canceled: true };
+  } catch (err) {
+    console.error('PrintToPDF failed:', err);
+    return { success: false, error: err.message };
+  }
+});
+
+// IPC: Execute downloaded installer and quit current app
+ipcMain.handle('install-and-restart', async () => {
+  if (downloadedInstallerPath && fs.existsSync(downloadedInstallerPath)) {
+    try {
+      await shell.openPath(downloadedInstallerPath);
+      setTimeout(() => app.quit(), 600);
+      return true;
+    } catch (err) {
+      console.error('shell.openPath failed, falling back to spawn:', err);
+      const child = spawn(downloadedInstallerPath, [], {
+        detached: true,
+        shell: true,
+        stdio: 'ignore'
+      });
+      child.unref();
+      setTimeout(() => app.quit(), 600);
+      return true;
+    }
   }
   return false;
 });

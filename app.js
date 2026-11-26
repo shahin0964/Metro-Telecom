@@ -234,6 +234,7 @@ const dom = {
   globalUpdateBar: document.getElementById('global-update-bar'),
   btnBannerUpdateAction: document.getElementById('btn-banner-update-action'),
   btnCheckForUpdates: document.getElementById('btn-check-for-updates'),
+  btnViewGithubReleasesPage: document.getElementById('btn-view-github-releases-page'),
   updateStatusBox: document.getElementById('update-status-box'),
   updateProgressContainer: document.getElementById('update-progress-container'),
   updateProgressText: document.getElementById('update-progress-text'),
@@ -288,6 +289,7 @@ const dom = {
   modalInvoiceDialog: document.getElementById('modal-invoice-dialog'),
   printableMemoSheet: document.getElementById('printable-memo-sheet'),
   btnInvokePrint: document.getElementById('btn-invoke-print'),
+  btnInvokeSavePdf: document.getElementById('btn-invoke-save-pdf'),
   btnCloseInvoiceModal: document.getElementById('btn-close-invoice-modal'),
   sizePills: document.querySelectorAll('.size-pill'),
 
@@ -829,10 +831,41 @@ function setupPos() {
 
   dom.cartDiscountInput.addEventListener('input', recalculateCart);
   dom.cartDiscountInput.addEventListener('focus', e => e.target.select());
-  dom.cartDiscountInput.addEventListener('click', e => e.target.select());
+  dom.cartDiscountInput.addEventListener('click', e => {
+    e.stopPropagation();
+    e.target.select();
+  });
   dom.cartPaidInput.addEventListener('input', recalculateCart);
   dom.cartPaidInput.addEventListener('focus', e => e.target.select());
-  dom.cartPaidInput.addEventListener('click', e => e.target.select());
+  dom.cartPaidInput.addEventListener('click', e => {
+    e.stopPropagation();
+    e.target.select();
+  });
+
+  // Ensure adhoc inputs are directly focusable and do not bubble unwanted events
+  if (dom.posCustNameInput) {
+    dom.posCustNameInput.addEventListener('click', e => e.stopPropagation());
+  }
+  if (dom.posCustPhoneInput) {
+    dom.posCustPhoneInput.addEventListener('click', e => e.stopPropagation());
+  }
+
+  // Click on wrappers focuses the input directly
+  document.querySelectorAll('.adhoc-input-wrap').forEach(wrap => {
+    wrap.addEventListener('click', () => {
+      const inp = wrap.querySelector('input');
+      if (inp) inp.focus();
+    });
+  });
+  document.querySelectorAll('.bill-input-box').forEach(box => {
+    box.addEventListener('click', () => {
+      const inp = box.querySelector('input');
+      if (inp) {
+        inp.focus();
+        inp.select();
+      }
+    });
+  });
 
   // Clear Cart
   dom.btnResetCart.addEventListener('click', () => {
@@ -1384,10 +1417,50 @@ window.viewInvoice = function(saleId) {
   if (sale) renderAndShowMemo(sale);
 };
 
+// Native System Print & PDF trigger
+function triggerSystemPrint(options = {}) {
+  if (window.electronAPI && typeof window.electronAPI.printPage === 'function') {
+    window.electronAPI.printPage(options)
+      .then(res => {
+        if (!res.success && res.reason && res.reason !== 'cancelled') {
+          console.warn('System print notification:', res.reason);
+        }
+      })
+      .catch(err => {
+        console.warn('Electron print fallback to window.print:', err);
+        window.print();
+      });
+  } else {
+    window.print();
+  }
+}
+window.triggerSystemPrint = triggerSystemPrint;
+
 // Size switch & print trigger
-dom.btnInvokePrint.addEventListener('click', () => {
-  window.print();
-});
+if (dom.btnInvokePrint) {
+  dom.btnInvokePrint.addEventListener('click', () => {
+    const isA5 = dom.printableMemoSheet && dom.printableMemoSheet.classList.contains('size-a5');
+    triggerSystemPrint({ pageSize: isA5 ? 'A5' : 'A4' });
+  });
+}
+
+if (dom.btnInvokeSavePdf) {
+  dom.btnInvokeSavePdf.addEventListener('click', async () => {
+    const isA5 = dom.printableMemoSheet && dom.printableMemoSheet.classList.contains('size-a5');
+    const memoNo = document.getElementById('out-memo-no') ? document.getElementById('out-memo-no').textContent.trim() : 'Invoice';
+    if (window.electronAPI && typeof window.electronAPI.printToPDF === 'function') {
+      const res = await window.electronAPI.printToPDF({
+        pageSize: isA5 ? 'A5' : 'A4',
+        filename: `Metro-Telecom-${memoNo}.pdf`
+      });
+      if (res && res.success) {
+        showSyncToast(`✅ PDF সফলভাবে সংরক্ষণ হয়েছে: ${res.filePath}`);
+      }
+    } else {
+      triggerSystemPrint({ pageSize: isA5 ? 'A5' : 'A4' });
+    }
+  });
+}
 
 dom.sizePills.forEach(pill => {
   pill.addEventListener('click', () => {
@@ -2324,7 +2397,7 @@ function renderDailyReport(dateStr) {
 }
 
 function printFinancialReport() {
-  window.print();
+  triggerSystemPrint({ pageSize: 'A4' });
 }
 
 function exportFinancialReportCsv() {
@@ -2680,10 +2753,19 @@ function showSyncToast(message) {
 }
 
 // ================= 9. AUTO UPDATER & PC DESKTOP NOTIFICATIONS =================
-const CURRENT_VERSION = '1.0.1';
+const CURRENT_VERSION = '1.0.2';
 const GITHUB_REPO = 'shahin0964/Metro-Telecom';
 let downloadedUpdatePath = null;
 let latestReleaseData = null;
+
+function openExternalUrl(url) {
+  if (window.electronAPI && typeof window.electronAPI.openExternal === 'function') {
+    window.electronAPI.openExternal(url);
+  } else {
+    window.open(url, '_blank');
+  }
+}
+window.openExternalUrl = openExternalUrl;
 
 function setupAutoUpdater() {
   if (dom.lastUpdateCheckTime) {
@@ -2710,6 +2792,12 @@ function setupAutoUpdater() {
 
   if (dom.btnCheckForUpdates) {
     dom.btnCheckForUpdates.addEventListener('click', () => checkForSoftwareUpdates(true));
+  }
+
+  if (dom.btnViewGithubReleasesPage) {
+    dom.btnViewGithubReleasesPage.addEventListener('click', () => {
+      openExternalUrl(`https://github.com/${GITHUB_REPO}/releases`);
+    });
   }
 
   if (dom.btnBannerUpdateAction) {
@@ -2758,6 +2846,7 @@ function checkForSoftwareUpdates(isManual = false) {
     localStorage.setItem('metro_tel_last_update_check', nowFormatted);
   }
 
+  // 1. Try official GitHub Releases API
   fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`, {
     headers: { 'Accept': 'application/vnd.github.v3+json' }
   })
@@ -2766,35 +2855,88 @@ function checkForSoftwareUpdates(isManual = false) {
       return res.json();
     })
     .then(release => {
-      latestReleaseData = release;
-      const latestTag = release.tag_name || 'v1.0.0';
-      const cleanLatest = latestTag.replace(/^v/, '');
-      const cleanCurrent = CURRENT_VERSION.replace(/^v/, '');
-
-      const isNewer = compareVersions(cleanLatest, cleanCurrent) > 0;
-
-      if (isNewer) {
-        handleNewUpdateAvailable(release, latestTag);
-      } else {
-        if (dom.updateStatusBox) {
-          dom.updateStatusBox.style.background = 'rgba(16, 185, 129, 0.15)';
-          dom.updateStatusBox.style.color = '#6ee7b7';
-          dom.updateStatusBox.innerHTML = `<span>✅ চমৎকার! আপনার কাছে সর্বশেষ ভার্সন (v${CURRENT_VERSION}) ইনস্টল করা আছে।</span>`;
-        }
-        if (dom.globalUpdateBar) dom.globalUpdateBar.style.display = 'none';
-        if (isManual) {
-          showSyncToast(`✅ আপনার সফটওয়্যার আপ-টু-ডেট আছে (v${CURRENT_VERSION})`);
-        }
-      }
+      processReleaseCheck(release, release.tag_name || 'v1.0.0', isManual);
     })
-    .catch(err => {
-      console.warn('Update check failed:', err);
-      if (dom.updateStatusBox) {
-        dom.updateStatusBox.style.background = 'rgba(239, 68, 68, 0.15)';
-        dom.updateStatusBox.style.color = '#fca5a5';
-        dom.updateStatusBox.innerHTML = `<span>⚠️ আপডেট চেক ব্যর্থ হয়েছে: ${err.message} (ইন্টারনেট কানেকশন চেক করুন)</span>`;
-      }
+    .catch(apiErr => {
+      console.warn('GitHub API rate limited or unreachable. Trying raw repo fallback...', apiErr);
+      // 2. Resilient fallback: Raw package.json from main branch (bypasses rate limits completely)
+      fetch(`https://raw.githubusercontent.com/${GITHUB_REPO}/main/package.json?_t=${Date.now()}`)
+        .then(res => {
+          if (!res.ok) throw new Error(`Raw package check HTTP ${res.status}`);
+          return res.json();
+        })
+        .then(pkgData => {
+          const rawVer = pkgData.version || '1.0.0';
+          const syntheticTag = 'v' + rawVer;
+          const syntheticRelease = {
+            tag_name: syntheticTag,
+            name: `Metro Telecom ${syntheticTag}`,
+            html_url: `https://github.com/${GITHUB_REPO}/releases/tag/${syntheticTag}`,
+            assets: [
+              {
+                name: `Metro-Telecom-Setup-${rawVer}.exe`,
+                browser_download_url: `https://github.com/${GITHUB_REPO}/releases/download/${syntheticTag}/Metro-Telecom-Setup-${rawVer}.exe`,
+                size: 85 * 1024 * 1024
+              },
+              {
+                name: `Metro-Telecom-Portable-${rawVer}.exe`,
+                browser_download_url: `https://github.com/${GITHUB_REPO}/releases/download/${syntheticTag}/Metro-Telecom-Portable-${rawVer}.exe`,
+                size: 80 * 1024 * 1024
+              },
+              {
+                name: `Metro-Telecom.apk`,
+                browser_download_url: `https://github.com/${GITHUB_REPO}/releases/download/${syntheticTag}/Metro-Telecom.apk`,
+                size: 40 * 1024 * 1024
+              }
+            ]
+          };
+          processReleaseCheck(syntheticRelease, syntheticTag, isManual);
+        })
+        .catch(fallbackErr => {
+          console.error('All update checks failed:', fallbackErr);
+          if (dom.updateStatusBox) {
+            dom.updateStatusBox.style.background = 'rgba(239, 68, 68, 0.15)';
+            dom.updateStatusBox.style.color = '#fca5a5';
+            dom.updateStatusBox.innerHTML = `
+              <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+                <span>⚠️ GitHub API রেট সীমা শেষ হয়েছে। সরাসরি GitHub Releases পেজে দেখুন।</span>
+                <button type="button" class="btn-outline-action" onclick="openExternalUrl('https://github.com/${GITHUB_REPO}/releases')" style="padding:0.4rem 0.8rem;font-size:0.8rem;">
+                  🌐 GitHub Releases খুলুন
+                </button>
+              </div>
+            `;
+          }
+        });
     });
+}
+
+function processReleaseCheck(release, latestTag, isManual) {
+  latestReleaseData = release;
+  const cleanLatest = (latestTag || '').replace(/^v/, '');
+  const cleanCurrent = CURRENT_VERSION.replace(/^v/, '');
+
+  const isNewer = compareVersions(cleanLatest, cleanCurrent) > 0;
+
+  if (isNewer) {
+    handleNewUpdateAvailable(release, latestTag);
+  } else {
+    if (dom.updateStatusBox) {
+      dom.updateStatusBox.style.background = 'rgba(16, 185, 129, 0.15)';
+      dom.updateStatusBox.style.color = '#6ee7b7';
+      dom.updateStatusBox.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+          <span>✅ চমৎকার! আপনার কাছে সর্বশেষ ভার্সন (v${CURRENT_VERSION}) ইনস্টল করা আছে।</span>
+          <button type="button" class="btn-outline-action" onclick="openExternalUrl('https://github.com/${GITHUB_REPO}/releases')" style="padding:0.4rem 0.8rem;font-size:0.8rem;border-color:rgba(110,231,183,0.3);color:#6ee7b7;">
+            🌐 সব রিলিজ দেখুন
+          </button>
+        </div>
+      `;
+    }
+    if (dom.globalUpdateBar) dom.globalUpdateBar.style.display = 'none';
+    if (isManual) {
+      showSyncToast(`✅ আপনার সফটওয়্যার আপ-টু-ডেট আছে (v${CURRENT_VERSION})`);
+    }
+  }
 }
 
 function compareVersions(v1, v2) {
@@ -2889,8 +3031,8 @@ function triggerDownloadFlow(exeAsset, apkAsset, release) {
   } else {
     const targetUrl = (apkAsset && /android/i.test(navigator.userAgent))
       ? apkAsset.browser_download_url
-      : (exeAsset ? exeAsset.browser_download_url : release.html_url);
-    window.open(targetUrl, '_blank');
+      : (exeAsset ? exeAsset.browser_download_url : (release ? release.html_url : `https://github.com/${GITHUB_REPO}/releases`));
+    openExternalUrl(targetUrl);
   }
 }
 
@@ -2936,6 +3078,41 @@ function setupModals() {
 
   // Invoice modal
   dom.btnCloseInvoiceModal.addEventListener('click', () => dom.modalInvoiceDialog.classList.remove('show'));
+}
+
+// Global Input Focus Helper for Electron & Web (Ensures immediate caret placement on click)
+document.addEventListener('click', (e) => {
+  const adhocWrap = e.target.closest('.adhoc-input-wrap');
+  if (adhocWrap) {
+    const input = adhocWrap.querySelector('input');
+    if (input && document.activeElement !== input) {
+      input.focus();
+    }
+    return;
+  }
+  const billBox = e.target.closest('.bill-input-box');
+  if (billBox) {
+    const input = billBox.querySelector('input');
+    if (input && document.activeElement !== input) {
+      input.focus();
+      input.select();
+    }
+    return;
+  }
+  const fg = e.target.closest('.form-group');
+  if (fg && !e.target.matches('input, select, textarea, button, label')) {
+    const input = fg.querySelector('input, select, textarea');
+    if (input && document.activeElement !== input) {
+      input.focus();
+    }
+  }
+});
+
+// Polyfill window.print for Electron so any print call routes to native OS print dialog
+if (window.electronAPI && typeof window.electronAPI.printPage === 'function') {
+  window.print = function() {
+    window.electronAPI.printPage();
+  };
 }
 
 // Kickoff

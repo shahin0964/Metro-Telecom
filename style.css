@@ -50,16 +50,27 @@ html, body {
   height: 100vh;
   max-height: 100vh;
   overflow: hidden; /* Fixed shell: page as a whole never scrolls */
-  user-select: none;
   -webkit-font-smoothing: antialiased;
 }
 
-input, select, textarea {
+input, select, textarea, [contenteditable="true"] {
   font-family: inherit;
   font-size: 0.95rem;
   user-select: text !important;
   -webkit-user-select: text !important;
   pointer-events: auto !important;
+  cursor: text !important;
+}
+
+.adhoc-input-wrap, .bill-input-box, .form-group {
+  cursor: text !important;
+}
+
+.adhoc-input-wrap input, .bill-input-box input, .form-group input {
+  cursor: text !important;
+  pointer-events: auto !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
 }
 
 button {
@@ -2457,11 +2468,15 @@ button {
   z-index: 3000 !important;
   padding: 1rem;
 }
-.modal-backdrop.show { display: flex !important; }
+.modal-backdrop.show {
+  display: flex !important;
+  pointer-events: auto !important;
+}
 
 .modal-card {
   position: relative !important;
   z-index: 3010 !important;
+  pointer-events: auto !important;
   background-color: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
@@ -2474,6 +2489,12 @@ button {
   animation: popIn 0.2s ease-out;
 }
 .modal-card.modal-lg { max-width: 680px; }
+
+.modal-body, .modal-body input, .modal-body select, .modal-body textarea, .modal-body .form-group {
+  pointer-events: auto !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
 
 @keyframes popIn {
   from { opacity: 0; transform: scale(0.96); }
