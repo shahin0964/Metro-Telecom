@@ -3782,3 +3782,198 @@ button {
   from { transform: translateX(100%); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
 }
+
+/* ================= SALES & PAYMENT HISTORY STYLES ================= */
+.sh-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .sh-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .sh-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sh-kpi-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.sh-kpi-card:hover {
+  border-color: rgba(56, 189, 248, 0.4);
+  transform: translateY(-2px);
+}
+
+.sh-kpi-card .icon {
+  font-size: 2rem;
+  background: rgba(56, 189, 248, 0.1);
+  padding: 0.5rem;
+  border-radius: 12px;
+}
+
+.sh-kpi-card small {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  display: block;
+}
+
+.sh-kpi-card h3 {
+  margin: 0.2rem 0 0 0;
+  font-size: 1.25rem;
+  color: var(--text-main);
+}
+
+.sh-kpi-card.danger {
+  border-left: 4px solid #ef4444;
+}
+
+.sh-kpi-card.danger .icon {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+/* Status Chips */
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-chip.success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-chip.danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Button variants */
+.btn-table-action.success {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #34d399;
+}
+
+.btn-table-action.success:hover {
+  background: #10b981;
+  color: #ffffff;
+}
+
+/* Quick Qty Chips */
+.quick-qty-chips .btn-outline-action {
+  padding: 0.25rem 0.65rem;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.quick-qty-chips .btn-outline-action:hover {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: #ffffff;
+}
+
+/* Order Confirmation Dialog */
+.confirm-order-summary-box {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.confirm-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.confirm-row .lbl {
+  color: var(--text-dim);
+}
+
+.confirm-row.highlight {
+  font-size: 1.05rem;
+  padding: 0.4rem 0;
+  border-top: 1px dashed var(--border-subtle);
+  border-bottom: 1px dashed var(--border-subtle);
+  margin: 0.3rem 0;
+  color: #38bdf8;
+}
+
+.confirm-divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 0.25rem 0;
+}
+
+.confirm-items-scroll-list {
+  max-height: 140px;
+  overflow-y: auto;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.5rem;
+  margin: 0.4rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.confirm-item-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.confirm-item-entry small {
+  color: #38bdf8;
+  display: block;
+  font-size: 0.72rem;
+}
+
+/* Cancelled Memo Print Overlay */
+.memo-cancelled-watermark {
+  border: 3px solid #ef4444;
+  color: #ef4444;
+  text-transform: uppercase;
+  font-size: 1.5rem;
+  font-weight: 900;
+  text-align: center;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  background: rgba(239, 68, 68, 0.08);
+}

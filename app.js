@@ -51,6 +51,7 @@ const state = {
   customers: [],
   expenses: [],
   sales: [],
+  duePayments: [],
   settings: SEED_SETTINGS,
   cart: [],
   heldBills: [],
@@ -90,6 +91,9 @@ function loadAllData() {
     const s = localStorage.getItem('metro_tel_sales');
     state.sales = s ? JSON.parse(s) : [];
 
+    const dp = localStorage.getItem('metro_tel_due_payments');
+    state.duePayments = dp ? JSON.parse(dp) : [];
+
     const set = localStorage.getItem('metro_tel_settings');
     state.settings = set ? JSON.parse(set) : SEED_SETTINGS;
 
@@ -102,6 +106,7 @@ function loadAllData() {
     state.customers = [];
     state.expenses = [];
     state.sales = [];
+    state.duePayments = [];
     state.settings = SEED_SETTINGS;
   }
 }
@@ -113,6 +118,7 @@ function persist(key, skipCloudSync = false) {
     if (!key || key === 'customers') localStorage.setItem('metro_tel_customers', JSON.stringify(state.customers));
     if (!key || key === 'expenses') localStorage.setItem('metro_tel_expenses', JSON.stringify(state.expenses));
     if (!key || key === 'sales') localStorage.setItem('metro_tel_sales', JSON.stringify(state.sales));
+    if (!key || key === 'duePayments') localStorage.setItem('metro_tel_due_payments', JSON.stringify(state.duePayments || []));
     if (!key || key === 'settings') localStorage.setItem('metro_tel_settings', JSON.stringify(state.settings));
     if (!key || key === 'held') localStorage.setItem('metro_tel_held', JSON.stringify(state.heldBills));
   } catch (err) {
@@ -125,6 +131,16 @@ function persist(key, skipCloudSync = false) {
 }
 
 // Helpers
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function formatTk(val) {
   const n = Number(val) || 0;
   return '৳ ' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -257,9 +273,51 @@ const dom = {
   modalPosSerial: document.getElementById('modal-pos-serial'),
   serialProdInfoText: document.getElementById('serial-prod-info-text'),
   serialInputField: document.getElementById('serial-input-field'),
+  serialInputField2: document.getElementById('serial-input-field-2'),
   btnConfirmSerial: document.getElementById('btn-confirm-serial'),
   btnCancelSerialModal: document.getElementById('btn-cancel-serial-modal'),
   btnCloseSerialModal: document.getElementById('btn-close-serial-modal'),
+
+  // Restock Modal
+  modalRestockProduct: document.getElementById('modal-restock-product'),
+  formRestockProduct: document.getElementById('form-restock-product'),
+  restockProdInfoBox: document.getElementById('restock-prod-info-box'),
+  inpRestockQty: document.getElementById('inp-restock-qty'),
+  inpRestockCost: document.getElementById('inp-restock-cost'),
+  inpRestockPrice: document.getElementById('inp-restock-price'),
+  btnCloseRestockModal: document.getElementById('btn-close-restock-modal'),
+  btnCancelRestock: document.getElementById('btn-cancel-restock'),
+
+  // Edit Product Modal
+  modalEditProduct: document.getElementById('modal-edit-product'),
+  formEditProduct: document.getElementById('form-edit-product'),
+  btnCloseEditProdModal: document.getElementById('btn-close-edit-prod-modal'),
+  btnCancelEditProd: document.getElementById('btn-cancel-edit-prod'),
+
+  // Order Confirmation Modal
+  modalConfirmCheckout: document.getElementById('modal-confirm-checkout'),
+  btnCloseConfirmCheckout: document.getElementById('btn-close-confirm-checkout'),
+  btnCancelCheckoutConfirm: document.getElementById('btn-cancel-checkout-confirm'),
+  btnExecuteConfirmedCheckout: document.getElementById('btn-execute-confirmed-checkout'),
+  confirmCustName: document.getElementById('confirm-cust-name'),
+  confirmCustPhone: document.getElementById('confirm-cust-phone'),
+  confirmItemCount: document.getElementById('confirm-item-count'),
+  confirmItemsPreviewList: document.getElementById('confirm-items-preview-list'),
+  confirmGrandTotal: document.getElementById('confirm-grand-total'),
+  confirmPayMethod: document.getElementById('confirm-pay-method'),
+  confirmPaidAmount: document.getElementById('confirm-paid-amount'),
+  confirmDueRow: document.getElementById('confirm-due-row'),
+  confirmDueAmount: document.getElementById('confirm-due-amount'),
+
+  // Sales History Tab
+  shSearchBox: document.getElementById('sh-search-box'),
+  shFilterStatus: document.getElementById('sh-filter-status'),
+  shFilterPeriod: document.getElementById('sh-filter-period'),
+  salesHistoryTbody: document.getElementById('sales-history-tbody'),
+  shTotalSalesCount: document.getElementById('sh-total-sales-count'),
+  shTotalSalesAmount: document.getElementById('sh-total-sales-amount'),
+  shTotalPaidAmount: document.getElementById('sh-total-paid-amount'),
+  shCancelledCount: document.getElementById('sh-cancelled-count'),
 
   modalAddCustomer: document.getElementById('modal-add-customer'),
   formCreateCustomer: document.getElementById('form-create-customer'),
@@ -332,6 +390,7 @@ function appInit() {
   setupDashboard();
   setupPos();
   setupInventory();
+  setupSalesHistory();
   setupWarranty();
   setupCustomers();
   setupExpenses();
@@ -344,6 +403,7 @@ function appInit() {
   renderPosCatalog();
   renderCart();
   renderDashboard();
+  renderSalesHistory();
 }
 
 function setupClock() {
@@ -364,6 +424,7 @@ function setupTabs() {
     dashboard: { icon: '📊', title: 'ড্যাশবোর্ড' },
     pos: { icon: '🛒', title: 'দ্রুত বিক্রয় (POS)' },
     inventory: { icon: '📦', title: 'স্টক ও মালামাল' },
+    'sales-history': { icon: '📜', title: 'পেমেন্ট ও বিক্রয় হিস্ট্রি' },
     warranty: { icon: '🛡️', title: 'ওয়ারেন্টি চেক' },
     customers: { icon: '📒', title: 'বাকির খাতা' },
     expenses: { icon: '💸', title: 'দোকানের খরচ' },
@@ -407,6 +468,7 @@ function setupTabs() {
       if (target === 'dashboard') renderDashboard();
       if (target === 'pos') renderPosCatalog();
       if (target === 'inventory') renderInventoryMaster();
+      if (target === 'sales-history') renderSalesHistory();
       if (target === 'customers') renderCustomerMaster();
       if (target === 'expenses') renderExpenseMaster();
       if (target === 'reports') renderReportsMaster();
@@ -555,24 +617,36 @@ function refreshGlobalStats() {
   let todayInvoices = 0;
 
   state.sales.forEach(s => {
+    if (s.status === 'cancelled') return;
     if (s.timestamp && s.timestamp.startsWith(todayStr)) {
       todaySale += (s.grandTotal || 0);
       todayCash += (s.paid || 0);
       todayInvoices++;
       if (s.items) {
         s.items.forEach(it => {
-          todayCost += ((it.cost || 0) * (it.qty || 1));
+          const itemCost = (it.cost !== undefined && it.cost !== null && it.cost !== '') ? Number(it.cost) : 0;
+          todayCost += (itemCost * (it.qty || 1));
         });
       }
     }
   });
+
+  // Include collected customer dues in today's cash in hand
+  let todayDueCash = 0;
+  (state.duePayments || []).forEach(dp => {
+    if (dp.date === todayStr) {
+      todayDueCash += (Number(dp.amount) || 0);
+    }
+  });
+  todayCash += todayDueCash;
 
   let todayExp = 0;
   state.expenses.forEach(e => {
     if (e.date === todayStr) todayExp += (e.amount || 0);
   });
 
-  const todayProfit = Math.max(0, todaySale - todayCost - todayExp);
+  const rawProfit = (todaySale - todayCost) - todayExp;
+  const todayProfit = rawProfit;
 
   let totalDue = 0;
   state.customers.forEach(c => totalDue += (c.due || 0));
@@ -591,7 +665,10 @@ function refreshGlobalStats() {
   dom.kpiSale.textContent = formatTk(todaySale);
   dom.kpiInvoices.textContent = `${todayInvoices} টি`;
   dom.kpiCash.textContent = formatTk(todayCash);
-  dom.kpiProfit.textContent = formatTk(todayProfit);
+  dom.kpiProfit.textContent = (todayProfit < 0 ? '- ' : '') + formatTk(Math.abs(todayProfit));
+  if (dom.kpiProfit) {
+    dom.kpiProfit.style.color = todayProfit < 0 ? '#ef4444' : (todayProfit > 0 ? '#10b981' : 'var(--text-main)');
+  }
   dom.kpiDue.textContent = formatTk(totalDue);
   dom.kpiStockVal.textContent = formatTk(totalStockVal);
   dom.kpiProdTypes.textContent = `${state.products.length} টি`;
@@ -622,7 +699,7 @@ function renderDashboard() {
 
     let daySales = 0;
     state.sales.forEach(s => {
-      if (s.timestamp && s.timestamp.startsWith(dateStr)) {
+      if (s.status !== 'cancelled' && s.timestamp && s.timestamp.startsWith(dateStr)) {
         daySales += (s.grandTotal || 0);
       }
     });
@@ -785,17 +862,21 @@ function renderDashboard() {
       const methodText = s.paymentMethod === 'bkash' ? 'বিকাশ' : (s.paymentMethod === 'due' ? 'বাকি' : 'নগদ');
       const paidVal = s.paidAmount !== undefined ? s.paidAmount : (s.paid !== undefined ? s.paid : (s.grandTotal || 0));
       const dueVal = s.dueAmount !== undefined ? s.dueAmount : (s.due !== undefined ? s.due : 0);
+      const isCancelled = s.status === 'cancelled';
 
       tr.innerHTML = `
-        <td><strong>${invoiceNum}</strong></td>
-        <td style="color:var(--text-muted);font-size:0.8rem;">${dateText}</td>
-        <td><strong>${custName}</strong></td>
-        <td><span class="memo-paid-chip" style="font-size:0.75rem;">${methodText}</span></td>
-        <td class="text-right"><strong>${formatTk(s.grandTotal)}</strong></td>
+        <td>
+          <strong>${escapeHtml(invoiceNum)}</strong>
+          ${isCancelled ? '<br><span class="status-chip danger" style="font-size:0.68rem;padding:0.1rem 0.4rem;">বাতিলকৃত</span>' : ''}
+        </td>
+        <td style="color:var(--text-muted);font-size:0.8rem;">${escapeHtml(dateText)}</td>
+        <td><strong>${escapeHtml(custName)}</strong></td>
+        <td><span class="memo-paid-chip" style="font-size:0.75rem;">${escapeHtml(methodText)}</span></td>
+        <td class="text-right"><strong style="${isCancelled ? 'text-decoration:line-through;color:var(--text-dim);' : ''}">${formatTk(s.grandTotal)}</strong></td>
         <td class="text-right" style="color:#34d399;font-weight:700;">${formatTk(paidVal)}</td>
         <td class="text-right ${dueVal > 0 ? 'text-danger' : ''}" style="color:${dueVal > 0 ? '#fb7185' : 'var(--text-muted)'};font-weight:700;">${formatTk(dueVal)}</td>
         <td class="text-center">
-          <button class="btn-table-action" onclick="viewInvoice('${s.id}')">📄 মেমো</button>
+          <button class="btn-table-action" onclick="viewInvoice('${escapeHtml(s.id)}')">📄 মেমো</button>
         </td>
       `;
       recTbody.appendChild(tr);
@@ -1030,20 +1111,40 @@ function onProductSelect(product) {
     return;
   }
 
-  // If requires serial/IMEI tracking, prompt dialog
-  if (product.hasSerial) {
+  // If requires serial/IMEI tracking, or category is Mobile/Phone
+  const isPhoneOrSerial = product.hasSerial ||
+    (product.cat && (/mobile|phone|মোবাইল|স্মার্টফোন/i.test(product.cat)));
+
+  if (isPhoneOrSerial) {
     state.pendingSerialProduct = product;
-    dom.serialProdInfoText.textContent = `পণ্য: ${product.name} | ওয়ারেন্টি: ${product.warranty || 'নাই'}`;
-    dom.serialInputField.value = '';
-    dom.modalPosSerial.classList.add('show');
-    setTimeout(() => dom.serialInputField.focus(), 150);
+    if (dom.serialProdInfoText) {
+      dom.serialProdInfoText.innerHTML = `<strong>${escapeHtml(product.name)}</strong> | ক্যাটাগরি: ${escapeHtml(product.cat)} | ওয়ারেন্টি: ${escapeHtml(product.warranty || 'নাই')}`;
+    }
+    if (dom.serialInputField) dom.serialInputField.value = '';
+    if (dom.serialInputField2) dom.serialInputField2.value = '';
+    if (dom.modalPosSerial) {
+      dom.modalPosSerial.classList.add('show');
+      setTimeout(() => { if (dom.serialInputField) dom.serialInputField.focus(); }, 150);
+    }
     return;
   }
 
   addItemToCart(product, null);
 }
 
-function addItemToCart(product, serialNumber) {
+function addItemToCart(product, serialData) {
+  let serialNumber = '';
+  let imei1 = '';
+  let imei2 = '';
+
+  if (typeof serialData === 'object' && serialData !== null) {
+    serialNumber = serialData.serial || '';
+    imei1 = serialData.imei1 || '';
+    imei2 = serialData.imei2 || '';
+  } else if (typeof serialData === 'string') {
+    serialNumber = serialData;
+  }
+
   const existing = state.cart.find(i => i.id === product.id && (!product.hasSerial || i.serial === serialNumber));
 
   if (existing) {
@@ -1058,11 +1159,13 @@ function addItemToCart(product, serialNumber) {
       name: product.name,
       cat: product.cat,
       price: product.price,
-      cost: product.cost,
+      cost: (product.cost !== undefined && product.cost !== null && product.cost !== '') ? Number(product.cost) : 0,
       unit: product.unit,
       warranty: product.warranty,
       image: product.image,
-      serial: serialNumber || '',
+      serial: serialNumber,
+      imei1: imei1,
+      imei2: imei2,
       qty: 1
     });
   }
@@ -1138,9 +1241,9 @@ function renderCart() {
       <div class="entry-top-line">
         ${item.image ? `<img class="entry-thumb" src="${item.image}">` : `<div class="entry-thumb" style="display:flex;align-items:center;justify-content:center;font-size:1.2rem;">📦</div>`}
         <div class="entry-info">
-          <div class="entry-title">${item.name}</div>
-          ${item.serial ? `<div class="entry-serial-badge">🏷️ SN/IMEI: ${item.serial}</div>` : ''}
-          ${item.warranty && item.warranty !== 'কোন ওয়ারেন্টি নেই' ? `<small style="color:var(--text-dim);font-size:0.7rem;">🛡️ ${item.warranty}</small>` : ''}
+          <div class="entry-title">${escapeHtml(item.name)}</div>
+          ${item.serial ? `<div class="entry-serial-badge">🏷️ ${escapeHtml(item.serial)}</div>` : ''}
+          ${item.warranty && item.warranty !== 'কোন ওয়ারেন্টি নেই' ? `<small style="color:var(--text-dim);font-size:0.7rem;">🛡️ ${escapeHtml(item.warranty)}</small>` : ''}
         </div>
         <button class="entry-remove-btn" onclick="removeCartPosItem(${idx})" title="মুছুন">✕</button>
       </div>
@@ -1229,11 +1332,85 @@ dom.cartPaidInput.addEventListener('focus', () => {
   dom.cartPaidInput.dataset.userTouched = 'true';
 });
 
-// POS Checkout
+// POS Checkout: Step 1 - Open Confirmation Modal
 function handlePosCheckout() {
   if (state.cart.length === 0) {
     alert('বিল করার জন্য প্রথমে পণ্য কার্টে যুক্ত করুন!');
     return;
+  }
+
+  const subtotal = state.cart.reduce((s, it) => s + (it.price * it.qty), 0);
+  const discount = Math.max(0, Number(dom.cartDiscountInput.value) || 0);
+  const grandTotal = Math.max(0, subtotal - discount);
+  const paid = Math.max(0, Number(dom.cartPaidInput.value) || 0);
+  const due = Math.max(0, grandTotal - paid);
+
+  const customerId = dom.posCustomerSelect.value;
+  let customerObj = null;
+
+  if (customerId !== 'walk-in') {
+    customerObj = state.customers.find(c => c.id === customerId);
+  }
+
+  const typedName = dom.posCustNameInput ? dom.posCustNameInput.value.trim() : '';
+  const typedPhone = dom.posCustPhoneInput ? dom.posCustPhoneInput.value.trim() : '';
+
+  const custDisplayName = customerObj ? (typedName || customerObj.name) : (typedName || 'খুচরা নগদ ক্রেতা');
+  const custDisplayPhone = customerObj ? (typedPhone || customerObj.phone) : (typedPhone || 'প্রযোজ্য নয়');
+
+  // Populate Confirmation Modal
+  if (dom.confirmCustName) dom.confirmCustName.textContent = custDisplayName;
+  if (dom.confirmCustPhone) dom.confirmCustPhone.textContent = custDisplayPhone;
+  const totalItemCount = state.cart.reduce((sum, it) => sum + it.qty, 0);
+  if (dom.confirmItemCount) dom.confirmItemCount.textContent = `${totalItemCount} টি`;
+
+  if (dom.confirmItemsPreviewList) {
+    dom.confirmItemsPreviewList.innerHTML = '';
+    state.cart.forEach(it => {
+      const row = document.createElement('div');
+      row.className = 'confirm-item-entry';
+      let snInfo = '';
+      if (it.serial) {
+        snInfo = `<small>🏷️ ${escapeHtml(it.serial)}</small>`;
+      }
+      row.innerHTML = `
+        <div>
+          <strong>${escapeHtml(it.name)}</strong> x${it.qty} ${escapeHtml(it.unit || 'Pcs')}
+          ${snInfo}
+        </div>
+        <div><b>${formatTk(it.price * it.qty)}</b></div>
+      `;
+      dom.confirmItemsPreviewList.appendChild(row);
+    });
+  }
+
+  if (dom.confirmGrandTotal) dom.confirmGrandTotal.textContent = formatTk(grandTotal);
+  let methodLabel = 'নগদ / ক্যাশ (Cash)';
+  if (state.paymentMethod === 'bkash') methodLabel = 'বিকাশ / মোবাইল ব্যাংকিং';
+  if (state.paymentMethod === 'due') methodLabel = 'বাকি (Due)';
+  if (dom.confirmPayMethod) dom.confirmPayMethod.textContent = methodLabel;
+  if (dom.confirmPaidAmount) dom.confirmPaidAmount.textContent = formatTk(paid);
+
+  if (dom.confirmDueRow && dom.confirmDueAmount) {
+    if (due > 0) {
+      dom.confirmDueRow.style.display = 'flex';
+      dom.confirmDueAmount.textContent = formatTk(due);
+    } else {
+      dom.confirmDueRow.style.display = 'none';
+    }
+  }
+
+  if (dom.modalConfirmCheckout) {
+    dom.modalConfirmCheckout.classList.add('show');
+  } else {
+    executeConfirmedCheckout();
+  }
+}
+
+// Step 2 - Execute Confirmed Checkout Order
+function executeConfirmedCheckout() {
+  if (dom.modalConfirmCheckout) {
+    dom.modalConfirmCheckout.classList.remove('show');
   }
 
   const subtotal = state.cart.reduce((s, it) => s + (it.price * it.qty), 0);
@@ -1261,17 +1438,36 @@ function handlePosCheckout() {
       address: customerObj.address || 'লোকাল'
     };
   } else {
-    customerData = {
-      name: typedName || 'খুচরা নগদ ক্রেতা',
-      phone: typedPhone || 'প্রযোজ্য নয়',
-      address: 'লোকাল'
-    };
-  }
-
-  if (due > 0 && customerId === 'walk-in') {
-    const custDesc = typedName ? `"${typedName}"` : 'নগদ ক্রেতা';
-    const proceed = confirm(`বাকি বিলের জন্য (${custDesc}) আপনি কি কাস্টমার তালিকায় যুক্ত না করেই ক্যাশ মেমোতে বাকি হিসাব তৈরি করতে চান?`);
-    if (!proceed) return;
+    // If walk-in customer has due, auto-register customer in ledger so due is never lost!
+    if (due > 0) {
+      const custName = typedName || 'খুচরা বাকি ক্রেতা';
+      const custPhone = typedPhone || '';
+      let existingCust = state.customers.find(c => (custPhone && c.phone === custPhone) || (c.name.toLowerCase() === custName.toLowerCase()));
+      if (existingCust) {
+        customerObj = existingCust;
+      } else {
+        customerObj = {
+          id: 'cust-' + Date.now(),
+          name: custName,
+          phone: custPhone,
+          address: 'খুচরা বাকির ক্রেতা',
+          due: 0
+        };
+        state.customers.push(customerObj);
+      }
+      customerData = {
+        id: customerObj.id,
+        name: customerObj.name,
+        phone: customerObj.phone,
+        address: customerObj.address
+      };
+    } else {
+      customerData = {
+        name: typedName || 'খুচরা নগদ ক্রেতা',
+        phone: typedPhone || 'প্রযোজ্য নয়',
+        address: 'লোকাল'
+      };
+    }
   }
 
   const invoiceNo = 'INV-' + new Date().getFullYear() + '-' + String(state.sales.length + 101).padStart(4, '0');
@@ -1289,7 +1485,8 @@ function handlePosCheckout() {
     grandTotal: grandTotal,
     paid: paid,
     due: due,
-    paymentMethod: state.paymentMethod
+    paymentMethod: state.paymentMethod,
+    status: 'completed'
   };
 
   // 1. Decrement Stock
@@ -1307,7 +1504,9 @@ function handlePosCheckout() {
 
   // 3. Save Sale
   state.sales.unshift(saleRecord);
-  persist();
+  persist('sales');
+  persist('products');
+  persist('customers');
 
   // Close Mobile Cart Overlay if open
   if (dom.posCartPane) dom.posCartPane.classList.remove('open');
@@ -1328,6 +1527,9 @@ function handlePosCheckout() {
   recalculateCart();
   renderCart();
   renderPosCatalog();
+  renderInventoryMaster();
+  renderCustomerMaster();
+  renderSalesHistory();
   refreshGlobalStats();
 }
 
@@ -1359,13 +1561,13 @@ function renderAndShowMemo(sale) {
     tr.innerHTML = `
       <td class="text-center">${idx + 1}</td>
       <td>
-        <strong>${it.name}</strong>
+        <strong>${escapeHtml(it.name)}</strong>
       </td>
       <td>
-        ${it.serial ? `<span class="memo-item-sn">${it.serial}</span>` : '<span style="color:#94a3b8;">—</span>'}
+        ${it.serial ? `<span class="memo-item-sn">${escapeHtml(it.serial)}</span>` : '<span style="color:#94a3b8;">—</span>'}
       </td>
-      <td>${it.warranty || 'নাই'}</td>
-      <td class="text-center">${it.qty} ${it.unit}</td>
+      <td>${escapeHtml(it.warranty || 'নাই')}</td>
+      <td class="text-center">${it.qty} ${escapeHtml(it.unit || 'Pcs')}</td>
       <td class="text-right">${formatTk(it.price)}</td>
       <td class="text-right">${formatTk(it.price * it.qty)}</td>
     `;
@@ -1380,11 +1582,20 @@ function renderAndShowMemo(sale) {
   document.getElementById('out-memo-due').textContent = formatTk(sale.due);
 
   const chip = document.getElementById('out-memo-status-chip');
-  if (sale.due <= 0) {
+  if (sale.status === 'cancelled') {
+    chip.className = 'memo-paid-chip due';
+    chip.style.background = '#ef4444';
+    chip.style.borderColor = '#dc2626';
+    chip.textContent = '❌ বাতিলকৃত মেমো (CANCELLED)';
+  } else if (sale.due <= 0) {
     chip.className = 'memo-paid-chip';
+    chip.style.background = '';
+    chip.style.borderColor = '';
     chip.textContent = 'পরিশোধিত (PAID)';
   } else {
     chip.className = 'memo-paid-chip due';
+    chip.style.background = '';
+    chip.style.borderColor = '';
     chip.textContent = `বাকি (DUE ৳ ${sale.due})`;
   }
 
@@ -1585,40 +1796,109 @@ function renderInventoryMaster() {
 
     tr.innerHTML = `
       <td>
-        ${p.image ? `<img src="${p.image}" class="table-thumb" alt="${p.name}">` : `<div class="table-thumb-placeholder">📦</div>`}
+        ${p.image ? `<img src="${p.image}" class="table-thumb" alt="${escapeHtml(p.name)}">` : `<div class="table-thumb-placeholder">📦</div>`}
       </td>
       <td>
-        <strong>${p.name}</strong>
-        <br><small style="color:var(--text-dim);">ব্র্যান্ড: ${p.brand || 'জেনেরিক'} | SKU: ${p.barcode}</small>
+        <strong>${escapeHtml(p.name)}</strong>
+        <br><small style="color:var(--text-dim);">ব্র্যান্ড: ${escapeHtml(p.brand || 'জেনেরিক')} | SKU: ${escapeHtml(p.barcode || '—')}</small>
       </td>
-      <td><span class="item-cat-label">${p.cat}</span></td>
-      <td>${p.unit}</td>
-      <td>${p.warranty}</td>
+      <td><span class="item-cat-label">${escapeHtml(p.cat)}</span></td>
+      <td>${escapeHtml(p.unit)}</td>
+      <td>${escapeHtml(p.warranty || 'নাই')}</td>
       <td class="text-right">${formatTk(p.cost)}</td>
       <td class="text-right"><strong>${formatTk(p.price)}</strong></td>
       <td class="text-center">${stockBadge}</td>
-      <td class="text-center">
-        <button class="btn-table-action" onclick="restockInvProduct('${p.id}')">+ স্টক ইন</button>
-        <button class="btn-table-action danger" onclick="deleteInvProduct('${p.id}')">মুছুন</button>
+      <td class="text-center" style="white-space:nowrap;">
+        <button class="btn-table-action success" onclick="openRestockModal('${escapeHtml(p.id)}')">➕ স্টক ইন</button>
+        <button class="btn-table-action" onclick="openEditProductModal('${escapeHtml(p.id)}')">✏️ এডিট</button>
+        <button class="btn-table-action danger" onclick="deleteInvProduct('${escapeHtml(p.id)}')">মুছুন</button>
       </td>
     `;
     tbody.appendChild(tr);
   });
 }
 
-window.restockInvProduct = function(id) {
+// Dedicated In-App Stock-In Modal
+window.openRestockModal = function(id) {
   const prod = state.products.find(p => p.id === id);
   if (!prod) return;
-  const val = prompt(`"${prod.name}" এর কত ${prod.unit} নতুন মাল স্টকে যোগ করতে চান?`, '10');
-  const qty = parseInt(val, 10);
-  if (qty && qty > 0) {
-    prod.stock += qty;
-    persist('products');
-    renderInventoryMaster();
-    renderPosCatalog();
-    refreshGlobalStats();
-    alert(`সফলভাবে ${qty} ${prod.unit} নতুন স্টক যোগ হয়েছে!`);
+
+  const modal = dom.modalRestockProduct || document.getElementById('modal-restock-product');
+  const infoBox = dom.restockProdInfoBox || document.getElementById('restock-prod-info-box');
+  const inpQty = dom.inpRestockQty || document.getElementById('inp-restock-qty');
+  const inpCost = dom.inpRestockCost || document.getElementById('inp-restock-cost');
+  const inpPrice = dom.inpRestockPrice || document.getElementById('inp-restock-price');
+  const form = dom.formRestockProduct || document.getElementById('form-restock-product');
+
+  if (form) form.dataset.targetProdId = id;
+  if (infoBox) {
+    infoBox.innerHTML = `<strong>${escapeHtml(prod.name)}</strong> (${escapeHtml(prod.cat)})<br><small style="color:var(--text-dim);">বর্তমান স্টক: <b>${prod.stock} ${escapeHtml(prod.unit)}</b> | ক্রয়মূল্য: ৳ ${prod.cost || 0} | বিক্রয়মূল্য: ৳ ${prod.price || 0}</small>`;
   }
+  if (inpQty) inpQty.value = 10;
+  if (inpCost) inpCost.value = (prod.cost !== undefined && prod.cost !== null) ? prod.cost : '';
+  if (inpPrice) inpPrice.value = prod.price || '';
+
+  if (modal) {
+    modal.classList.add('show');
+    setTimeout(() => { if (inpQty) { inpQty.focus(); inpQty.select(); } }, 150);
+  }
+};
+
+window.setRestockQty = function(n) {
+  const inp = dom.inpRestockQty || document.getElementById('inp-restock-qty');
+  if (inp) inp.value = n;
+};
+
+// Fallback alias
+window.restockInvProduct = function(id) {
+  window.openRestockModal(id);
+};
+
+// Dedicated In-App Edit Product Modal
+window.openEditProductModal = function(id) {
+  const prod = state.products.find(p => p.id === id);
+  if (!prod) return;
+
+  const modal = dom.modalEditProduct || document.getElementById('modal-edit-product');
+  if (!modal) return;
+
+  const editIdEl = document.getElementById('edit-prod-id');
+  const nameEl = document.getElementById('inp-edit-p-name');
+  const catEl = document.getElementById('inp-edit-p-cat');
+  const brandEl = document.getElementById('inp-edit-p-brand');
+  const unitEl = document.getElementById('inp-edit-p-unit');
+  const barcodeEl = document.getElementById('inp-edit-p-barcode');
+  const costEl = document.getElementById('inp-edit-p-cost');
+  const priceEl = document.getElementById('inp-edit-p-price');
+  const stockEl = document.getElementById('inp-edit-p-stock');
+  const warrantyEl = document.getElementById('inp-edit-p-warranty');
+  const hasSerialEl = document.getElementById('inp-edit-p-has-serial');
+
+  if (editIdEl) editIdEl.value = prod.id;
+  if (nameEl) nameEl.value = prod.name;
+
+  if (catEl) {
+    catEl.innerHTML = '';
+    state.categories.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.name;
+      opt.textContent = c.label || c.name;
+      if (c.name === prod.cat) opt.selected = true;
+      catEl.appendChild(opt);
+    });
+  }
+
+  if (brandEl) brandEl.value = prod.brand || '';
+  if (unitEl) unitEl.value = prod.unit || 'Pcs';
+  if (barcodeEl) barcodeEl.value = prod.barcode || '';
+  if (costEl) costEl.value = prod.cost !== undefined ? prod.cost : '';
+  if (priceEl) priceEl.value = prod.price || '';
+  if (stockEl) stockEl.value = prod.stock !== undefined ? prod.stock : 0;
+  if (warrantyEl) warrantyEl.value = prod.warranty || 'কোন ওয়ারেন্টি নেই';
+  if (hasSerialEl) hasSerialEl.checked = !!prod.hasSerial;
+
+  modal.classList.add('show');
+  setTimeout(() => { if (nameEl) { nameEl.focus(); nameEl.select(); } }, 150);
 };
 
 window.deleteInvProduct = function(id) {
@@ -1654,9 +1934,11 @@ function runWarrantyVerification() {
   let matches = [];
   state.sales.forEach(sale => {
     sale.items.forEach(it => {
-      const matchInv = sale.invoiceNo.toLowerCase().includes(query);
+      const matchInv = (sale.invoiceNo || sale.id || '').toLowerCase().includes(query);
       const matchSerial = it.serial && it.serial.toLowerCase().includes(query);
-      if (matchInv || matchSerial) {
+      const matchImei1 = it.imei1 && it.imei1.toLowerCase().includes(query);
+      const matchImei2 = it.imei2 && it.imei2.toLowerCase().includes(query);
+      if (matchInv || matchSerial || matchImei1 || matchImei2) {
         matches.push({ sale, item: it });
       }
     });
@@ -1667,7 +1949,7 @@ function runWarrantyVerification() {
       <div class="empty-placeholder" style="border:1px dashed var(--border-subtle);border-radius:var(--radius-lg);margin-top:1rem;">
         <span class="icon">⚠️</span>
         <h3>কোনো বিক্রয় রেকর্ড পাওয়া যায়নি!</h3>
-        <p>"${query}" নম্বর দিয়ে কোনো ক্যাশ মেমো বা ডিভাইস আমাদের সিস্টেমে নথিভুক্ত নেই।</p>
+        <p>"${escapeHtml(query)}" নম্বর দিয়ে কোনো ক্যাশ মেমো বা ডিভাইস আমাদের সিস্টেমে নথিভুক্ত নেই।</p>
       </div>
     `;
     return;
@@ -1675,6 +1957,7 @@ function runWarrantyVerification() {
 
   resContainer.innerHTML = '';
   matches.forEach(m => {
+    const isCancelled = m.sale.status === 'cancelled';
     const saleDate = new Date(m.sale.timestamp);
     let days = 365;
     const w = m.item.warranty || '';
@@ -1693,33 +1976,42 @@ function runWarrantyVerification() {
     const now = new Date();
     const diffTime = expiryDate - now;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    const isValid = days > 0 && diffDays > 0;
+    const isValid = !isCancelled && days > 0 && diffDays > 0;
 
     const wCustName = (typeof m.sale.customer === 'object' && m.sale.customer !== null) ? (m.sale.customer.name || 'খুচরা ক্রেতা') : (m.sale.customer || 'খুচরা ক্রেতা');
     const wCustPhone = (typeof m.sale.customer === 'object' && m.sale.customer !== null) ? (m.sale.customer.phone || '') : '';
     const wInvoiceNo = m.sale.invoiceNo || m.sale.id || 'INV-001';
     const wDate = m.sale.formattedDate || (m.sale.timestamp ? m.sale.timestamp.slice(0, 10) : 'আজ');
 
+    let statusBadgeText = '';
+    if (isCancelled) {
+      statusBadgeText = '❌ মেমোটি বাতিল করা হয়েছে (ওয়ারেন্টি প্রযোজ্য নয়)';
+    } else if (isValid) {
+      statusBadgeText = `✅ ওয়ারেন্টি কার্যকর (বাকি আছে ${diffDays} দিন)`;
+    } else {
+      statusBadgeText = '❌ ওয়ারেন্টির মেয়াদ উত্তীর্ণ';
+    }
+
     const card = document.createElement('div');
     card.className = `warranty-result-card ${isValid ? '' : 'expired'}`;
     card.innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;">
         <div>
-          <span class="memo-paid-chip ${isValid ? '' : 'due'}" style="font-size:0.85rem;padding:0.25rem 0.65rem;">
-            ${isValid ? `✅ ওয়ারেন্টি কার্যকর (বাকি আছে ${diffDays} দিন)` : '❌ ওয়ারেন্টির মেয়াদ উত্তীর্ণ'}
+          <span class="memo-paid-chip ${isValid ? '' : 'due'}" style="font-size:0.85rem;padding:0.25rem 0.65rem;${isCancelled ? 'background:#ef4444;color:#fff;' : ''}">
+            ${statusBadgeText}
           </span>
-          <h3 style="font-size:1.25rem;color:#fff;margin-top:0.6rem;">${m.item.name}</h3>
-          ${m.item.serial ? `<p style="color:#38bdf8;font-weight:700;margin-top:0.2rem;">🏷️ Serial/IMEI: ${m.item.serial}</p>` : ''}
+          <h3 style="font-size:1.25rem;color:#fff;margin-top:0.6rem;">${escapeHtml(m.item.name)}</h3>
+          ${m.item.serial ? `<p style="color:#38bdf8;font-weight:700;margin-top:0.2rem;">🏷️ Serial/IMEI: ${escapeHtml(m.item.serial)}</p>` : ''}
         </div>
-        <button class="btn-primary-action" onclick="viewInvoice('${m.sale.id}')">📄 মূল মেমো দেখুন</button>
+        <button class="btn-primary-action" onclick="viewInvoice('${escapeHtml(m.sale.id)}')">📄 মূল মেমো দেখুন</button>
       </div>
       <hr style="border:none;border-top:1px solid rgba(255,255,255,0.08);margin:1rem 0;">
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;font-size:0.88rem;">
-        <div><strong>ইনভয়েস নং:</strong> <br>${wInvoiceNo}</div>
-        <div><strong>বিক্রয় তারিখ:</strong> <br>${wDate}</div>
-        <div><strong>ওয়ারেন্টি মেয়াদ:</strong> <br>${m.item.warranty}</div>
+        <div><strong>ইনভয়েস নং:</strong> <br>${escapeHtml(wInvoiceNo)}</div>
+        <div><strong>বিক্রয় তারিখ:</strong> <br>${escapeHtml(wDate)}</div>
+        <div><strong>ওয়ারেন্টি মেয়াদ:</strong> <br>${escapeHtml(m.item.warranty || 'নাই')}</div>
         <div><strong>মেয়াদ শেষ হওয়ার তারিখ:</strong> <br>${days > 0 ? expiryDate.toLocaleDateString('bn-BD', { year:'numeric', month:'long', day:'numeric' }) : 'প্রযোজ্য নয়'}</div>
-        <div><strong>কাস্টমারের নাম:</strong> <br>${wCustName} ${wCustPhone ? `(${wCustPhone})` : ''}</div>
+        <div><strong>কাস্টমারের নাম:</strong> <br>${escapeHtml(wCustName)} ${wCustPhone ? `(${escapeHtml(wCustPhone)})` : ''}</div>
       </div>
     `;
     resContainer.appendChild(card);
@@ -1775,12 +2067,26 @@ function setupCustomers() {
     if (amount <= 0) return;
 
     cust.due = Math.max(0, (cust.due || 0) - amount);
+
+    // Record due collection payment in duePayments so today's cash in hand reflects it!
+    state.duePayments = state.duePayments || [];
+    state.duePayments.push({
+      id: 'duepay-' + Date.now(),
+      customerId: cust.id,
+      customerName: cust.name,
+      amount: amount,
+      method: dom.inpDueMethod ? dom.inpDueMethod.value : 'cash',
+      date: new Date().toISOString().split('T')[0],
+      timestamp: new Date().toISOString()
+    });
+
     persist('customers');
+    persist('duePayments');
     dom.modalCollectDue.classList.remove('show');
     renderCustomerMaster();
     updatePosCustomerDropdown();
     refreshGlobalStats();
-    alert(`৳ ${amount} টাকা জমা নেওয়া হয়েছে! বর্তমান বাকি: ৳ ${cust.due}`);
+    alert(`৳ ${amount} টাকা জমা নেওয়া হয়েছে এবং ক্যাশে যোগ করা হয়েছে! বর্তমান বাকি: ৳ ${cust.due}`);
   });
 }
 
@@ -1796,17 +2102,17 @@ function renderCustomerMaster() {
   state.customers.forEach(c => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td><strong>${c.name}</strong></td>
-      <td>${c.phone}</td>
-      <td>${c.address || '—'}</td>
+      <td><strong>${escapeHtml(c.name)}</strong></td>
+      <td>${escapeHtml(c.phone || '—')}</td>
+      <td>${escapeHtml(c.address || '—')}</td>
       <td class="text-right ${c.due > 0 ? 'text-danger' : 'text-green'}">
         <strong>${formatTk(c.due || 0)}</strong>
       </td>
       <td class="text-center">
-        ${c.due > 0 ? `<button class="btn-table-action" onclick="openDueCollectModal('${c.id}')">💵 টাকা জমা নিন</button>` : `<span style="color:var(--text-dim);font-size:0.8rem;">বাকি নেই</span>`}
+        ${c.due > 0 ? `<button class="btn-table-action" onclick="openDueCollectModal('${escapeHtml(c.id)}')">💵 টাকা জমা নিন</button>` : `<span style="color:var(--text-dim);font-size:0.8rem;">বাকি নেই</span>`}
       </td>
       <td class="text-center">
-        <button class="btn-table-action danger" onclick="deleteCustomer('${c.id}')">মুছুন</button>
+        <button class="btn-table-action danger" onclick="deleteCustomer('${escapeHtml(c.id)}')">মুছুন</button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -2001,11 +2307,12 @@ function renderYearlyReport(year, monthNamesBn, monthNamesEn) {
     let mExpenses = 0;
 
     state.sales.forEach(s => {
+      if (s.status === 'cancelled') return;
       if (s.timestamp && s.timestamp.startsWith(monthKey)) {
         mSales += (s.grandTotal || 0);
         if (s.items && Array.isArray(s.items)) {
           s.items.forEach(it => {
-            const cost = it.cost || (it.price ? Math.round(it.price * 0.75) : 0);
+            const cost = (it.cost !== undefined && it.cost !== null && it.cost !== '') ? Number(it.cost) : 0;
             mCogs += (cost * (it.qty || 1));
           });
         }
@@ -2218,14 +2525,14 @@ function renderMonthlyReport(year, monthIdx, monthNamesBn, monthNamesEn) {
   if (dom.reportChartSub) dom.reportChartSub.textContent = `চলতি মাসের প্রতিদিনের বেচাকেনা ও খরচের গ্রাফ`;
   if (dom.reportTableTitle) dom.reportTableTitle.textContent = `📑 ${mName} মাসের তারিখভিত্তিক লেনদেন বিবরণী`;
 
-  const mSales = state.sales.filter(s => s.timestamp && s.timestamp.startsWith(monthKey));
+  const mSales = state.sales.filter(s => s.status !== 'cancelled' && s.timestamp && s.timestamp.startsWith(monthKey));
   const mExpenses = state.expenses.filter(e => e.date && e.date.startsWith(monthKey));
 
   let totSales = 0, totCogs = 0, totExp = 0;
   mSales.forEach(s => {
     totSales += (s.grandTotal || 0);
     if (s.items) s.items.forEach(it => {
-      const cost = it.cost || Math.round((it.price || 0) * 0.75);
+      const cost = (it.cost !== undefined && it.cost !== null && it.cost !== '') ? Number(it.cost) : 0;
       totCogs += (cost * (it.qty || 1));
     });
   });
@@ -2303,14 +2610,14 @@ function renderDailyReport(dateStr) {
   if (dom.reportChartSub) dom.reportChartSub.textContent = `সারাদিনের সকল মেমো এবং খরচের সমন্বিত হিসাব`;
   if (dom.reportTableTitle) dom.reportTableTitle.textContent = `📑 ${dateStr} তারিখের সম্পূর্ণ খতিয়ান`;
 
-  const dSales = state.sales.filter(s => s.timestamp && s.timestamp.startsWith(dateStr));
+  const dSales = state.sales.filter(s => s.status !== 'cancelled' && s.timestamp && s.timestamp.startsWith(dateStr));
   const dExpenses = state.expenses.filter(e => e.date && e.date.startsWith(dateStr));
 
   let totSales = 0, totCogs = 0, totExp = 0;
   dSales.forEach(s => {
     totSales += (s.grandTotal || 0);
     if (s.items) s.items.forEach(it => {
-      const cost = it.cost || Math.round((it.price || 0) * 0.75);
+      const cost = (it.cost !== undefined && it.cost !== null && it.cost !== '') ? Number(it.cost) : 0;
       totCogs += (cost * (it.qty || 1));
     });
   });
@@ -2420,6 +2727,199 @@ function exportFinancialReportCsv() {
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+
+// ================= SALES & PAYMENT HISTORY =================
+function setupSalesHistory() {
+  if (dom.shSearchBox) {
+    dom.shSearchBox.addEventListener('input', renderSalesHistory);
+  }
+  if (dom.shFilterStatus) {
+    dom.shFilterStatus.addEventListener('change', renderSalesHistory);
+  }
+  if (dom.shFilterPeriod) {
+    dom.shFilterPeriod.addEventListener('change', renderSalesHistory);
+  }
+}
+
+function renderSalesHistory() {
+  const tbody = dom.salesHistoryTbody || document.getElementById('sales-history-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  const q = dom.shSearchBox ? dom.shSearchBox.value.trim().toLowerCase() : '';
+  const statusFilter = dom.shFilterStatus ? dom.shFilterStatus.value : 'all';
+  const periodFilter = dom.shFilterPeriod ? dom.shFilterPeriod.value : 'all';
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const curMonthStr = todayStr.substring(0, 7);
+
+  // Filter sales
+  const filtered = state.sales.filter(s => {
+    // Status filter
+    if (statusFilter === 'completed' && s.status === 'cancelled') return false;
+    if (statusFilter === 'cancelled' && s.status !== 'cancelled') return false;
+
+    // Period filter
+    if (periodFilter === 'today' && (!s.timestamp || !s.timestamp.startsWith(todayStr))) return false;
+    if (periodFilter === 'this_month' && (!s.timestamp || !s.timestamp.startsWith(curMonthStr))) return false;
+
+    // Search query
+    if (q) {
+      const invMatch = (s.invoiceNo || s.id || '').toLowerCase().includes(q);
+      const custObj = typeof s.customer === 'object' && s.customer !== null ? s.customer : {};
+      const custNameMatch = (custObj.name || (typeof s.customer === 'string' ? s.customer : '')).toLowerCase().includes(q);
+      const custPhoneMatch = (custObj.phone || '').toLowerCase().includes(q);
+      const itemMatch = (s.items || []).some(it => 
+        (it.name || '').toLowerCase().includes(q) ||
+        (it.serial || '').toLowerCase().includes(q) ||
+        (it.imei1 || '').toLowerCase().includes(q) ||
+        (it.imei2 || '').toLowerCase().includes(q)
+      );
+      if (!invMatch && !custNameMatch && !custPhoneMatch && !itemMatch) return false;
+    }
+
+    return true;
+  });
+
+  // Calculate KPIs based on all non-cancelled sales
+  let totalActiveCount = 0;
+  let totalActiveAmount = 0;
+  let totalActivePaid = 0;
+  let totalCancelledCount = 0;
+
+  state.sales.forEach(s => {
+    if (s.status === 'cancelled') {
+      totalCancelledCount++;
+    } else {
+      totalActiveCount++;
+      totalActiveAmount += (s.grandTotal || 0);
+      const paidVal = s.paidAmount !== undefined ? s.paidAmount : (s.paid !== undefined ? s.paid : (s.grandTotal || 0));
+      totalActivePaid += paidVal;
+    }
+  });
+
+  if (dom.shTotalSalesCount) dom.shTotalSalesCount.textContent = `${totalActiveCount} টি`;
+  if (dom.shTotalSalesAmount) dom.shTotalSalesAmount.textContent = formatTk(totalActiveAmount);
+  if (dom.shTotalPaidAmount) dom.shTotalPaidAmount.textContent = formatTk(totalActivePaid);
+  if (dom.shCancelledCount) dom.shCancelledCount.textContent = `${totalCancelledCount} টি`;
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center" style="padding:2.5rem;color:var(--text-dim);">কোনো বিক্রয় বা পেমেন্ট রেকর্ড খুঁজে পাওয়া যায়নি</td></tr>`;
+    return;
+  }
+
+  filtered.forEach(s => {
+    const tr = document.createElement('tr');
+    const invoiceNum = s.invoiceNo || s.id || 'INV-001';
+    const custObj = typeof s.customer === 'object' && s.customer !== null ? s.customer : {};
+    const custName = custObj.name || (typeof s.customer === 'string' ? s.customer : 'খুচরা ক্রেতা');
+    const custPhone = custObj.phone || '—';
+    const dateText = s.formattedDate || (s.timestamp ? s.timestamp.slice(0, 10) : 'আজ');
+    const methodText = s.paymentMethod === 'bkash' ? 'বিকাশ' : (s.paymentMethod === 'due' ? 'বাকি' : 'নগদ');
+    const paidVal = s.paidAmount !== undefined ? s.paidAmount : (s.paid !== undefined ? s.paid : (s.grandTotal || 0));
+    const dueVal = s.dueAmount !== undefined ? s.dueAmount : (s.due !== undefined ? s.due : 0);
+    const isCancelled = s.status === 'cancelled';
+
+    // Format items list summary with IMEIs
+    let itemsHtml = (s.items || []).map(it => {
+      let imeiSpan = '';
+      if (it.serial) {
+        imeiSpan = `<br><small style="color:#38bdf8;font-size:0.75rem;">🏷️ ${escapeHtml(it.serial)}</small>`;
+      }
+      return `<div style="margin-bottom:0.25rem;">• <strong>${escapeHtml(it.name)}</strong> x${it.qty} ${escapeHtml(it.unit || 'Pcs')}${imeiSpan}</div>`;
+    }).join('');
+
+    tr.innerHTML = `
+      <td>
+        <strong>${escapeHtml(invoiceNum)}</strong>
+        <br><small style="color:var(--text-dim);font-size:0.75rem;">🕒 ${escapeHtml(dateText)}</small>
+      </td>
+      <td>
+        <strong>${escapeHtml(custName)}</strong>
+        <br><small style="color:var(--text-dim);">📞 ${escapeHtml(custPhone)}</small>
+      </td>
+      <td style="max-width:280px;font-size:0.85rem;">
+        ${itemsHtml || '<span style="color:var(--text-dim);">—</span>'}
+      </td>
+      <td class="text-right">
+        <strong style="${isCancelled ? 'text-decoration:line-through;color:var(--text-dim);' : ''}">${formatTk(s.grandTotal)}</strong>
+      </td>
+      <td class="text-right">
+        <span style="color:#34d399;font-weight:700;">${formatTk(paidVal)}</span>
+        ${dueVal > 0 ? `<br><small style="color:#fb7185;font-weight:600;">বাকি: ${formatTk(dueVal)}</small>` : ''}
+      </td>
+      <td class="text-center">
+        <span class="memo-paid-chip" style="font-size:0.75rem;">${escapeHtml(methodText)}</span>
+      </td>
+      <td class="text-center">
+        ${isCancelled 
+          ? `<span class="status-chip danger">❌ বাতিলকৃত</span>` 
+          : `<span class="status-chip success">✅ সম্পন্ন</span>`}
+      </td>
+      <td class="text-center" style="white-space:nowrap;">
+        <button class="btn-table-action" onclick="viewInvoice('${escapeHtml(s.id)}')">📄 মেমো</button>
+        ${!isCancelled 
+          ? `<button class="btn-table-action danger" onclick="cancelSaleOrder('${escapeHtml(s.id)}')" title="অর্ডার বাতিল করে পণ্য স্টকে ফেরত নিন">↩️ বাতিল ও ফেরত</button>` 
+          : `<span style="color:var(--text-dim);font-size:0.75rem;display:block;margin-top:0.2rem;">স্টক ফেরত সম্পন্ন</span>`}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+window.cancelSaleOrder = function(saleId) {
+  const sale = state.sales.find(s => s.id === saleId);
+  if (!sale) return;
+
+  if (sale.status === 'cancelled') {
+    alert('এই মেমোটি ইতিমধ্যে বাতিল করা হয়েছে!');
+    return;
+  }
+
+  const invoiceNo = sale.invoiceNo || sale.id;
+  const proceed = confirm(`⚠️ আপনি কি নিশ্চিত যে [${invoiceNo}] মেমোটি বাতিল করতে চান?\n\n• এই মেমোর অন্তর্ভুক্ত সকল বিক্রিত পণ্য স্বয়ংক্রিয়ভাবে বর্তমান স্টকে ফেরত যোগ হবে।\n• কাস্টমারের বাকি বিল থাকলে তা বাকির খাতা থেকে সমন্বয় হবে।\n• বিক্রয় খতিয়ান থেকে এই মেমোর হিসাব বাদ পড়বে।\n\nআপনি কি এগিয়ে যেতে চান?`);
+  if (!proceed) return;
+
+  // 1. Restore Stock for all items
+  let restoredItemsCount = 0;
+  if (Array.isArray(sale.items)) {
+    sale.items.forEach(it => {
+      const prod = state.products.find(p => p.id === it.id);
+      if (prod) {
+        prod.stock += (Number(it.qty) || 1);
+        restoredItemsCount += (Number(it.qty) || 1);
+      }
+    });
+  }
+
+  // 2. Adjust Customer Due if sale had remaining due
+  const dueAmount = sale.dueAmount !== undefined ? sale.dueAmount : (sale.due !== undefined ? sale.due : 0);
+  if (dueAmount > 0 && sale.customer && sale.customer.id) {
+    const cust = state.customers.find(c => c.id === sale.customer.id);
+    if (cust) {
+      cust.due = Math.max(0, (cust.due || 0) - dueAmount);
+    }
+  }
+
+  // 3. Mark sale as cancelled
+  sale.status = 'cancelled';
+  sale.cancelledAt = new Date().toISOString();
+
+  // 4. Persist data
+  persist('sales');
+  persist('products');
+  persist('customers');
+
+  // 5. Re-render UI
+  renderSalesHistory();
+  renderInventoryMaster();
+  renderPosCatalog();
+  renderCustomerMaster();
+  renderDashboard();
+  refreshGlobalStats();
+
+  alert(`✅ মেমো [${invoiceNo}] সফলভাবে বাতিল করা হয়েছে!\n\nমোট ${restoredItemsCount} টি পণ্য স্টকে ফেরত যুক্ত হয়েছে।`);
+};
 
 // ================= 8. SETTINGS =================
 function setupSettings() {
@@ -2732,7 +3232,7 @@ function showSyncToast(message) {
 }
 
 // ================= 9. AUTO UPDATER & PC DESKTOP NOTIFICATIONS =================
-const CURRENT_VERSION = '1.0.3';
+const CURRENT_VERSION = '1.0.4';
 const GITHUB_REPO = 'shahin0964/Metro-Telecom';
 let downloadedUpdatePath = null;
 let latestReleaseData = null;
@@ -3017,27 +3517,148 @@ function triggerDownloadFlow(exeAsset, apkAsset, release) {
 
 // ================= MODAL LISTENERS =================
 function setupModals() {
-  // Serial modal
-  dom.btnConfirmSerial.addEventListener('click', () => {
-    const sn = dom.serialInputField.value.trim();
-    dom.modalPosSerial.classList.remove('show');
-    if (state.pendingSerialProduct) {
-      addItemToCart(state.pendingSerialProduct, sn);
-      state.pendingSerialProduct = null;
-    }
-  });
+  // Serial / Dual IMEI modal
+  if (dom.btnConfirmSerial) {
+    dom.btnConfirmSerial.addEventListener('click', () => {
+      const imei1 = dom.serialInputField ? dom.serialInputField.value.trim() : '';
+      const imei2 = dom.serialInputField2 ? dom.serialInputField2.value.trim() : '';
+      let sn = '';
+      if (imei1 && imei2) {
+        sn = `IMEI 1: ${imei1} | IMEI 2: ${imei2}`;
+      } else if (imei1) {
+        sn = `IMEI: ${imei1}`;
+      } else if (imei2) {
+        sn = `IMEI: ${imei2}`;
+      }
+      if (dom.modalPosSerial) dom.modalPosSerial.classList.remove('show');
+      if (state.pendingSerialProduct) {
+        addItemToCart(state.pendingSerialProduct, { serial: sn, imei1, imei2 });
+        state.pendingSerialProduct = null;
+      }
+    });
+  }
 
-  dom.btnCancelSerialModal.addEventListener('click', () => {
-    dom.modalPosSerial.classList.remove('show');
-    if (state.pendingSerialProduct) {
-      addItemToCart(state.pendingSerialProduct, '');
+  if (dom.btnCancelSerialModal) {
+    dom.btnCancelSerialModal.addEventListener('click', () => {
+      if (dom.modalPosSerial) dom.modalPosSerial.classList.remove('show');
+      if (state.pendingSerialProduct) {
+        addItemToCart(state.pendingSerialProduct, { serial: '', imei1: '', imei2: '' });
+        state.pendingSerialProduct = null;
+      }
+    });
+  }
+  if (dom.btnCloseSerialModal) {
+    dom.btnCloseSerialModal.addEventListener('click', () => {
+      if (dom.modalPosSerial) dom.modalPosSerial.classList.remove('show');
       state.pendingSerialProduct = null;
-    }
-  });
-  dom.btnCloseSerialModal.addEventListener('click', () => {
-    dom.modalPosSerial.classList.remove('show');
-    state.pendingSerialProduct = null;
-  });
+    });
+  }
+
+  // Restock modal
+  if (dom.btnCloseRestockModal) {
+    dom.btnCloseRestockModal.addEventListener('click', () => {
+      if (dom.modalRestockProduct) dom.modalRestockProduct.classList.remove('show');
+    });
+  }
+  if (dom.btnCancelRestock) {
+    dom.btnCancelRestock.addEventListener('click', () => {
+      if (dom.modalRestockProduct) dom.modalRestockProduct.classList.remove('show');
+    });
+  }
+  if (dom.formRestockProduct) {
+    dom.formRestockProduct.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const prodId = dom.formRestockProduct.dataset.targetProdId;
+      const prod = state.products.find(p => p.id === prodId);
+      if (!prod) return;
+
+      const addQty = parseInt(dom.inpRestockQty.value, 10);
+      if (!addQty || addQty <= 0) {
+        alert('অনুগ্রহ করে সঠিক পরিমাণ লিখুন!');
+        return;
+      }
+      prod.stock += addQty;
+      if (dom.inpRestockCost && dom.inpRestockCost.value !== '') {
+        prod.cost = Number(dom.inpRestockCost.value) || 0;
+      }
+      if (dom.inpRestockPrice && dom.inpRestockPrice.value !== '') {
+        prod.price = Number(dom.inpRestockPrice.value) || 0;
+      }
+
+      persist('products');
+      if (dom.modalRestockProduct) dom.modalRestockProduct.classList.remove('show');
+      renderInventoryMaster();
+      renderPosCatalog();
+      refreshGlobalStats();
+      alert(`✅ সফলভাবে "${prod.name}" এর ${addQty} ${prod.unit} নতুন স্টক যোগ হয়েছে! বর্তমান মোট স্টক: ${prod.stock}`);
+    });
+  }
+
+  // Edit product modal
+  if (dom.btnCloseEditProdModal) {
+    dom.btnCloseEditProdModal.addEventListener('click', () => {
+      if (dom.modalEditProduct) dom.modalEditProduct.classList.remove('show');
+    });
+  }
+  if (dom.btnCancelEditProd) {
+    dom.btnCancelEditProd.addEventListener('click', () => {
+      if (dom.modalEditProduct) dom.modalEditProduct.classList.remove('show');
+    });
+  }
+  if (dom.formEditProduct) {
+    dom.formEditProduct.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const prodId = document.getElementById('edit-prod-id') ? document.getElementById('edit-prod-id').value : '';
+      const prod = state.products.find(p => p.id === prodId);
+      if (!prod) return;
+
+      const nameEl = document.getElementById('inp-edit-p-name');
+      const catEl = document.getElementById('inp-edit-p-cat');
+      const brandEl = document.getElementById('inp-edit-p-brand');
+      const unitEl = document.getElementById('inp-edit-p-unit');
+      const barcodeEl = document.getElementById('inp-edit-p-barcode');
+      const costEl = document.getElementById('inp-edit-p-cost');
+      const priceEl = document.getElementById('inp-edit-p-price');
+      const stockEl = document.getElementById('inp-edit-p-stock');
+      const warrantyEl = document.getElementById('inp-edit-p-warranty');
+      const hasSerialEl = document.getElementById('inp-edit-p-has-serial');
+
+      if (nameEl) prod.name = nameEl.value.trim();
+      if (catEl) prod.cat = catEl.value;
+      if (brandEl) prod.brand = brandEl.value.trim();
+      if (unitEl) prod.unit = unitEl.value;
+      if (barcodeEl) prod.barcode = barcodeEl.value.trim();
+      if (costEl && costEl.value !== '') prod.cost = Number(costEl.value) || 0;
+      if (priceEl && priceEl.value !== '') prod.price = Number(priceEl.value) || 0;
+      if (stockEl && stockEl.value !== '') prod.stock = Number(stockEl.value) || 0;
+      if (warrantyEl) prod.warranty = warrantyEl.value;
+      if (hasSerialEl) prod.hasSerial = hasSerialEl.checked;
+
+      persist('products');
+      if (dom.modalEditProduct) dom.modalEditProduct.classList.remove('show');
+      renderInventoryMaster();
+      renderPosCatalog();
+      refreshGlobalStats();
+      alert(`✅ "${prod.name}" এর তথ্য সফলভাবে আপডেট করা হয়েছে!`);
+    });
+  }
+
+  // Confirm checkout modal
+  if (dom.btnCloseConfirmCheckout) {
+    dom.btnCloseConfirmCheckout.addEventListener('click', () => {
+      if (dom.modalConfirmCheckout) dom.modalConfirmCheckout.classList.remove('show');
+    });
+  }
+  if (dom.btnCancelCheckoutConfirm) {
+    dom.btnCancelCheckoutConfirm.addEventListener('click', () => {
+      if (dom.modalConfirmCheckout) dom.modalConfirmCheckout.classList.remove('show');
+    });
+  }
+  if (dom.btnExecuteConfirmedCheckout) {
+    dom.btnExecuteConfirmedCheckout.addEventListener('click', () => {
+      executeConfirmedCheckout();
+    });
+  }
 
   // Product modal
   dom.btnCloseProdModal.addEventListener('click', () => dom.modalAddProduct.classList.remove('show'));

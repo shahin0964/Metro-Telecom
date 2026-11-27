@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Metro Telecom - POS & Stock System</title>
-  <link rel="stylesheet" href="style.css?v=1.0.3">
+  <link rel="stylesheet" href="style.css?v=1.0.4">
 </head>
 <body>
   <div class="app-layout">
@@ -48,28 +48,33 @@
           <span class="t-text">স্টক ও মালামাল</span>
           <span class="warn-pill-badge" id="nav-low-stock-pill">0</span>
         </button>
-        <button class="tab-btn" data-tab="warranty">
+        <button class="tab-btn" data-tab="sales-history">
           <span class="t-serial">০৪</span>
+          <span class="t-icon">📜</span>
+          <span class="t-text">পেমেন্ট ও বিক্রয় হিস্ট্রি</span>
+        </button>
+        <button class="tab-btn" data-tab="warranty">
+          <span class="t-serial">০৫</span>
           <span class="t-icon">🛡️</span>
           <span class="t-text">ওয়ারেন্টি চেক</span>
         </button>
         <button class="tab-btn" data-tab="customers">
-          <span class="t-serial">০৫</span>
+          <span class="t-serial">০৬</span>
           <span class="t-icon">📒</span>
           <span class="t-text">বাকির খাতা</span>
         </button>
         <button class="tab-btn" data-tab="expenses">
-          <span class="t-serial">০৬</span>
+          <span class="t-serial">০৭</span>
           <span class="t-icon">💸</span>
           <span class="t-text">দোকানের খরচ</span>
         </button>
         <button class="tab-btn" data-tab="reports">
-          <span class="t-serial">০৭</span>
+          <span class="t-serial">০৮</span>
           <span class="t-icon">📈</span>
           <span class="t-text">বার্ষিক ও মাসিক হিসাব</span>
         </button>
         <button class="tab-btn" data-tab="settings">
-          <span class="t-serial">০৮</span>
+          <span class="t-serial">০৯</span>
           <span class="t-icon">⚙️</span>
           <span class="t-text">সেটিংস ও সিঙ্ক</span>
         </button>
@@ -77,7 +82,7 @@
 
       <div class="sidebar-footer-box">
         <div class="sidebar-version-row">
-          <span class="sidebar-ver-tag">Version 1.0.3</span>
+          <span class="sidebar-ver-tag">Version 1.0.4</span>
           <span class="sidebar-live-dot" title="ক্লাউড কানেক্টেড"></span>
         </div>
       </div>
@@ -511,7 +516,95 @@
         </div>
       </section>
 
-      <!-- ================= 4. WARRANTY CHECKER TOOL ================= -->
+      <!-- ================= 4. SALES & PAYMENT HISTORY ================= -->
+      <section class="tab-view" id="view-sales-history">
+        <div class="view-content">
+          <div class="section-header-box">
+            <div>
+              <h2>📜 বিক্রয় ও পেমেন্ট হিস্ট্রি (Sales & Payment Ledger)</h2>
+              <p>দোকানের সকল ক্যাশ মেমো, পেমেন্ট রেকর্ড এবং ভুল মেমো বাতিল করে স্টক ফেরত নেওয়ার ব্যবস্থা</p>
+            </div>
+            <button class="btn-primary-action" onclick="switchTab('pos')">
+              <span>🛒 নতুন মেমো তৈরি করুন</span>
+            </button>
+          </div>
+
+          <!-- Summary KPI Row for Sales History -->
+          <div class="sh-kpi-grid">
+            <div class="sh-kpi-card">
+              <span class="icon">🧾</span>
+              <div>
+                <small>মোট সম্পন্ন মেমো</small>
+                <h3 id="sh-total-sales-count">০ টি</h3>
+              </div>
+            </div>
+            <div class="sh-kpi-card">
+              <span class="icon">💰</span>
+              <div>
+                <small>মোট বিক্রয় মূল্য</small>
+                <h3 id="sh-total-sales-amount">৳ 0.00</h3>
+              </div>
+            </div>
+            <div class="sh-kpi-card">
+              <span class="icon">💵</span>
+              <div>
+                <small>মোট নগদ আদায়</small>
+                <h3 id="sh-total-paid-amount">৳ 0.00</h3>
+              </div>
+            </div>
+            <div class="sh-kpi-card danger">
+              <span class="icon">❌</span>
+              <div>
+                <small>বাতিলকৃত মেমো</small>
+                <h3 id="sh-cancelled-count">০ টি</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Toolbar / Filters -->
+          <div class="inv-filter-toolbar">
+            <div class="search-box-large">
+              <span class="search-ico">🔍</span>
+              <input type="text" id="sh-search-box" placeholder="ইনভয়েস নং, কাস্টমারের নাম, ফোন বা IMEI দিয়ে খুঁজুন...">
+            </div>
+            <div class="inv-select-group">
+              <select id="sh-filter-status">
+                <option value="all">সব মেমো (All)</option>
+                <option value="completed">সফল / সক্রিয় মেমো</option>
+                <option value="cancelled">বাতিলকৃত মেমো (Cancelled)</option>
+              </select>
+              <select id="sh-filter-period">
+                <option value="all">সকল সময়ের রেকর্ড</option>
+                <option value="today">আজকের মেমো</option>
+                <option value="this_month">চলতি মাসের মেমো</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Sales History Table -->
+          <div class="card-table-wrapper">
+            <table class="data-table-main">
+              <thead>
+                <tr>
+                  <th>মেমো নং ও সময়</th>
+                  <th>ক্রেতার নাম ও মোবাইল</th>
+                  <th>বিক্রিত পণ্য ও IMEI</th>
+                  <th class="text-right">মোট বিল</th>
+                  <th class="text-right">পরিশোধ</th>
+                  <th class="text-center">মাধ্যম</th>
+                  <th class="text-center">স্ট্যাটাস</th>
+                  <th class="text-center">অ্যাকশন</th>
+                </tr>
+              </thead>
+              <tbody id="sales-history-tbody">
+                <!-- Dynamically rendered rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 5. WARRANTY CHECKER TOOL ================= -->
       <section class="tab-view" id="view-warranty">
         <div class="view-content">
           <div class="section-header-box">
@@ -829,7 +922,7 @@
                     GitHub Releases থেকে সরাসরি নতুন আপডেট ডাউনলোড ও পিসিতে নোটিফিকেশন
                   </p>
                 </div>
-                <span class="version-badge" id="current-app-version-badge">v1.0.3</span>
+                <span class="version-badge" id="current-app-version-badge">v1.0.4</span>
               </div>
 
               <div class="form-group" style="margin: 1rem 0;">
@@ -844,7 +937,7 @@
                 <div class="update-status-idle">
                   <span class="status-box-icon">💻</span>
                   <div>
-                    <p>বর্তমান ইনস্টলড ভার্সন: <strong>v1.0.3</strong></p>
+                    <p>বর্তমান ইনস্টলড ভার্সন: <strong>v1.0.4</strong></p>
                     <small style="color:var(--text-dim);" id="last-update-check-time">সর্বশেষ চেক: কখনো নয়</small>
                   </div>
                 </div>
@@ -1000,7 +1093,7 @@
   <div class="modal-backdrop" id="modal-pos-serial">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>সিরিয়াল নম্বর / IMEI এন্ট্রি</h3>
+        <h3>📱 মোবাইল IMEI / সিরিয়াল এন্ট্রি</h3>
         <button class="modal-close-btn" id="btn-close-serial-modal">✕</button>
       </div>
       <div class="modal-body">
@@ -1008,14 +1101,193 @@
           পণ্য: — | ওয়ারেন্টি: —
         </div>
         <div class="form-group" style="margin-top: 1rem;">
-          <label>ডিভাইসের Serial Number বা IMEI লিখুন বা বারকোড স্ক্যানার দিয়ে স্ক্যান করুন:</label>
+          <label><b>IMEI 1 / Serial Number *</b> (প্রথম সিম / মূল সিরিয়াল):</label>
           <input type="text" id="serial-input-field" placeholder="যেমন: 862940051928374" autofocus>
-          <small class="hint-text">ওয়ারেন্টি মেমোতে এই নম্বরটি মুদ্রিত থাকবে।</small>
+        </div>
+        <div class="form-group" style="margin-top: 0.85rem;">
+          <label><b>IMEI 2</b> (দ্বিতীয় সিম - ডুয়েল সিম ফোনের জন্য ঐচ্ছিক):</label>
+          <input type="text" id="serial-input-field-2" placeholder="যেমন: 862940051928375">
+          <small class="hint-text">ক্যাশ মেমো ও ওয়ারেন্টিতে উভয় IMEI নম্বর প্রিন্ট থাকবে।</small>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn-cancel" id="btn-cancel-serial-modal">সিরিয়াল ছাড়া যোগ করুন</button>
-        <button type="button" class="btn-submit" id="btn-confirm-serial">কার্টে যুক্ত করুন</button>
+        <button type="button" class="btn-cancel" id="btn-cancel-serial-modal">IMEI ছাড়া যোগ করুন</button>
+        <button type="button" class="btn-submit" id="btn-confirm-serial">🛒 কার্টে যুক্ত করুন</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= STOCK IN / RESTOCK MODAL ================= -->
+  <div class="modal-backdrop" id="modal-restock-product">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>📦 নতুন স্টক যোগ করুন (Stock In)</h3>
+        <button class="modal-close-btn" id="btn-close-restock-modal">✕</button>
+      </div>
+      <form id="form-restock-product">
+        <div class="modal-body">
+          <div class="modal-info-box" id="restock-prod-info-box">
+            পণ্য: — | বর্তমান স্টক: —
+          </div>
+          <div class="form-group" style="margin-top: 1rem;">
+            <label>নতুন আগত মালের সংখ্যা (পরিমাণ) *</label>
+            <input type="number" id="inp-restock-qty" min="1" step="1" value="10" required autofocus>
+            <div class="quick-qty-chips" style="display:flex;gap:0.4rem;margin-top:0.5rem;flex-wrap:wrap;">
+              <button type="button" class="btn-outline-action" onclick="setRestockQty(1)">+১</button>
+              <button type="button" class="btn-outline-action" onclick="setRestockQty(5)">+৫</button>
+              <button type="button" class="btn-outline-action" onclick="setRestockQty(10)">+১০</button>
+              <button type="button" class="btn-outline-action" onclick="setRestockQty(25)">+২৫</button>
+              <button type="button" class="btn-outline-action" onclick="setRestockQty(50)">+৫০</button>
+              <button type="button" class="btn-outline-action" onclick="setRestockQty(100)">+১০০</button>
+            </div>
+          </div>
+          <div class="form-row" style="margin-top: 0.85rem;display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+            <div class="form-group">
+              <label>নতুন ক্রয়মূল্য / কেনা দর (ঐচ্ছিক)</label>
+              <input type="number" id="inp-restock-cost" step="any" placeholder="অপরিবর্তিত থাকলে খালি রাখুন">
+            </div>
+            <div class="form-group">
+              <label>নতুন বিক্রয়মূল্য / MRP (ঐচ্ছিক)</label>
+              <input type="number" id="inp-restock-price" step="any" placeholder="অপরিবর্তিত থাকলে খালি রাখুন">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" id="btn-cancel-restock">বাতিল</button>
+          <button type="submit" class="btn-submit">✅ স্টক যুক্ত করুন</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= EDIT PRODUCT MODAL ================= -->
+  <div class="modal-backdrop" id="modal-edit-product">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <h3>✏️ পণ্য তথ্য ও স্টক সম্পাদনা (Edit Product)</h3>
+        <button class="modal-close-btn" id="btn-close-edit-prod-modal">✕</button>
+      </div>
+      <form id="form-edit-product">
+        <input type="hidden" id="edit-prod-id">
+        <div class="modal-body form-grid-2">
+          <div class="form-group full-width">
+            <label>পণ্যের নাম (Product Name) *</label>
+            <input type="text" id="inp-edit-p-name" required>
+          </div>
+          <div class="form-group">
+            <label>ক্যাটাগরি *</label>
+            <select id="inp-edit-p-cat" required></select>
+          </div>
+          <div class="form-group">
+            <label>ব্র্যান্ড / কোম্পানি</label>
+            <input type="text" id="inp-edit-p-brand">
+          </div>
+          <div class="form-group">
+            <label>ইউনিট</label>
+            <select id="inp-edit-p-unit">
+              <option value="Pcs">Pcs (পিস)</option>
+              <option value="Box">Box (বক্স)</option>
+              <option value="Set">Set (সেট)</option>
+              <option value="Packet">Packet (প্যাকেট)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>বারকোড / SKU</label>
+            <input type="text" id="inp-edit-p-barcode">
+          </div>
+          <div class="form-group">
+            <label>ক্রয়মূল্য / কেনা দাম (৳)</label>
+            <input type="number" id="inp-edit-p-cost" step="any">
+          </div>
+          <div class="form-group">
+            <label>বিক্রয়মূল্য / MRP (৳) *</label>
+            <input type="number" id="inp-edit-p-price" step="any" required>
+          </div>
+          <div class="form-group">
+            <label>বর্তমান স্টক সংখ্যা *</label>
+            <input type="number" id="inp-edit-p-stock" required>
+          </div>
+          <div class="form-group">
+            <label>ওয়ারেন্টি মেয়াদ</label>
+            <select id="inp-edit-p-warranty">
+              <option value="কোন ওয়ারেন্টি নেই">কোন ওয়ারেন্টি নেই</option>
+              <option value="৭ দিনের রিপ্লেসমেন্ট">৭ দিনের রিপ্লেসমেন্ট</option>
+              <option value="১ মাসের ওয়ারেন্টি">১ মাসের ওয়ারেন্টি</option>
+              <option value="৩ মাসের ওয়ারেন্টি">৩ মাসের ওয়ারেন্টি</option>
+              <option value="৬ মাসের ওয়ারেন্টি">৬ মাসের ওয়ারেন্টি</option>
+              <option value="১ বছর সার্ভিস ওয়ারেন্টি">১ বছর সার্ভিস ওয়ারেন্টি</option>
+              <option value="১ বছর অফিসিয়াল ওয়ারেন্টি">১ বছর অফিসিয়াল ওয়ারেন্টি</option>
+              <option value="২ বছর অফিসিয়াল ওয়ারেন্টি">২ বছর অফিসিয়াল ওয়ারেন্টি</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label class="custom-chk-label">
+              <input type="checkbox" id="inp-edit-p-has-serial">
+              <span>বিক্রির সময় <b>Serial Number বা IMEI</b> ইনপুট নিতে হবে?</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" id="btn-cancel-edit-prod">বাতিল</button>
+          <button type="submit" class="btn-submit">💾 পরিবর্তন সংরক্ষণ করুন</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= ORDER CONFIRMATION MODAL ================= -->
+  <div class="modal-backdrop" id="modal-confirm-checkout">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>⚠️ ক্যাশ মেমো চূড়ান্ত নিশ্চিতকরণ</h3>
+        <button class="modal-close-btn" id="btn-close-confirm-checkout">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="confirm-order-summary-box">
+          <div class="confirm-row">
+            <span class="lbl">ক্রেতার নাম:</span>
+            <strong id="confirm-cust-name">—</strong>
+          </div>
+          <div class="confirm-row">
+            <span class="lbl">মোবাইল:</span>
+            <span id="confirm-cust-phone">—</span>
+          </div>
+          <div class="confirm-row">
+            <span class="lbl">মোট আইটেম:</span>
+            <strong id="confirm-item-count">০ টি</strong>
+          </div>
+          <div class="confirm-items-scroll-list" id="confirm-items-preview-list">
+            <!-- Items preview -->
+          </div>
+          <div class="confirm-divider"></div>
+          <div class="confirm-row highlight">
+            <span>সর্বমোট বিল (Grand Total):</span>
+            <strong id="confirm-grand-total">৳ 0.00</strong>
+          </div>
+          <div class="confirm-row">
+            <span>পেমেন্ট মাধ্যম:</span>
+            <span id="confirm-pay-method">ক্যাশ</span>
+          </div>
+          <div class="confirm-row">
+            <span>গ্রহণকৃত টাকা (Paid):</span>
+            <strong id="confirm-paid-amount" style="color:#10b981;">৳ 0.00</strong>
+          </div>
+          <div class="confirm-row" id="confirm-due-row" style="display:none;">
+            <span style="color:#ef4444;font-weight:700;">বাকি পরিমাণ (Due):</span>
+            <strong id="confirm-due-amount" style="color:#ef4444;">৳ 0.00</strong>
+          </div>
+        </div>
+        <p style="margin-top:0.85rem;font-size:0.85rem;color:var(--text-muted);text-align:center;">
+          আপনি কি নিশ্চিত যে বিলটি সম্পন্ন করে ক্যাশ মেমো তৈরি ও প্রিন্ট করবেন?
+        </p>
+      </div>
+      <div class="modal-footer" style="gap:0.75rem;">
+        <button type="button" class="btn-cancel" id="btn-cancel-checkout-confirm" style="flex:1;">
+          ↩️ ফিরে যান ও এডিট করুন
+        </button>
+        <button type="button" class="btn-submit" id="btn-execute-confirmed-checkout" style="flex:1.5;background:#10b981;">
+          ✅ হ্যাঁ, মেমো তৈরি ও প্রিন্ট করুন
+        </button>
       </div>
     </div>
   </div>
@@ -1286,6 +1558,6 @@
   <div id="toast-container" class="toast-container"></div>
 
   <!-- Dynamic Async Cloud Engine -->
-  <script src="app.js?v=1.0.3"></script>
+  <script src="app.js?v=1.0.4"></script>
 </body>
 </html>
