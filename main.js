@@ -4,6 +4,9 @@ const fs = require('fs');
 const https = require('https');
 const { spawn } = require('child_process');
 
+// Disable hardware acceleration to eliminate Windows GPU compositor input hit-testing glitches
+app.disableHardwareAcceleration();
+
 let mainWindow;
 let downloadedInstallerPath = '';
 
@@ -15,48 +18,51 @@ function createWindow() {
     minHeight: 650,
     title: 'Metro Telecom - POS & Inventory System',
     backgroundColor: '#090d16',
-    autoHideMenuBar: true,
+    show: false,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.js'),
+      spellcheck: false
     }
   });
 
-  // Windows Edit and View Accelerators (Enables Typing, Backspace, Copy, Paste, Undo, Select All)
-  const template = [
-    {
-      label: 'Edit',
-      submenu: [
-        { role: 'undo' },
-        { role: 'redo' },
-        { type: 'separator' },
-        { role: 'cut' },
-        { role: 'copy' },
-        { role: 'paste' },
-        { role: 'delete' },
-        { role: 'selectAll' }
-      ]
-    },
-    {
-      label: 'View',
-      submenu: [
-        { role: 'reload' },
-        { role: 'forceReload' },
-        { role: 'toggleDevTools' },
-        { type: 'separator' },
-        { role: 'resetZoom' },
-        { role: 'zoomIn' },
-        { role: 'zoomOut' },
-        { type: 'separator' },
-        { role: 'togglefullscreen' }
-      ]
+  // Completely remove native Windows menu bar so Alt or Alt+Shift (Bangla keyboard switch) never steals focus
+  mainWindow.removeMenu();
+  Menu.setApplicationMenu(null);
+
+  // In-window developer and navigation shortcuts without native menu interception
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    // F12 or Ctrl+Shift+I: toggle DevTools
+    if (input.key === 'F12' || (input.control && input.shift && input.key.toLowerCase() === 'i')) {
+      mainWindow.webContents.toggleDevTools();
+      event.preventDefault();
     }
-  ];
-  const menu = Menu.buildFromTemplate(template);
-  Menu.setApplicationMenu(menu);
+    // F5 or Ctrl+R: reload app
+    if (input.key === 'F5' || (input.control && input.key.toLowerCase() === 'r')) {
+      mainWindow.reload();
+      event.preventDefault();
+    }
+    // F11: toggle fullscreen
+    if (input.key === 'F11') {
+      mainWindow.setFullScreen(!mainWindow.isFullScreen());
+      event.preventDefault();
+    }
+  });
 
   mainWindow.loadFile('index.html');
+
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+    mainWindow.focus();
+    mainWindow.webContents.focus();
+  });
+
+  mainWindow.on('focus', () => {
+    if (mainWindow && mainWindow.webContents) {
+      mainWindow.webContents.focus();
+    }
+  });
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
@@ -143,6 +149,17 @@ ipcMain.handle('download-update-file', (event, downloadUrl) => {
 ipcMain.handle('open-external-url', (event, url) => {
   if (url && (url.startsWith('https://') || url.startsWith('http://'))) {
     shell.openExternal(url);
+    return true;
+  }
+  return false;
+});
+
+// IPC: Refocus native window and web contents if focus desyncs
+ipcMain.handle('refocus-web-contents', (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender) || mainWindow;
+  if (win) {
+    win.focus();
+    win.webContents.focus();
     return true;
   }
   return false;

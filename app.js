@@ -830,25 +830,7 @@ function setupPos() {
   });
 
   dom.cartDiscountInput.addEventListener('input', recalculateCart);
-  dom.cartDiscountInput.addEventListener('focus', e => e.target.select());
-  dom.cartDiscountInput.addEventListener('click', e => {
-    e.stopPropagation();
-    e.target.select();
-  });
   dom.cartPaidInput.addEventListener('input', recalculateCart);
-  dom.cartPaidInput.addEventListener('focus', e => e.target.select());
-  dom.cartPaidInput.addEventListener('click', e => {
-    e.stopPropagation();
-    e.target.select();
-  });
-
-  // Ensure adhoc inputs are directly focusable and do not bubble unwanted events
-  if (dom.posCustNameInput) {
-    dom.posCustNameInput.addEventListener('click', e => e.stopPropagation());
-  }
-  if (dom.posCustPhoneInput) {
-    dom.posCustPhoneInput.addEventListener('click', e => e.stopPropagation());
-  }
 
   // Click on wrappers focuses the input directly
   document.querySelectorAll('.adhoc-input-wrap').forEach(wrap => {
@@ -860,10 +842,7 @@ function setupPos() {
   document.querySelectorAll('.bill-input-box').forEach(box => {
     box.addEventListener('click', () => {
       const inp = box.querySelector('input');
-      if (inp) {
-        inp.focus();
-        inp.select();
-      }
+      if (inp) inp.focus();
     });
   });
 
@@ -2753,7 +2732,7 @@ function showSyncToast(message) {
 }
 
 // ================= 9. AUTO UPDATER & PC DESKTOP NOTIFICATIONS =================
-const CURRENT_VERSION = '1.0.2';
+const CURRENT_VERSION = '1.0.3';
 const GITHUB_REPO = 'shahin0964/Metro-Telecom';
 let downloadedUpdatePath = null;
 let latestReleaseData = null;
@@ -3095,7 +3074,6 @@ document.addEventListener('click', (e) => {
     const input = billBox.querySelector('input');
     if (input && document.activeElement !== input) {
       input.focus();
-      input.select();
     }
     return;
   }
@@ -3108,6 +3086,15 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// Automatically ensure native window and WebContents focus whenever an input receives focus
+document.addEventListener('focusin', (e) => {
+  if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+    if (window.electronAPI && typeof window.electronAPI.refocusWebContents === 'function') {
+      window.electronAPI.refocusWebContents();
+    }
+  }
+});
+
 // Polyfill window.print for Electron so any print call routes to native OS print dialog
 if (window.electronAPI && typeof window.electronAPI.printPage === 'function') {
   window.print = function() {
@@ -3115,8 +3102,16 @@ if (window.electronAPI && typeof window.electronAPI.printPage === 'function') {
   };
 }
 
-// Kickoff
-document.addEventListener('DOMContentLoaded', appInit);
-if (document.readyState === 'interactive' || document.readyState === 'complete') {
+// Single-execution Kickoff Guard
+let isAppInitialized = false;
+function safeAppInit() {
+  if (isAppInitialized) return;
+  isAppInitialized = true;
   appInit();
+}
+
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+  safeAppInit();
+} else {
+  document.addEventListener('DOMContentLoaded', safeAppInit);
 }

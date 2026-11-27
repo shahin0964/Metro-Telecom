@@ -53,6 +53,10 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
+input, select, textarea, button, [contenteditable="true"] {
+  -webkit-app-region: no-drag !important;
+}
+
 input, select, textarea, [contenteditable="true"] {
   font-family: inherit;
   font-size: 0.95rem;
@@ -60,6 +64,11 @@ input, select, textarea, [contenteditable="true"] {
   -webkit-user-select: text !important;
   pointer-events: auto !important;
   cursor: text !important;
+}
+
+input, textarea {
+  -webkit-user-modify: read-write !important;
+  caret-color: #38bdf8 !important;
 }
 
 .adhoc-input-wrap, .bill-input-box, .form-group {
@@ -71,6 +80,7 @@ input, select, textarea, [contenteditable="true"] {
   pointer-events: auto !important;
   user-select: text !important;
   -webkit-user-select: text !important;
+  -webkit-app-region: no-drag !important;
 }
 
 button {
