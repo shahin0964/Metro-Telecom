@@ -57,30 +57,22 @@ input, select, textarea, button, [contenteditable="true"] {
   -webkit-app-region: no-drag !important;
 }
 
-input, select, textarea, [contenteditable="true"] {
+input, select, textarea {
   font-family: inherit;
   font-size: 0.95rem;
-  user-select: text !important;
-  -webkit-user-select: text !important;
   pointer-events: auto !important;
-  cursor: text !important;
+  caret-color: #38bdf8;
+  -webkit-user-select: auto;
+  user-select: auto;
 }
 
-input, textarea {
-  -webkit-user-modify: read-write !important;
-  caret-color: #38bdf8 !important;
-}
-
-.adhoc-input-wrap, .bill-input-box, .form-group {
-  cursor: text !important;
-}
-
-.adhoc-input-wrap input, .bill-input-box input, .form-group input {
-  cursor: text !important;
-  pointer-events: auto !important;
-  user-select: text !important;
-  -webkit-user-select: text !important;
-  -webkit-app-region: no-drag !important;
+input[type="text"],
+input[type="tel"],
+input[type="number"],
+input[type="search"],
+input[type="password"],
+textarea {
+  cursor: text;
 }
 
 button {
@@ -1872,8 +1864,6 @@ button {
   color: #fff;
   font-size: 0.8rem;
   outline: none;
-  user-select: text !important;
-  -webkit-user-select: text !important;
 }
 
 .adhoc-input-wrap input::placeholder {
@@ -2477,6 +2467,8 @@ button {
   justify-content: center;
   z-index: 3000 !important;
   padding: 1rem;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
 }
 .modal-backdrop.show {
   display: flex !important;
@@ -2492,18 +2484,18 @@ button {
   border-radius: var(--radius-lg);
   width: 100%;
   max-width: 520px;
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
   box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   animation: popIn 0.2s ease-out;
+  margin: auto;
 }
 .modal-card.modal-lg { max-width: 680px; }
 
 .modal-body, .modal-body input, .modal-body select, .modal-body textarea, .modal-body .form-group {
   pointer-events: auto !important;
-  user-select: text !important;
-  -webkit-user-select: text !important;
 }
 
 @keyframes popIn {

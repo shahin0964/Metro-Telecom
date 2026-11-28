@@ -913,20 +913,6 @@ function setupPos() {
   dom.cartDiscountInput.addEventListener('input', recalculateCart);
   dom.cartPaidInput.addEventListener('input', recalculateCart);
 
-  // Click on wrappers focuses the input directly
-  document.querySelectorAll('.adhoc-input-wrap').forEach(wrap => {
-    wrap.addEventListener('click', () => {
-      const inp = wrap.querySelector('input');
-      if (inp) inp.focus();
-    });
-  });
-  document.querySelectorAll('.bill-input-box').forEach(box => {
-    box.addEventListener('click', () => {
-      const inp = box.querySelector('input');
-      if (inp) inp.focus();
-    });
-  });
-
   // Clear Cart
   dom.btnResetCart.addEventListener('click', () => {
     if (state.cart.length === 0) return;
@@ -3232,7 +3218,7 @@ function showSyncToast(message) {
 }
 
 // ================= 9. AUTO UPDATER & PC DESKTOP NOTIFICATIONS =================
-const CURRENT_VERSION = '1.0.4';
+const CURRENT_VERSION = '1.0.5';
 const GITHUB_REPO = 'shahin0964/Metro-Telecom';
 let downloadedUpdatePath = null;
 let latestReleaseData = null;
@@ -3518,6 +3504,27 @@ function triggerDownloadFlow(exeAsset, apkAsset, release) {
 // ================= MODAL LISTENERS =================
 function setupModals() {
   // Serial / Dual IMEI modal
+  if (dom.serialInputField) {
+    dom.serialInputField.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (dom.serialInputField2) {
+          dom.serialInputField2.focus();
+        } else if (dom.btnConfirmSerial) {
+          dom.btnConfirmSerial.click();
+        }
+      }
+    });
+  }
+  if (dom.serialInputField2) {
+    dom.serialInputField2.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (dom.btnConfirmSerial) dom.btnConfirmSerial.click();
+      }
+    });
+  }
+
   if (dom.btnConfirmSerial) {
     dom.btnConfirmSerial.addEventListener('click', () => {
       const imei1 = dom.serialInputField ? dom.serialInputField.value.trim() : '';
@@ -3679,42 +3686,6 @@ function setupModals() {
   // Invoice modal
   dom.btnCloseInvoiceModal.addEventListener('click', () => dom.modalInvoiceDialog.classList.remove('show'));
 }
-
-// Global Input Focus Helper for Electron & Web (Ensures immediate caret placement on click)
-document.addEventListener('click', (e) => {
-  const adhocWrap = e.target.closest('.adhoc-input-wrap');
-  if (adhocWrap) {
-    const input = adhocWrap.querySelector('input');
-    if (input && document.activeElement !== input) {
-      input.focus();
-    }
-    return;
-  }
-  const billBox = e.target.closest('.bill-input-box');
-  if (billBox) {
-    const input = billBox.querySelector('input');
-    if (input && document.activeElement !== input) {
-      input.focus();
-    }
-    return;
-  }
-  const fg = e.target.closest('.form-group');
-  if (fg && !e.target.matches('input, select, textarea, button, label')) {
-    const input = fg.querySelector('input, select, textarea');
-    if (input && document.activeElement !== input) {
-      input.focus();
-    }
-  }
-});
-
-// Automatically ensure native window and WebContents focus whenever an input receives focus
-document.addEventListener('focusin', (e) => {
-  if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
-    if (window.electronAPI && typeof window.electronAPI.refocusWebContents === 'function') {
-      window.electronAPI.refocusWebContents();
-    }
-  }
-});
 
 // Polyfill window.print for Electron so any print call routes to native OS print dialog
 if (window.electronAPI && typeof window.electronAPI.printPage === 'function') {
